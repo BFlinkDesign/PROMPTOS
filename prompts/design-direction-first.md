@@ -16,5 +16,6 @@
 > generic gradients, emoji as UI, "Welcome, user", spinners where skeletons
 > fit, tooltips repeating labels. Floor: WCAG AA including muted text, 44px
 > targets, visible focus, works at 390px. Before finishing: render or
-> screenshot it, walk all 8 criteria pass/fail with no hedging, then remove
+> screenshot it, walk all **11** criteria pass/fail with no hedging (see
+> [experience-standard](../patterns/experience-standard.md)), then remove
 > one decorative thing.

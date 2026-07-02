@@ -15,7 +15,8 @@ unification, and the real-world pain points agents actually hit.
 | Prompt library / meta-prompts | `prompts/` — paste-in blocks |
 | Agent harness patterns | `patterns/` — architecture without domain logic |
 | Context engineering | Token-budget navigation + mandatory repo index |
-| Eval / verify harness | Verify gate pattern + adversarial review block |
+| Eval / verify harness | Verify gate pattern + adversarial review block + experience camera |
+| Human UX law | `patterns/experience-standard.md` — 11 criteria; resources in `experience-resources.md` |
 | Agent memory | Ledger pattern (pairs with agent-kit) |
 | Model routing | Model-tier adapter + MODEL-TIERS architecture |
 
@@ -54,8 +55,8 @@ Writes `agent/PROMPTS.md` as a **pointer** — prompt content stays here.
 | Section | What |
 | --- | --- |
 | [prompts/](prompts/) | Paste-in blocks: scope pipeline, decision matrix, UI design, review, retrospective, model-tier adapter, token navigation, handoff |
-| [patterns/](patterns/) | Architecture: gated pipeline, verify gate, schema contracts, memory, hygiene, pain catalog |
-| [playbooks/](playbooks/) | Multi-step workflows: elite architecture pass, new repo bootstrap, field hardening |
+| [patterns/](patterns/) | Architecture: gated pipeline, verify gate, schema contracts, memory, hygiene, pain catalog, **experience standard**, promotion loop |
+| [playbooks/](playbooks/) | Multi-step workflows: elite architecture pass, new repo bootstrap, field hardening, **instantiate DESIGN-BRIEF** |
 | [efficiency/](efficiency/) | Model-tier table + self-improvement loop |
 | [glossary/](glossary/) | Plain language → industry terminology |
 

@@ -25,7 +25,8 @@ capable LLM.
 ## Architecture patterns & playbooks
 
 Full catalog: **[PATTERNS.md](PATTERNS.md)** — deterministic pipelines, verify gates,
-schema contracts, agent memory, session hygiene, pain points, elite architecture pass.
+schema contracts, agent memory, session hygiene, pain points, elite architecture pass,
+**experience standard** (11 UI criteria), **experience resources** (WCAG, Playwright, libs).
 
 Terminology map (plain language → industry terms): [glossary/TERMINOLOGY.md](glossary/TERMINOLOGY.md).
 
