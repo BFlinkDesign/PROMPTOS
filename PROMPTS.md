@@ -18,6 +18,13 @@ capable LLM.
 | 3 | Design direction first (UI work) | [prompts/design-direction-first.md](prompts/design-direction-first.md) |
 | 4 | Adversarial self-review (before shipping) | [prompts/adversarial-self-review.md](prompts/adversarial-self-review.md) |
 | 5 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
+| 6 | Model-tier adapter (inject frontier discipline downward) | [prompts/model-tier-adapter.md](prompts/model-tier-adapter.md) |
+| 7 | Token-budget navigation (mandatory repo indexing) | [prompts/token-budget-navigation.md](prompts/token-budget-navigation.md) |
+
+## Efficiency architecture
+
+Tier table, mandatory-indexing rule, and the human-gated self-improvement
+loop: [efficiency/MODEL-TIERS.md](efficiency/MODEL-TIERS.md).
 
 ## Console
 

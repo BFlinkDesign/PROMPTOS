@@ -50,6 +50,8 @@ C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"
 | Design direction first | UI/UX before any code |
 | Adversarial self-review | Pre-ship quality gate |
 | Retrospective | Project pause, errors/gaps ledger update |
+| Model-tier adapter | Running mid/small-tier models with frontier discipline |
+| Token-budget navigation | Any repo session — index-first, no tree walks |
 
 ## Adding a prompt
 
