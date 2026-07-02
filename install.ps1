@@ -22,12 +22,7 @@ Canonical library lives in **PROMPTOS**, not in this repo.
 Read the prompt you need from ``prompts/`` in that repo. Do not duplicate
 prompt content here — edit PROMPTOS once, all projects benefit.
 
-Quick blocks:
-1. Scope pipeline — ``prompts/scope-pipeline.md``
-2. Decision matrix — ``prompts/decision-matrix.md``
-3. Design direction first — ``prompts/design-direction-first.md``
-4. Adversarial self-review — ``prompts/adversarial-self-review.md``
-5. Retrospective — ``prompts/retrospective.md``
+Full catalog (19 blocks + locked modules + behaviors): ``PROMPTS.md`` in that repo.
 "@
 
 [System.IO.File]::WriteAllText($dst, $pointer)
