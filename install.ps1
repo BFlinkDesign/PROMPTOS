@@ -30,5 +30,5 @@ Quick blocks:
 5. Retrospective — ``prompts/retrospective.md``
 "@
 
-Set-Content -Path $dst -Value $pointer -Encoding UTF8
+[System.IO.File]::WriteAllText($dst, $pointer)
 Write-Host "installed pointer: agent/PROMPTS.md -> PROMPTOS" -ForegroundColor Green
