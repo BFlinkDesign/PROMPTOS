@@ -1,3 +1,4 @@
+<!-- promptos-block: id=adversarial-self-review v=1.0 -->
 # Adversarial self-review (before shipping)
 
 > Review the artifact you just produced as a hostile senior reviewer who

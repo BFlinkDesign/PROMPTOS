@@ -82,6 +82,13 @@ snapshot) in the same PR that changed the state. A handoff a mid-tier executor c
 run without judgment calls beats a plan only you understand. (The hygiene sweep:
 [locked/04](../locked/04-LANE-AND-HYGIENE.md).)
 
+## 13. Leave a receipt
+
+Any PROMPTOS block used this session gets a one-line usage receipt in this
+repo's `agent/RECEIPTS.log` (grammar: PROMPTOS `telemetry/RECEIPTS.md`) —
+outcome graded by gate evidence, never feeling. Loss receipts are the most
+valuable line you can write; a used block with no receipt is itself a miss.
+
 ## The doctrine lifecycle: SEED → PROVE → LOCK → PRUNE
 
 This contract must never become a cage. Rules bind, but the SET of rules is alive:

@@ -1,3 +1,4 @@
+<!-- promptos-block: id=scope-pipeline v=1.0 -->
 # Scope pipeline (corpus → trust-tiered deliverable)
 
 > Run a deterministic scope pass on [CORPUS PATH] for [TRADE/DOMAIN].

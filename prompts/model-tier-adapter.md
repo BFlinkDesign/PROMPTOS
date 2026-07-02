@@ -1,3 +1,4 @@
+<!-- promptos-block: id=model-tier-adapter v=1.0 -->
 # Model-tier adapter (inject frontier discipline into any model)
 
 Use when: pointing a mid- or small-tier model (Sonnet-class, Haiku-class,

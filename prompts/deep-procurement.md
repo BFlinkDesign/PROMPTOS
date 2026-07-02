@@ -1,3 +1,4 @@
+<!-- promptos-block: id=deep-procurement v=1.1 -->
 # Deep procurement — find the hidden gems, fight the default bias
 
 Use when: choosing a tool, library, model, vendor, or approach — and you suspect the

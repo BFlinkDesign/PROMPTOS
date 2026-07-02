@@ -1,3 +1,4 @@
+<!-- promptos-block: id=vetting-brief v=1.0 -->
 # Meta: vetting brief — before any architecture / vendor / model commitment
 
 Use BEFORE writing a decision into any plan or doc. The incident behind this: a voice

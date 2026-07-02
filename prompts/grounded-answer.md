@@ -1,3 +1,4 @@
+<!-- promptos-block: id=grounded-answer v=1.0 -->
 # Meta: grounded answering — retrieval-locked, citation-validated
 
 The pattern for any "ask questions about your own data" feature. The model is never

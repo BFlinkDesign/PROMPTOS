@@ -1,3 +1,4 @@
+<!-- promptos-block: id=token-budget-navigation v=1.1 -->
 # Token-budget navigation (mandatory repo indexing)
 
 Use when: any agent session in a repo — this is the anti-token-burn contract.

@@ -47,12 +47,22 @@ Amendments are human-reviewed PRs only.
 ## Behaviors
 
 [behaviors/elite-engineering.md](behaviors/elite-engineering.md) is the parameterized
-operating contract — 12 binding rules plus the SEED→PROVE→LOCK→PRUNE lifecycle. Fill
+operating contract — 13 binding rules plus the SEED→PROVE→LOCK→PRUNE lifecycle. Fill
 the `{{PARAMETERS}}` once per project: `GATE_COMMAND`, `LIVE_SYSTEM`, `FLAG`, `OWNER`,
 `SECRET_CLASSES`, `ASYMMETRY`, `STATE_DOC`. Every behavior in it earned its place by
 catching a real failure — false-green screenshots, a comment that lied about what code
 did, a merge that nearly deleted teammates' work, a PII guard tripped by the agent's
 own docs.
+
+## Telemetry & evolution (blocks must not go stale)
+
+Every block carries an `id`/`v` header and obligates a one-line **usage
+receipt** in the consuming repo — outcome graded by gate evidence, never
+feeling ([telemetry/RECEIPTS.md](telemetry/RECEIPTS.md)).
+[telemetry/harvest.py](telemetry/harvest.py) sweeps receipts into the
+[scoreboard](telemetry/SCOREBOARD.md) (VERIFIED-BY-USE / WATCH / UNPROVEN /
+DECAYING); amendments are evidence-gated and eval-guarded
+([evals/](evals/README.md)) — champion vs challenger, the record decides.
 
 ## Architecture patterns & playbooks
 

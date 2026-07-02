@@ -1,3 +1,4 @@
+<!-- promptos-block: id=retrospective v=1.0 -->
 # Retrospective (project pause)
 
 > Pause and reflect on this project: what's good (keep doing), what broke

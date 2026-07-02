@@ -1,3 +1,4 @@
+<!-- promptos-block: id=opportunity-scout v=1.1 -->
 # Opportunity scout — the standing radar over models, papers, and repos
 
 Use when: you keep stumbling onto Hugging Face models, GitHub repos, arXiv papers, or

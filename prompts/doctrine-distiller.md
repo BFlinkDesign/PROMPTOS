@@ -1,3 +1,4 @@
+<!-- promptos-block: id=doctrine-distiller v=1.0 -->
 # Meta: doctrine distiller — turn incidents into behaviors
 
 How the behavior prompt itself stays alive. Run at the end of any substantial session

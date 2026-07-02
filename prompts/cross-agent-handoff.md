@@ -1,3 +1,4 @@
+<!-- promptos-block: id=cross-agent-handoff v=1.0 -->
 # Cross-agent handoff (session continuity)
 
 Use when: switching tools mid-project (Cursor → Claude Code → Codex) or

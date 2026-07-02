@@ -1,3 +1,4 @@
+<!-- promptos-block: id=decision-matrix v=1.0 -->
 # Decision matrix (high-stakes choice)
 
 > You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5].

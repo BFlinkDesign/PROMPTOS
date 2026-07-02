@@ -1,3 +1,4 @@
+<!-- promptos-block: id=task-cards v=1.0 -->
 # Meta: task-card generator — executor-proof work units
 
 Use when handing work to a weaker/cheaper executor (a medium-effort model, a junior,

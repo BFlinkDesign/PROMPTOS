@@ -1,3 +1,4 @@
+<!-- promptos-block: id=miss-promotion v=1.0 -->
 # Meta: miss → rule promotion — the kill chain
 
 Turns observed misses (things your deterministic layer failed to catch, surfaced by a

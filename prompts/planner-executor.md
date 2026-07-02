@@ -1,3 +1,4 @@
+<!-- promptos-block: id=planner-executor v=1.1 -->
 # Planner–executor (frontier kicks off and finalizes; workhorse builds)
 
 > Split this project into the three roles and never blur them.

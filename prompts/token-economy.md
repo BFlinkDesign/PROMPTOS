@@ -1,3 +1,4 @@
+<!-- promptos-block: id=token-economy v=1.1 -->
 # Token economy — stop paying twice for the same knowledge
 
 Use when: sessions burn budget re-reading, re-deriving, and re-explaining. Paste at

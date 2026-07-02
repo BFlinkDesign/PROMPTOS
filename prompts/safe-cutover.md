@@ -1,3 +1,4 @@
+<!-- promptos-block: id=safe-cutover v=1.0 -->
 # Meta: safe-cutover runbook generator — legacy (LIVE) → new
 
 For migrating live traffic/processing off a running system without breaking it. The

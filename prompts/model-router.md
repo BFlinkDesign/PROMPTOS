@@ -1,3 +1,4 @@
+<!-- promptos-block: id=model-router v=1.1 -->
 # Model router — which agent, which effort, when
 
 Use when: starting ANY session or task and you don't want to hand-decide model /
