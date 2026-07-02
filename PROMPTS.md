@@ -20,6 +20,14 @@ capable LLM.
 | 5 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
 | 6 | Model-tier adapter (inject frontier discipline downward) | [prompts/model-tier-adapter.md](prompts/model-tier-adapter.md) |
 | 7 | Token-budget navigation (mandatory repo indexing) | [prompts/token-budget-navigation.md](prompts/token-budget-navigation.md) |
+| 8 | Cross-agent handoff (session continuity) | [prompts/cross-agent-handoff.md](prompts/cross-agent-handoff.md) |
+
+## Architecture patterns & playbooks
+
+Full catalog: **[PATTERNS.md](PATTERNS.md)** — deterministic pipelines, verify gates,
+schema contracts, agent memory, session hygiene, pain points, elite architecture pass.
+
+Terminology map (plain language → industry terms): [glossary/TERMINOLOGY.md](glossary/TERMINOLOGY.md).
 
 ## Efficiency architecture
 

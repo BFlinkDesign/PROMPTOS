@@ -1,60 +1,67 @@
 # PROMPTOS
 
-Portable, tool-agnostic prompt library for AI coding agents. One canonical
-home for reusable prompt blocks — not copied into every repo.
+Portable **agent engineering kit** — prompt library, architecture patterns,
+playbooks, and efficiency rules for any project. One canonical home; never
+copied into every repo.
 
-Born from the EagleScope build day: scope pipeline, decision matrix,
-design-first UI, adversarial review, and retrospective patterns extracted
-from production work.
+Born from the EagleScope production build day and generalized for any domain:
+deterministic pipelines, verify gates, trust tiers, token discipline, cross-agent
+unification, and the real-world pain points agents actually hit.
+
+## What this is (industry terms)
+
+| You might call it | PROMPTOS provides |
+| --- | --- |
+| Prompt library / meta-prompts | `prompts/` — paste-in blocks |
+| Agent harness patterns | `patterns/` — architecture without domain logic |
+| Context engineering | Token-budget navigation + mandatory repo index |
+| Eval / verify harness | Verify gate pattern + adversarial review block |
+| Agent memory | Ledger pattern (pairs with agent-kit) |
+| Model routing | Model-tier adapter + MODEL-TIERS architecture |
+
+Full glossary: [glossary/TERMINOLOGY.md](glossary/TERMINOLOGY.md)
 
 ## Quick start
 
 ```powershell
-# Browse locally
+# Browse prompts locally
 start C:\Eagle\PROMPTOS\console\promptos-console.html
 
-# Or read the catalog
-notepad C:\Eagle\PROMPTOS\PROMPTS.md
+# Read catalogs
+notepad C:\Eagle\PROMPTOS\PROMPTS.md    # paste-in blocks
+notepad C:\Eagle\PROMPTOS\PATTERNS.md   # architecture & playbooks
 ```
 
-## Install pointer into a repo
+## Install into any repo
 
 ```powershell
-C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\your\repo"
+C:\Eagle\agent-kit\install.ps1 -Target "C:\path\to\repo"   # operating law
+C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"   # pointer only
 ```
 
-This writes `agent/PROMPTS.md` as a **pointer** to this repo — it does not
-copy prompt content. Edit prompts here once; every repo sees the update.
+Writes `agent/PROMPTS.md` as a **pointer** — prompt content stays here.
 
-## Relationship to agent-kit
+## Three-repo stack
 
 | Repo | Role |
 | --- | --- |
-| **agent-kit** | Operating contract (`AGENTS.md`), verify gates, trust tiers, bootstrap, per-project ledgers |
-| **PROMPTOS** (this repo) | Reusable prompt blocks — the *what to ask* library |
-| **Your project repo** | Thin pointers + project-specific `agent/ERRORS.md` and `agent/GAPS.md` |
+| **[agent-kit](https://github.com/BFlinkDesign/agent-kit)** | Operating contract, verify/trust docs, bootstrap, per-project ledgers |
+| **PROMPTOS** (this repo) | Reusable prompts + patterns + playbooks — domain-agnostic |
+| **Your project** | Code + `agent/ERRORS.md` + `agent/GAPS.md` + generated profile |
 
-Install both:
+## Contents
 
-```powershell
-C:\Eagle\agent-kit\install.ps1 -Target "C:\path\to\repo"
-C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"
-```
-
-## The prompts
-
-| Block | Use when |
+| Section | What |
 | --- | --- |
-| Scope pipeline | Corpus extraction, bid scoping, spec/plan reconciliation |
-| Decision matrix | Architecture or vendor choice with real tradeoffs |
-| Design direction first | UI/UX before any code |
-| Adversarial self-review | Pre-ship quality gate |
-| Retrospective | Project pause, errors/gaps ledger update |
-| Model-tier adapter | Running mid/small-tier models with frontier discipline |
-| Token-budget navigation | Any repo session — index-first, no tree walks |
+| [prompts/](prompts/) | Paste-in blocks: scope pipeline, decision matrix, UI design, review, retrospective, model-tier adapter, token navigation, handoff |
+| [patterns/](patterns/) | Architecture: gated pipeline, verify gate, schema contracts, memory, hygiene, pain catalog |
+| [playbooks/](playbooks/) | Multi-step workflows: elite architecture pass, new repo bootstrap, field hardening |
+| [efficiency/](efficiency/) | Model-tier table + self-improvement loop |
+| [glossary/](glossary/) | Plain language → industry terminology |
 
-## Adding a prompt
+## Adding content
 
-1. Add `prompts/your-block.md` with the fill-in-the-bracket template.
-2. Add a row to `PROMPTS.md` catalog.
-3. Commit. No per-repo copies to update.
+1. **Prompt block** → `prompts/your-block.md` + row in `PROMPTS.md`
+2. **Pattern** → `patterns/your-pattern.md` + row in `PATTERNS.md`
+3. **Playbook** → `playbooks/your-playbook.md` + row in `PATTERNS.md`
+4. Commit. No per-repo copies to update.
