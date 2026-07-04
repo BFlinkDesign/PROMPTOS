@@ -19,6 +19,7 @@ capable LLM.
 | 4 | Adversarial self-review (before shipping) | [prompts/adversarial-self-review.md](prompts/adversarial-self-review.md) |
 | 5 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
 | 6 | Adversarial safety red-team (shields, filters, validators) | [prompts/adversarial-safety-red-team.md](prompts/adversarial-safety-red-team.md) |
+| 7 | Session kickoff — align to the delivery systems | [prompts/session-alignment.md](prompts/session-alignment.md) |
 
 ## Console
 
