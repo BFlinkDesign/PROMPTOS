@@ -18,6 +18,7 @@ capable LLM.
 | 3 | Design direction first (UI work) | [prompts/design-direction-first.md](prompts/design-direction-first.md) |
 | 4 | Adversarial self-review (before shipping) | [prompts/adversarial-self-review.md](prompts/adversarial-self-review.md) |
 | 5 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
+| 6 | Adversarial safety red-team (shields, filters, validators) | [prompts/adversarial-safety-red-team.md](prompts/adversarial-safety-red-team.md) |
 
 ## Console
 
