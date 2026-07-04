@@ -30,3 +30,11 @@ skips the check, a path the new pattern doesn't reach. Those are found only by
 adversarial input, never by reading the addition. Pair every "it now catches X"
 with "and it still passes legitimate Y," because over-blocking is a silent
 failure that costs a real user real access.
+
+## Runnable companion (don't stop at the prose)
+
+The receipt this prompt asks for is executable: `agent/harness/safety_control_harness.py`
+in [agent-kit](https://github.com/BFlinkDesign/agent-kit) runs the
+positive/negative-control pass and refuses a suite with no negative control.
+Wire it as a required CI check so the control's "hardened" is a green gate, not
+a claim. Reference use in the wild: `dsm-jobs` `tests/test_scam_shield_receipt.py`.
