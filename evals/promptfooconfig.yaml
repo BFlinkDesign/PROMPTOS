@@ -1,0 +1,38 @@
+# PromptOS behavioral eval scaffold (promptfoo) -- OPT-IN, costs tokens.
+#
+# The FREE/deterministic gate is evals/lint_prompt_structure.py (runs in CI).
+# THIS file is the behavioral layer: it runs a prompt through a model and
+# asserts on the result. It is deliberately NOT wired into CI-on-every-push
+# (that would burn tokens on every PR). Run it manually when you change a
+# prompt's behavior:
+#
+#   export ANTHROPIC_API_KEY=...        # your key, in env only
+#   npx promptfoo@latest eval -c evals/promptfooconfig.yaml
+#
+# Extend: add one `tests:` block per prompt you want behaviorally pinned.
+# Model id below is Haiku (cheapest); confirm the exact promptfoo provider
+# string for your version if it errors (see https://www.promptfoo.dev/docs).
+
+description: "PromptOS prompt regression (scaffold -- extend one tests block per prompt)"
+
+prompts:
+  - file://../prompts/scope-pipeline.md
+
+providers:
+  - id: anthropic:messages:claude-haiku-4-5
+    config:
+      max_tokens: 1024
+
+tests:
+  # Zero-cost invariant check: the scope-pipeline prompt must keep its
+  # load-bearing spine (deterministic hash + verify gate + trust tiers) after
+  # any edit. This asserts on the PROMPT TEXT, so it runs without a model call.
+  # Replace/add model-exercising tests (vars + llm-rubric/contains) as needed.
+  - description: "scope-pipeline keeps hash + verify-gate + trust-tier invariants"
+    vars: {}
+    assert:
+      - type: javascript
+        value: |
+          const t = String(context.prompt.raw || context.prompt.label || '').toLowerCase();
+          const ok = t.includes('sha-256') && t.includes('verify') && t.includes('trust');
+          return ok ? true : 'scope-pipeline lost a load-bearing invariant (hash/verify/trust)';

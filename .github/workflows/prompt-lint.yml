@@ -1,0 +1,21 @@
+name: prompt-lint
+
+on:
+  pull_request:
+    paths:
+      - "prompts/**"
+      - "evals/lint_prompt_structure.py"
+      - ".github/workflows/prompt-lint.yml"
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Deterministic prompt-structure lint (zero-token)
+        run: python evals/lint_prompt_structure.py
