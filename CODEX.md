@@ -35,17 +35,22 @@ tool's runtime contract.
 
 ## Worktree Boundary
 
-Current safe implementation branch:
+The durable local clone is:
 
 ```text
-C:\Temp\promptos-audit-github
-branch: codex/prompt-library-audit
-PR: https://github.com/BFlinkDesign/PROMPTOS/pull/9
+C:\GitHub-Repos\PROMPTOS
 ```
 
-The original checkout at `C:\GitHub-Repos\PROMPTOS` is the durable local clone.
-Keep it clean. Use a temporary worktree for feature branches when the original
-checkout has unrelated local files or is behind `origin/main`.
+Do not trust a remembered branch name or a stale handoff path. Start with:
+
+```powershell
+git status --short --branch
+git fetch --prune origin
+gh pr list --state open --json number,title,isDraft,headRefName,baseRefName,mergeable,url
+```
+
+Use temporary worktrees for feature branches when useful, but remove them after
+merge and do not bake temporary paths into tracked docs.
 
 ## Eval Tooling
 
@@ -67,7 +72,7 @@ C:\Python313\python.exe -m venv .venv
 .\.venv\Scripts\pytest.exe --version
 ```
 
-Installed eval stack on PR #9:
+Installed eval stack:
 
 - `promptfoo` for prompt regression configs and CI-friendly model/prompt comparisons.
 - `@playwright/test` for local console smoke tests, screenshots, and file/drop workflows.
@@ -81,6 +86,19 @@ Core repo hygiene:
 ```powershell
 git status --short --branch
 git diff --check
+```
+
+Default local verification gate:
+
+```powershell
+npm run verify
+```
+
+Catalog and console hardening:
+
+```powershell
+npm run catalog:build
+npm run catalog:evaluate
 ```
 
 Installer smoke:
@@ -132,6 +150,8 @@ PromptOS Console
 - `npm install-scripts ls` reports install-script approvals pending for
   dependency packages. The CLI and Playwright browser smoke still passed in the
   local worktree.
+- The console embeds generated data from `PROMPTS.md` and `prompts/*.md`. Do not
+  hand-edit the `const DATA = ...` payload; run `npm run catalog:build`.
 - The console currently uses `DATA.prompts`, `payload.prompts`, and `S.prompts`.
   It still needs the typed `items[]` schema before workflows, playbooks, and
   runbooks can be first-class.
@@ -141,12 +161,13 @@ PromptOS Console
 Do not start by reshaping everything. Add the durable evaluation spine in this
 order:
 
-1. Add a deterministic catalog evaluator that scores prompt entries for inputs,
-   rules, summaries, output contracts, and enforceability.
-2. Add `promptfooconfig.yaml` with 3 to 5 high-value prompt regression cases.
-3. Add Playwright tests for the console, including paste/drop evaluation input.
-4. Add an Evaluator or Tools tab to the console that can paste or drag/drop JSON
+1. Add an Evaluator or Tools tab to the console that can paste or drag/drop JSON
    and Markdown, then run the deterministic local score.
+2. Promote `prompts[]` to typed `items[]` with prompt/workflow/playbook/runbook
+   support.
+3. Add 3 to 5 high-value promptfoo regression cases beyond the current local
+   echo smoke.
+4. Add CI for `npm run verify`.
 5. Record Inspect AI and DeepEval starter examples only after the deterministic
    and promptfoo lanes are working.
 

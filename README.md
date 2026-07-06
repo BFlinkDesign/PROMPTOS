@@ -51,6 +51,23 @@ C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"
 | Adversarial self-review | Pre-ship quality gate |
 | Retrospective | Project pause, errors/gaps ledger update |
 
+## Verify locally
+
+```powershell
+npm ci
+npm run verify
+```
+
+The verify gate checks the generated console catalog, runs a local promptfoo
+smoke through the no-API `echo` provider, and launches Playwright Chromium
+against the static console.
+
+Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
+
+```powershell
+npm run catalog:build
+```
+
 ## Audits
 
 - [Prompt library audit - 2026-07-06](audits/prompt-library-audit-2026-07-06.md)

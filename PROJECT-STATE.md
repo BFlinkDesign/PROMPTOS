@@ -1,166 +1,117 @@
 # PromptOS Project State
 
-Last verified: 2026-07-06 15:27 America/Chicago
+Last verified: 2026-07-06 15:44 America/Chicago
 
-## Current GitHub State
-
-Repository: `BFlinkDesign/PROMPTOS`
-
-Primary active branch:
-
-```text
-codex/prompt-library-audit
-```
-
-Open PR:
-
-```text
-PR #9: docs: add prompt library audit
-https://github.com/BFlinkDesign/PROMPTOS/pull/9
-head: 31f2525ac2d8d4517376a61ac9b73569f7b84cae
-state: draft
-checks: green as of 2026-07-06 01:17 America/Chicago
-```
-
-The exact current head changes when this state file is updated. Refresh it with:
+This file is an operating snapshot, not a substitute for live state. Start every
+session by refreshing Git and GitHub:
 
 ```powershell
-gh pr view 9 --json number,title,isDraft,mergeable,headRefOid,statusCheckRollup,url
+git status --short --branch
+git fetch --prune origin
+gh pr list --state open --json number,title,isDraft,headRefName,baseRefName,mergeable,url
 ```
 
-PR #9 currently contains:
+## Durable Checkout
 
-- `audits/prompt-library-audit-2026-07-06.md`
-- README audit pointer
-- npm eval/test tooling metadata
-- Python eval tooling requirements
-- repo ignore rules for local dependencies and test outputs
-
-No GitHub issues existed when last checked after PR #9 was opened. Do not assume
-issues have been created unless `gh issue list --state open` says so.
-
-## Worktrees
-
-Durable local clone:
+Primary local clone:
 
 ```text
 C:\GitHub-Repos\PROMPTOS
-branch: main
 ```
 
-Implementation worktree:
+Default branch:
 
 ```text
-C:\Temp\promptos-audit-github
-branch: codex/prompt-library-audit
+main
 ```
 
-Use the implementation worktree for PR #9 follow-up work. Keep the durable local
-clone clean and fast-forwarded to `origin/main`.
+Use temporary worktrees for risky feature work, but do not bake temporary paths
+or branch names into repo docs after the branch is merged.
 
-## Installed Packages
+## Current Hardening Spine
 
-Node:
-
-```text
-node: v24.2.0
-npm: 11.18.0
-promptfoo: 0.121.17
-@playwright/test: 1.61.1
-```
-
-Python:
-
-```text
-C:\Python313\python.exe: Python 3.13.14
-inspect-ai: 0.3.244
-inspect-evals: 0.14.3
-deepeval: 4.0.7
-pytest: 9.1.1
-```
-
-The Python packages are installed in the local worktree `.venv`, which is
-ignored by Git.
-
-## Verified Gates
-
-Local gate evidence from `C:\Temp\promptos-audit-github`:
-
-```text
-git diff --cached --check -> pass
-install.ps1 smoke -> installed pointer: agent/PROMPTS.md -> PROMPTOS
-npm run tool:promptfoo -> 0.121.17
-npm run tool:playwright -> Version 1.61.1
-.\.venv\Scripts\inspect.exe --version -> 0.3.244
-.\.venv\Scripts\deepeval.exe --version -> 4.0.7
-.\.venv\Scripts\pytest.exe --version -> pytest 9.1.1
-Playwright Chromium smoke -> PromptOS Console
-npm audit --omit=dev -> found 0 vulnerabilities
-```
-
-Remote PR checks on `31f2525`:
-
-```text
-CodeQL Advanced / Analyze (actions): success
-CodeQL Advanced / Analyze (javascript-typescript): success
-CodeQL: success
-GitGuardian Security Checks: success
-Socket Security: Project Report: success
-Socket Security: Pull Request Alerts: success
-CodeRabbit: success
-```
-
-## Caveats
-
-- Full dev `npm audit --audit-level=moderate` reports 9 moderate findings through
-  promptfoo's transitive OpenTelemetry dependency chain.
-- `npm audit fix --force` proposes a breaking promptfoo downgrade. Do not run it
-  without reviewing the promptfoo version impact.
-- `npm install-scripts ls` reports pending install-script approvals for:
-  `onnxruntime-node@1.24.3`, `@playwright/browser-chromium@1.61.1`, and
-  `@swc/core@1.15.43`.
-- The console is still prompt-only. It has no `items[]` artifact model yet.
-- The Evaluator or Tools tab is not implemented yet.
-- No promptfoo, Inspect AI, DeepEval, or Playwright test files have been added
-  yet beyond dependency metadata.
-
-## Next Agent Instructions
-
-Start here:
+The repo now has a local, no-API verification spine:
 
 ```powershell
-cd C:\Temp\promptos-audit-github
-git status --short --branch
-gh pr view 9 --json number,title,isDraft,mergeable,headRefOid,statusCheckRollup,url
+npm run catalog:build
+npm run catalog:evaluate
+npm run eval:promptfoo
+npm run test:console
+npm run verify
 ```
 
-If the worktree is clean and PR #9 is still current, continue with the next
-slice:
+`npm run verify` is the default local gate. It runs:
 
-1. Add a deterministic catalog evaluator under `tools/` or `scripts/`.
-2. Add fixtures under `evals/fixtures/`.
-3. Add a Playwright config and a console smoke test.
-4. Add a promptfoo config with a small golden set.
-5. Only then add the console Evaluator or Tools tab.
+1. deterministic catalog evaluation,
+2. promptfoo smoke through the documented local `echo` provider,
+3. Playwright Chromium tests against the static console.
 
-Commit order should stay atomic:
+## Generated Console Contract
 
-1. Deterministic evaluator and fixtures.
-2. Playwright console tests.
-3. promptfoo config.
-4. Console UI evaluator tab.
-5. Documentation updates.
+`console/promptos-console.html` embeds catalog data, but that data is not hand
+maintained. Regenerate it from `PROMPTS.md` and `prompts/*.md`:
 
-Do not squash or merge PR #9 until the user explicitly asks.
+```powershell
+npm run catalog:build
+```
 
-## Merge Strategy Reminder
+Then verify the generated data still matches source:
 
-The older PromptOS PR stack still matters:
+```powershell
+npm run catalog:evaluate
+```
 
-- PR #4 is the likely canonical base, but it was conflicting when last checked.
-- PR #5 is stacked on PR #4.
-- PR #3 is clean but design-only.
-- PR #1 and PR #2 appear superseded by PR #4 unless specific files are recovered.
-- The DCC branch should wait until PR #4 is resolved or explicitly rejected.
+The evaluator fails on broken catalog links, missing prompt files, stale console
+data, malformed embedded JSON, and duplicate catalog entries. Quality scores are
+reported for triage; low scores should become follow-up prompt hardening work.
 
-Refresh live GitHub state before acting on any of these.
+## Installed Tooling
+
+Node tools are declared in `package.json` and `package-lock.json`.
+
+Python eval tools are declared in `requirements-dev.txt`. They are installed in
+the local `.venv`, which is ignored by Git. Recreate it when needed:
+
+```powershell
+C:\Python313\python.exe -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements-dev.txt
+```
+
+## Last Verified Evidence
+
+Commands run from `C:\GitHub-Repos\PROMPTOS`:
+
+```text
+npm run catalog:evaluate -> 7 prompts, average score 76/100, no warnings
+npm run eval:promptfoo -> 1 passed, 0 failed, local echo provider
+npm run test:console -> 2 passed, Chromium
+npm run verify -> all three gates passed
+```
+
+The console now renders the 7 tracked prompt blocks from `PROMPTS.md`; it no
+longer carries the older unrelated 159-item embedded catalog.
+
+## Known Caveats
+
+- Full dev `npm audit` reports moderate transitive findings through promptfoo's
+  dependency chain. `npm audit --omit=dev` is the production-relevant check for
+  this repo shape.
+- `npm install-scripts ls` may report pending install-script approvals for
+  dependency packages used by Playwright, SWC, or ONNX. Review before approving.
+- The console is still a prompt browser, not a full evaluator UI. The local
+  deterministic evaluator exists in `tools/`, but there is not yet an in-browser
+  Evaluator or Tools tab.
+- The repo still needs a typed artifact model before workflows, playbooks, and
+  runbooks become first-class catalog items.
+
+## Next Improvement Tasks
+
+1. Add an Evaluator or Tools tab that accepts pasted or dropped Markdown/JSON and
+   runs the same deterministic scoring rules client-side.
+2. Promote the catalog schema from `prompts[]` to typed `items[]` with
+   `type`, `created_at`, `updated_at`, `maturity`, `domain`, and `tags`.
+3. Harden the remaining lower-scoring prompts, starting with prompts that have
+   no explicit inputs or verification language.
+4. Add CI for `npm run verify` after the local gate is stable.
+5. Add Inspect AI and DeepEval examples only after the deterministic and
+   promptfoo lanes are non-brittle.
