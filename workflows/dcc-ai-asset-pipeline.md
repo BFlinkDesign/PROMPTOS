@@ -1,8 +1,43 @@
+---
+id: workflow.dcc-ai-asset-pipeline
+type: workflow
+title: DCC AI asset pipeline
+created_at: 2026-07-06T00:38:04-05:00
+updated_at: 2026-07-06T00:38:04-05:00
+timezone: America/Chicago
+maturity: draft
+domain: DCC pipeline
+tags: [dcc, blender, unity, unreal, ai-assets, mesh-optimization, pipeline]
+---
+
 # DCC AI asset pipeline workflow
 
 Purpose: convert AI-generated 3D assets into engine-ready production assets through a controlled DCC pipeline.
 
 This workflow is for Blender, Unity, Unreal, WebGL, AR/GLB, and similar 3D production targets. It is especially useful when generated models look visually promising but have excessive triangles, bad topology, warped UVs, holes, inconsistent scale, or texture-bake problems.
+
+## Source timeline, oldest to newest
+
+| Timecode | Source step | Pipeline lesson |
+| ---: | --- | --- |
+| 00:00 | Intro | Target state: messy high-poly AI meshes converted into a usable game-ready scene. |
+| 00:40 | Concept art | Start with concept art so later assets share a visual language. |
+| 00:47 | Asset reference split | Split the concept into individual building, prop, and environment references. |
+| 01:03 | First AI house | Generate the first image-to-3D candidate and inspect it before trusting it. |
+| 01:26 | Smart-poly failure | Smart low-poly can fail on complex buildings: holes, missing details, warped textures. |
+| 01:44 | High-quality mesh | For complex assets, generate high-quality source first, optimize second. |
+| 02:08 | Blender decimate test | Naive decimation can hit the triangle target while destroying visual quality. |
+| 03:24 | Agent plus Blender MCP | Agent-controlled DCC tooling can inspect, iterate, unwrap, bake, and repair. |
+| 04:55 | First repair pass fails | One pass is not enough; the workflow needs diagnosis and retry loops. |
+| 05:18 | Iterative repair | Multiple passes can reach acceptable quality near a 20K-40K triangle target. |
+| 05:53 | Python automation | Once one asset succeeds, convert the learned method into a reusable script. |
+| 06:58 | Batch processing | Validate the automation on multiple high-poly assets, not only the first test. |
+| 07:39 | Usage statistics | Track time, tokens, script size, and human review cost where available. |
+| 08:01 | Unity HDRP import | Blend AI assets with proven asset packs instead of generating everything. |
+| 08:39 | Low-poly props | Smart low-poly is more suitable for small props than complex architecture. |
+| 10:04 | Scene dressing | Composition, foliage, props, and set dressing create believability. |
+| 10:59 | HDRP lighting | Lighting is a final quality multiplier, not a replacement for asset cleanup. |
+| 11:51 | Lessons learned | The durable value is reusable workflow automation, not raw generated output. |
 
 ## Operating doctrine
 
@@ -11,7 +46,7 @@ AI-generated assets are raw material, not deliverables. The deliverable is the v
 The correct pattern is:
 
 ```text
-concept/reference → raw high-poly generation → defect inspection → optimized mesh → UV repair → high-to-low bake → LOD/collider/lightmap prep → engine export → re-import validation → batch automation
+concept/reference -> raw high-poly generation -> defect inspection -> optimized mesh -> UV repair -> high-to-low bake -> LOD/collider/lightmap prep -> engine export -> re-import validation -> batch automation
 ```
 
 ## When to use this workflow
