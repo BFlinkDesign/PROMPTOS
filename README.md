@@ -51,6 +51,10 @@ C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"
 | Adversarial self-review | Pre-ship quality gate |
 | Retrospective | Project pause, errors/gaps ledger update |
 
+## Audits
+
+- [Prompt library audit - 2026-07-06](audits/prompt-library-audit-2026-07-06.md)
+
 ## Adding a prompt
 
 1. Add `prompts/your-block.md` with the fill-in-the-bracket template.
