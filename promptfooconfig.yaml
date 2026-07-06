@@ -1,0 +1,18 @@
+description: PromptOS local no-API prompt smoke
+
+prompts:
+  - file://prompts/scope-pipeline.md
+
+providers:
+  - id: echo
+    label: local echo provider
+
+tests:
+  - description: scope pipeline preserves deterministic verification requirements
+    assert:
+      - type: contains
+        value: Verify gate
+      - type: contains
+        value: trust tiers
+      - type: contains
+        value: recompute
