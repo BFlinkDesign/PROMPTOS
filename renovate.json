@@ -1,1 +1,31 @@
-{"$schema": "https://docs.renovatebot.com/renovate-schema.json", "extends": ["github>BFlinkDesign/renovate-config"]}
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "timezone": "America/Chicago",
+  "schedule": ["before 6am on monday"],
+  "prConcurrentLimit": 8,
+  "prHourlyLimit": 4,
+  "dependencyDashboard": true,
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Group all minor and patch bumps into one PR per repo per week.",
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "minor and patch updates",
+      "automerge": false
+    },
+    {
+      "description": "Require Dependency Dashboard approval before major update PRs.",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Group GitHub Actions updates together.",
+      "matchManagers": ["github-actions"],
+      "groupName": "github actions"
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  }
+}
