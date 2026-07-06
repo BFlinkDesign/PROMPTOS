@@ -1,4 +1,16 @@
-# DCC asset pipeline (AI mesh → engine-ready asset)
+---
+id: prompt.dcc-asset-pipeline
+type: prompt
+title: DCC asset pipeline
+created_at: 2026-07-06T00:38:04-05:00
+updated_at: 2026-07-06T00:38:04-05:00
+timezone: America/Chicago
+maturity: draft
+domain: DCC pipeline
+tags: [dcc, blender, unity, unreal, ai-assets, mesh-optimization]
+---
+
+# DCC asset pipeline (AI mesh to engine-ready asset)
 
 > You are a senior technical artist, Blender pipeline engineer, and game-asset optimization specialist.
 > Convert [RAW ASSET FOLDER] of AI-generated 3D assets into engine-ready assets for [ENGINE / TARGET PLATFORM].
