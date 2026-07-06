@@ -11,6 +11,33 @@ Use four artifact types with different jobs:
 | Playbook | `playbooks/` | Strategic response pattern for a class of scenarios | The situation requires judgment, branching, triage, or decision logic. |
 | Runbook | `runbooks/` | Step-by-step operational procedure | The task is known, repeatable, and should be executed consistently under pressure. |
 
+## Required metadata
+
+Every new PromptOS artifact must include YAML front matter.
+
+```yaml
+---
+id: workflow.example-slug
+type: workflow
+title: Human-readable title
+created_at: 2026-07-06T00:38:04-05:00
+updated_at: 2026-07-06T00:38:04-05:00
+timezone: America/Chicago
+maturity: draft
+domain: Example domain
+tags: [example, audit-ready]
+---
+```
+
+Rules:
+
+- Use ISO-8601 timestamps with an explicit UTC offset.
+- Default timezone is `America/Chicago` unless the source clearly uses another timezone.
+- Catalogs and the console sort artifacts oldest to newest by `created_at` ascending.
+- Legacy artifacts with unknown timestamps sort before timestamped artifacts until backfilled.
+- If two artifacts share the same timestamp, sort by `type`, then `id`, then title.
+- Transcript-derived artifacts must preserve source timecodes in oldest-to-newest order.
+
 ## Boundary rules
 
 ### Prompt
@@ -65,7 +92,7 @@ A runbook should include prerequisites, commands, exact steps, expected outputs,
 
 ## Console target
 
-The PromptOS console should eventually expose all four types, with filtering by:
+The PromptOS console should expose all four types, with filtering by:
 
 - type: prompt / workflow / playbook / runbook
 - domain
@@ -73,5 +100,8 @@ The PromptOS console should eventually expose all four types, with filtering by:
 - toolchain
 - enforcement level
 - maturity: draft / tested / hardened / deprecated
+- created/updated timestamp
+
+Console default order: oldest to newest by `created_at`, with legacy unknown-timestamp entries first until backfilled.
 
 Until the console data model is expanded, catalogs remain the source of truth.
