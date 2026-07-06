@@ -1,0 +1,14 @@
+{
+  "name": "promptos",
+  "private": true,
+  "scripts": {
+    "eval:promptfoo": "promptfoo eval",
+    "test:console": "playwright test",
+    "tool:promptfoo": "promptfoo --version",
+    "tool:playwright": "playwright --version"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "promptfoo": "^0.121.17"
+  }
+}
