@@ -1,0 +1,4 @@
+inspect-ai==0.3.244
+inspect-evals==0.14.3
+deepeval==4.0.7
+pytest==9.1.1
