@@ -22,6 +22,7 @@ name: Review Pipeline
 
 on:
   workflow_run:
+    workflows: ["CodeQL Advanced"]
     types: [completed]
   pull_request:
     types: [closed]
