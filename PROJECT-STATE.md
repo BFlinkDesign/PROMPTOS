@@ -122,8 +122,8 @@ Implementation contract:
 
 ## Outcome Governance Standard
 
-`standards/outcome-governance-standard.md` is now the governing standard for
-decision and evaluator language. The user-facing evaluator contract is:
+`OGS.md` is now the normative governing standard for decision and evaluator
+language. The user-facing evaluator contract is:
 
 ```text
 Action
@@ -136,14 +136,16 @@ Fallback
 
 Core rules:
 
-1. Reality is the only truth; everything else is evidence competing to
+1. Domain First: every decision identifies the governing domain before
+   evaluating authority.
+2. Reality is the only truth; everything else is evidence competing to
    approximate reality.
-2. Authority is domain-bound. User preference governs goals and priorities, not
+3. Authority is domain-bound. User preference governs goals and priorities, not
    physics, law, safety, contracts, verified measurements, or governing
    standards.
-3. Measurements are evidence, not truth. They become authoritative only after
+4. Measurements are evidence, not truth. They become authoritative only after
    passing the measurement verification gate.
-4. No artifact self-certifies. Sensors, photos, AI outputs, calculations,
+5. No artifact self-certifies. Sensors, photos, AI outputs, calculations,
    drawings, models, documents, and tests require independent verification
    appropriate to their domain.
 

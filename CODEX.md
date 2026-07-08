@@ -16,7 +16,7 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 
 1. `PROJECT-STATE.md` for current branch, PR, gates, caveats, and next actions.
 2. `README.md` for repo purpose and workflow.
-3. `standards/*.md` for governing decision and evaluation standards.
+3. `OGS.md` for the normative Outcome Governance Standard.
 4. `PROMPTS.md` for the tracked prompt catalog.
 5. `prompts/*.md` for individual prompt blocks.
 6. `schema/items.schema.json` for the typed artifact contract.
@@ -192,9 +192,8 @@ The next high-leverage console slice is File System Access API support:
 
 ## Outcome Governance Direction
 
-`standards/outcome-governance-standard.md` is the governing response and
-decision standard. Build evaluator UX around outcome language, not confidence
-language:
+`OGS.md` is the governing response and decision standard. Build evaluator UX
+around outcome language, not confidence language:
 
 ```text
 Action
@@ -205,9 +204,10 @@ Next Checkpoint
 Fallback
 ```
 
-Do not let user preference, model output, a document, a measurement, or a test
-self-certify. Authority is domain-bound, and measurements become authoritative
-only after passing the measurement verification gate.
+Apply Domain First before authority ranking. Do not let user preference, model
+output, a document, a measurement, or a test self-certify. Authority is
+domain-bound, governing authorities are domain-specific, and measurements
+become authoritative only after passing the measurement verification gate.
 
 ## Next Work Slice
 

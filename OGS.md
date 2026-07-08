@@ -1,7 +1,7 @@
 # Outcome Governance Standard (OGS)
 
 Version: 1.0
-Status: Foundational Standard
+Status: Normative
 Scope: Universal systems that recommend, automate, evaluate, or govern action.
 
 ## Foundational Principle
@@ -20,6 +20,36 @@ highest traceability, and lowest operational friction.
 The objective is not confidence. The objective is correct decisions.
 
 ## Immutable Laws
+
+### Law 0: Domain First
+
+Every decision shall first identify the governing domain before evaluating
+authority. Authority is meaningful only within its domain of jurisdiction.
+
+Example:
+
+```text
+User: I want the footing smaller.
+
+Domain: Engineering
+Authority: Engineering standards, verified loads, stamped calculations, AHJ.
+Result: User preference is accepted as a goal, but it cannot override the
+engineering authority that governs the decision.
+```
+
+Example:
+
+```text
+User: I prefer the UI to be dark.
+
+Domain: User Preference
+Authority: User preference.
+Result: Engineering standards have no authority over this aesthetic choice
+unless the preference creates an accessibility, safety, legal, or contractual
+failure.
+```
+
+This law prevents category mistakes.
 
 ### Law 1: Reality Always Wins
 
@@ -125,20 +155,36 @@ No failed verification gates remain.
 
 Predictions exist to reduce future uncertainty. They may estimate, forecast, or
 recommend verification. They may never replace measured reality, verified
-sources, governing standards, laws, or approved reference tables.
+measurements, governing authorities, deterministic rules, standards, laws, or
+approved reference tables.
 
 ### Law 7: Learning Cannot Overwrite Governing Truth
 
 Learning may change coefficients, weights, prediction accuracy, timing, and
 state estimation. Learning may not overwrite verified equations, physics,
-chemistry, standards, laws, or approved reference tables.
+chemistry, standards, laws, governing authorities, or approved reference tables.
+
+## Universal Decision Questions
+
+Every decision starts with these five questions, in order:
+
+1. What domain governs this decision?
+2. What reality are we trying to approximate?
+3. What evidence has passed verification?
+4. What authority does that evidence permit?
+5. What action follows from that authority?
+
+The same reasoning process applies to engineering, software, health,
+operations, finance, manufacturing, robotics, AI agents, and business
+decisions.
 
 ## Decision Pipeline
 
 Every decision follows this pipeline:
 
 ```text
-Reality
+Determine Governing Domain
+-> Reality
 -> Observations
 -> Verification
 -> Evidence
@@ -155,10 +201,12 @@ Never bypass it.
 
 Authority flows downward. It never flows upward.
 
+The governing domain must be determined before the hierarchy is applied.
+
 ```text
 Reality
 -> Verified Measurements
--> Verified Sources of Truth
+-> Governing Authorities
 -> Deterministic Rules
 -> Validated Mathematical Models
 -> Historical Evidence
@@ -169,6 +217,18 @@ Reality
 
 The engine may descend this hierarchy only when the higher level cannot answer
 the question. A lower level may never overwrite a higher level.
+
+Governing authorities are domain-specific.
+
+Examples:
+
+| Domain | Governing authorities |
+| --- | --- |
+| Engineering | AISC, ACI, ASCE, IBC, stamped calculations, approved drawings, AHJ |
+| Software | specifications, accepted tests, contracts, APIs, release policies |
+| Medicine | validated diagnostics, clinical guidelines, regulations, licensed clinicians |
+| Pool operations | verified FC/CYA relationship, manufacturer instructions, validated operating procedures |
+| Business | signed contracts, policy, budget authority, market evidence, owner goals |
 
 Authority remains domain-bound at every level. For example, a user preference
 may define the desired outcome, but it cannot override an engineering code,
@@ -211,14 +271,16 @@ Exactly what should be done. No ambiguity.
 
 ### 2. Evidence
 
-The observations that support the action: measurements, documents, photos,
-calculations, verified rules, tests, or accepted instructions.
+The observations that support the action: verified measurements, documents,
+photos, calculations, verified rules, tests, or accepted instructions within
+their domain of authority.
 
 ### 3. Authority
 
-Why the recommendation is allowed: verified measurement, governing standard,
-manufacturer specification, unit test, approved drawing, signed contract,
-professional authority, AHJ, or user instruction within its domain.
+Why the recommendation is allowed: verified measurement, governing authority,
+deterministic rule, manufacturer specification, unit test, approved drawing,
+signed contract, professional authority, AHJ, or user instruction within its
+domain.
 
 ### 4. Blockers
 

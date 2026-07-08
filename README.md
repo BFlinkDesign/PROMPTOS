@@ -75,8 +75,8 @@ npm run catalog:build
 
 ## Standards
 
-- [Outcome Governance Standard](standards/outcome-governance-standard.md) -
-  universal decision architecture for outcome-first AI systems.
+- [Outcome Governance Standard](OGS.md) - normative universal decision
+  architecture for outcome-first AI systems.
 
 ## Adding a prompt
 
