@@ -18,10 +18,12 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 2. `README.md` for repo purpose and workflow.
 3. `PROMPTS.md` for the tracked prompt catalog.
 4. `prompts/*.md` for individual prompt blocks.
-5. `console/promptos-console.html` for the static local browser console.
-6. `audits/*.md` for dated quality and architecture assessments.
-7. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
-8. `.github/workflows/` for remote security scanning.
+5. `schema/items.schema.json` for the typed artifact contract.
+6. `tools/scoring-core.mjs` for the shared deterministic scoring rules.
+7. `console/promptos-console.html` for the static local browser console.
+8. `audits/*.md` for dated quality and architecture assessments.
+9. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
+10. `.github/workflows/` for remote security scanning and verification.
 
 ## Platform Boundary
 
@@ -99,6 +101,7 @@ Catalog and console hardening:
 ```powershell
 npm run catalog:build
 npm run catalog:evaluate
+npm run schema:validate
 ```
 
 Installer smoke:
@@ -152,23 +155,23 @@ PromptOS Console
   local worktree.
 - The console embeds generated data from `PROMPTS.md` and `prompts/*.md`. Do not
   hand-edit the `const DATA = ...` payload; run `npm run catalog:build`.
-- The console currently uses `DATA.prompts`, `payload.prompts`, and `S.prompts`.
-  It still needs the typed `items[]` schema before workflows, playbooks, and
-  runbooks can be first-class.
+- `items[]` is the canonical catalog shape. `prompts[]` remains as a generated
+  compatibility projection for older browser and JSON consumers.
+- The in-browser Evaluator uses a generated copy of `tools/scoring-core.mjs`.
+  If scoring logic changes, `npm run verify` fails until `npm run catalog:build`
+  refreshes the embedded runtime.
 
 ## Next Work Slice
 
-Do not start by reshaping everything. Add the durable evaluation spine in this
-order:
+The repo has the durable deterministic spine. Continue hardening in this order:
 
-1. Add an Evaluator or Tools tab to the console that can paste or drag/drop JSON
-   and Markdown, then run the deterministic local score.
-2. Promote `prompts[]` to typed `items[]` with prompt/workflow/playbook/runbook
-   support.
-3. Add 3 to 5 high-value promptfoo regression cases beyond the current local
+1. Add 3 to 5 high-value promptfoo regression cases beyond the current local
    echo smoke.
-4. Add CI for `npm run verify`.
-5. Record Inspect AI and DeepEval starter examples only after the deterministic
+2. Add first-class workflow, playbook, and runbook source directories once their
+   content model is settled.
+3. Backfill real `created_at` and `updated_at` values from Git history instead
+   of inventing dates.
+4. Record Inspect AI and DeepEval starter examples only after the deterministic
    and promptfoo lanes are working.
 
 Keep each slice independently revertible and commit by concern.

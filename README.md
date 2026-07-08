@@ -58,9 +58,10 @@ npm ci
 npm run verify
 ```
 
-The verify gate checks the generated console catalog, runs a local promptfoo
-smoke through the no-API `echo` provider, and launches Playwright Chromium
-against the static console.
+The verify gate checks the generated console catalog, validates the typed
+`items[]` schema, runs a local promptfoo smoke through the no-API `echo`
+provider, and launches Playwright Chromium against the static console and
+Evaluator tab.
 
 Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
 
@@ -76,4 +77,13 @@ npm run catalog:build
 
 1. Add `prompts/your-block.md` with the fill-in-the-bracket template.
 2. Add a row to `PROMPTS.md` catalog.
-3. Commit. No per-repo copies to update.
+3. Run `npm run catalog:build`.
+4. Run `npm run verify`.
+5. Commit. No per-repo copies to update.
+
+## Catalog schema
+
+The console catalog is generated as `items[]` with typed artifacts:
+`prompt`, `workflow`, `playbook`, or `runbook`. The compatibility `prompts[]`
+projection remains embedded for older consumers, but `items[]` is the canonical
+schema validated by `npm run schema:validate`.
