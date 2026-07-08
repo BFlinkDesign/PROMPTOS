@@ -1,5 +1,13 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import {
+  extractInputs,
+  extractRules,
+  extractSummary,
+  extractTitle,
+  maturityForScore,
+  scorePrompt,
+} from './scoring-core.mjs';
 
 export function readText(filePath) {
   return fs.readFileSync(filePath, 'utf8');
@@ -46,22 +54,39 @@ export function loadPromptEntries(rootDir = process.cwd()) {
 export function buildConsoleData(rootDir = process.cwd()) {
   const entries = loadPromptEntries(rootDir);
   const ids = entries.map((entry) => promptId(entry.markdownPath));
-  const prompts = entries.map((entry, index) => ({
+  const items = entries.map((entry, index) => ({
     id: ids[index],
-    volume: 'core',
-    domain: 'Core Prompt Blocks',
-    num: entry.number,
+    type: 'prompt',
+    source_path: entry.markdownPath,
     title: entry.title,
     summary: entry.summary,
-    replaces: '',
-    when_to_use: entry.catalogTitle,
-    inputs: entry.inputs,
+    input_requirements: entry.inputs,
+    expected_output_format: entry.catalogTitle,
     rules: entry.rules,
-    enforceable: entry.score.total >= 60,
+    domain: 'Core Prompt Blocks',
     tags: tagsFor(entry),
+    maturity: maturityForScore(entry.score.total),
+    created_at: 'legacy-unknown',
+    updated_at: 'legacy-unknown',
+    score: entry.score.total,
     related: relatedIds(ids, index),
   }));
-  return { version: 2, count: prompts.length, prompts };
+  const prompts = items.map((item, index) => ({
+    id: item.id,
+    volume: 'core',
+    domain: item.domain,
+    num: entries[index].number,
+    title: item.title,
+    summary: item.summary,
+    replaces: '',
+    when_to_use: item.expected_output_format,
+    inputs: item.input_requirements,
+    rules: item.rules,
+    enforceable: item.maturity !== 'draft',
+    tags: item.tags,
+    related: relatedIds(ids, index),
+  }));
+  return { version: 3, count: items.length, items, prompts };
 }
 
 export function extractConsoleData(html) {
@@ -85,6 +110,47 @@ export function replaceConsoleData(html, data) {
   const jsonEnd = findJsonEnd(html, jsonStart);
   const serialized = JSON.stringify(data, null, 2);
   return `${html.slice(0, jsonStart)}${serialized}${html.slice(jsonEnd)}`;
+}
+
+export function buildScoringRuntime(rootDir = process.cwd()) {
+  const source = readText(path.join(rootDir, 'tools', 'scoring-core.mjs'));
+  const browserSource = source.replace(/^export\s+/gm, '');
+  return `${browserSource.trim()}
+
+globalThis.PromptOSScoring = Object.freeze({
+  extractTitle,
+  extractSummary,
+  extractInputs,
+  extractRules,
+  scorePrompt,
+  maturityForScore,
+  verdictForScore,
+  normalizeText,
+});`;
+}
+
+export function extractConsoleScoring(html) {
+  const startMarker = '/* __PROMPTOS_SCORING_START__ */';
+  const endMarker = '/* __PROMPTOS_SCORING_END__ */';
+  const start = html.indexOf(startMarker);
+  const end = html.indexOf(endMarker);
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error('console scoring markers not found');
+  }
+  return html.slice(start + startMarker.length, end).trim();
+}
+
+export function replaceConsoleScoring(html, runtime) {
+  const startMarker = '/* __PROMPTOS_SCORING_START__ */';
+  const endMarker = '/* __PROMPTOS_SCORING_END__ */';
+  const start = html.indexOf(startMarker);
+  const end = html.indexOf(endMarker);
+  if (start === -1 || end === -1 || end < start) {
+    throw new Error('console scoring markers not found');
+  }
+  return `${html.slice(0, start + startMarker.length)}
+${runtime}
+${html.slice(end)}`;
 }
 
 export function evaluateCatalog(rootDir = process.cwd()) {
@@ -140,6 +206,15 @@ export function evaluateCatalog(rootDir = process.cwd()) {
       }
       if (JSON.stringify(embedded) !== JSON.stringify(generated)) {
         errors.push('console DATA is not generated from PROMPTS.md; run npm run catalog:build');
+      }
+      try {
+        const embeddedScoring = extractConsoleScoring(html);
+        const generatedScoring = buildScoringRuntime(rootDir);
+        if (embeddedScoring !== generatedScoring) {
+          errors.push('console scoring runtime is stale; run npm run catalog:build');
+        }
+      } catch (error) {
+        errors.push(`console scoring runtime parse failed: ${error.message}`);
       }
     } catch (error) {
       errors.push(`console DATA parse failed: ${error.message}`);
@@ -201,62 +276,6 @@ function stripMarkdown(value) {
     .trim();
 }
 
-function extractTitle(body) {
-  const match = body.match(/^#\s+(.+)$/m);
-  return match ? stripMarkdown(match[1]) : '';
-}
-
-function extractSummary(body) {
-  const withoutTitle = body.replace(/^#\s+.+$/m, '').trim();
-  const quoteLines = withoutTitle
-    .split(/\r?\n/)
-    .filter((line) => line.trim().startsWith('>'))
-    .map((line) => line.replace(/^>\s?/, '').trim())
-    .filter(Boolean);
-  const source = quoteLines.length ? quoteLines.join(' ') : withoutTitle;
-  return normalizeText(source).slice(0, 260);
-}
-
-function extractInputs(body) {
-  const labels = new Set();
-  const pattern = /\[([A-Z][A-Z0-9 /&._-]{1,80})\]/g;
-  let match;
-  while ((match = pattern.exec(body)) !== null) {
-    const label = match[1].trim();
-    if (!label.includes('http')) {
-      labels.add(label);
-    }
-  }
-  return [...labels].map((label) => ({
-    label,
-    hint: 'Fill this placeholder before running the prompt.',
-  }));
-}
-
-function extractRules(body) {
-  const quoteLines = body
-    .split(/\r?\n/)
-    .filter((line) => line.trim().startsWith('>'))
-    .map((line) => line.replace(/^>\s?/, '').trim())
-    .filter(Boolean);
-  return quoteLines.length ? quoteLines.join('\n') : normalizeText(body.replace(/^#\s+.+$/m, ''));
-}
-
-function scorePrompt(body) {
-  const text = body.toLowerCase();
-  const inputs = extractInputs(body);
-  const factors = {
-    title: /^#\s+.+$/m.test(body) ? 15 : 0,
-    bodyLength: body.trim().length >= 250 ? 15 : body.trim().length >= 120 ? 8 : 0,
-    inputs: inputs.length ? 15 : 0,
-    verification: /\b(verify|gate|evidence|cite|citation|hash|recompute|source)\b/.test(text) ? 20 : 0,
-    outputContract: /\b(produce|emit|return|deliver|ending|output|matrix|summary|plan)\b/.test(text) ? 20 : 0,
-    boundaries: /\b(never|do not|if .*missing|ambiguous|unknown|assumption|trust)\b/.test(text) ? 15 : 0,
-  };
-  const total = Object.values(factors).reduce((sum, value) => sum + value, 0);
-  return { total, factors };
-}
-
 function promptId(markdownPath) {
   return `core.${path.basename(markdownPath, path.extname(markdownPath))}`;
 }
@@ -273,11 +292,4 @@ function tagsFor(entry) {
 
 function relatedIds(ids, index) {
   return ids.filter((_, i) => i !== index).slice(0, 4);
-}
-
-function normalizeText(value) {
-  return String(value || '')
-    .replace(/\r?\n+/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
 }

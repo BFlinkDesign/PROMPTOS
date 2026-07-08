@@ -111,6 +111,28 @@
   /* banner */
   .banner{grid-column:1/-1;border:1px solid var(--accent-c);background:var(--surface-2);border-radius:var(--radius);
     padding:.9rem 1.1rem;font-family:var(--font-sans);font-size:1rem}
+  .tabs{display:inline-flex;gap:.35rem;border:1px solid var(--border);border-radius:var(--radius);padding:.18rem;background:var(--surface-2)}
+  .tabs .btn{border-color:transparent;background:transparent}
+  .tabs .btn.on{background:var(--accent-c);color:#fff}
+  .wrap.tools{grid-template-columns:1fr}
+  .wrap.tools nav{display:none}
+  .eval{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1rem;display:grid;gap:.85rem}
+  .eval[hidden]{display:none}
+  .eval-top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap}
+  .eval h2{font-family:var(--font-sans);font-size:1.2rem;line-height:1.2}
+  .eval-actions{display:flex;gap:.45rem;flex-wrap:wrap}
+  .eval textarea{width:100%;min-height:15rem;resize:vertical;background:var(--surface-2);color:var(--text);
+    border:1px solid var(--border);border-radius:var(--radius);padding:.85rem;font-family:var(--font-mono);font-size:.85rem;line-height:1.45}
+  .dropzone{border:1px dashed var(--border);border-radius:var(--radius);padding:.8rem;font-family:var(--font-sans);font-size:.9rem;color:var(--text-2);background:var(--surface-2)}
+  .dropzone.on{border-color:var(--accent-c);color:var(--accent-text)}
+  .eval-result{border:1px solid var(--border);border-radius:var(--radius);padding:.85rem;background:var(--surface-2);font-family:var(--font-sans)}
+  .eval-score{display:flex;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:.65rem}
+  .eval-score strong{font-size:1.8rem;line-height:1;color:var(--accent-text)}
+  .eval-table{width:100%;border-collapse:collapse;font-size:.88rem}
+  .eval-table th,.eval-table td{border-top:1px solid var(--border);padding:.4rem;text-align:left;vertical-align:top}
+  .eval-table th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text-2)}
+  .eval-issues{margin-top:.7rem;color:var(--text-2);font-size:.88rem}
+  .eval-issues li{margin:.18rem 0}
   /* drawer */
   .scrim{position:fixed;inset:0;background:#14141366;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
   .scrim.on{opacity:1;pointer-events:auto}
@@ -159,6 +181,10 @@
     <span class="brand">Prompt<b>OS</b> Console</span>
     <span class="count" id="count"></span>
     <span class="grow"></span>
+    <div class="tabs" role="tablist" aria-label="Console view">
+      <button class="btn on" id="catalogBtn" role="tab" aria-selected="true" aria-controls="grid">Catalog</button>
+      <button class="btn" id="evalBtn" role="tab" aria-selected="false" aria-controls="evalPanel">Evaluator</button>
+    </div>
     <input id="q" type="search" placeholder="Search...  ( / )" autocomplete="off" aria-label="Search prompts">
     <button class="btn" id="palBtn" title="Command palette">Commands <span class="kbd">Ctrl K</span></button>
     <button class="btn" id="densBtn" title="Toggle density (D)">Comfortable</button>
@@ -168,7 +194,23 @@
 </header>
 <div class="wrap" id="main">
   <nav><div class="navh">Domains</div><div id="nav"></div></nav>
-  <main><div class="grid" id="grid" aria-live="polite"></div></main>
+  <main>
+    <section class="eval" id="evalPanel" hidden aria-label="Prompt evaluator">
+      <div class="eval-top">
+        <h2>Evaluator</h2>
+        <div class="eval-actions">
+          <button class="btn" id="evalPick" type="button">Open file</button>
+          <button class="btn" id="evalRun" type="button">Evaluate</button>
+          <button class="btn" id="evalClear" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="dropzone" id="evalDrop">Drop Markdown, JSON catalog data, or paste below.</div>
+      <input id="evalFile" type="file" accept=".md,.markdown,.json,.txt" hidden>
+      <textarea id="evalText" spellcheck="false" placeholder="# Prompt title&#10;&#10;Paste a prompt, workflow, playbook, runbook, or catalog JSON."></textarea>
+      <div class="eval-result" id="evalResult" role="status" aria-live="polite">No evaluation run.</div>
+    </section>
+    <div class="grid" id="grid" aria-live="polite"></div>
+  </main>
 </div>
 <footer id="foot"></footer>
 <div class="scrim" id="scrim"></div>
@@ -198,9 +240,355 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
+/* __PROMPTOS_SCORING_START__ */
+function extractTitle(body) {
+  const match = String(body || '').match(/^#\s+(.+)$/m);
+  return match ? stripMarkdown(match[1]) : '';
+}
+
+function extractSummary(body) {
+  const text = String(body || '');
+  const withoutTitle = text.replace(/^#\s+.+$/m, '').trim();
+  const quoteLines = withoutTitle
+    .split(/\r?\n/)
+    .filter((line) => line.trim().startsWith('>'))
+    .map((line) => line.replace(/^>\s?/, '').trim())
+    .filter(Boolean);
+  const source = quoteLines.length ? quoteLines.join(' ') : withoutTitle;
+  return normalizeText(source).slice(0, 260);
+}
+
+function extractInputs(body) {
+  const labels = new Set();
+  const pattern = /\[([A-Z][A-Z0-9 /&._-]{1,80})\]/g;
+  let match;
+  while ((match = pattern.exec(String(body || ''))) !== null) {
+    const label = match[1].trim();
+    if (!label.includes('http')) {
+      labels.add(label);
+    }
+  }
+  return [...labels].map((label) => ({
+    label,
+    hint: 'Fill this placeholder before running the prompt.',
+  }));
+}
+
+function extractRules(body) {
+  const text = String(body || '');
+  const quoteLines = text
+    .split(/\r?\n/)
+    .filter((line) => line.trim().startsWith('>'))
+    .map((line) => line.replace(/^>\s?/, '').trim())
+    .filter(Boolean);
+  return quoteLines.length ? quoteLines.join('\n') : normalizeText(text.replace(/^#\s+.+$/m, ''));
+}
+
+function scorePrompt(body) {
+  const source = String(body || '');
+  const text = source.toLowerCase();
+  const inputs = extractInputs(source);
+  const factors = {
+    title: /^#\s+.+$/m.test(source) ? 15 : 0,
+    bodyLength: source.trim().length >= 250 ? 15 : source.trim().length >= 120 ? 8 : 0,
+    inputs: inputs.length ? 15 : 0,
+    verification: /\b(verify|gate|evidence|cite|citation|hash|recompute|source)\b/.test(text) ? 20 : 0,
+    outputContract: /\b(produce|emit|return|deliver|ending|output|matrix|summary|plan)\b/.test(text) ? 20 : 0,
+    boundaries: /\b(never|do not|if .*missing|ambiguous|unknown|assumption|trust)\b/.test(text) ? 15 : 0,
+  };
+  const total = Object.values(factors).reduce((sum, value) => sum + value, 0);
+  return { total, factors };
+}
+
+function maturityForScore(score) {
+  if (score >= 85) return 'hardened';
+  if (score >= 60) return 'usable';
+  return 'draft';
+}
+
+function verdictForScore(score) {
+  if (score >= 85) return 'ready';
+  if (score >= 60) return 'needs-review';
+  return 'revise';
+}
+
+function normalizeText(value) {
+  return String(value || '')
+    .replace(/\r?\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function stripMarkdown(value) {
+  return String(value || '')
+    .replace(/\*\*/g, '')
+    .replace(/`/g, '')
+    .trim();
+}
+
+globalThis.PromptOSScoring = Object.freeze({
+  extractTitle,
+  extractSummary,
+  extractInputs,
+  extractRules,
+  scorePrompt,
+  maturityForScore,
+  verdictForScore,
+  normalizeText,
+});
+/* __PROMPTOS_SCORING_END__ */
+</script>
+
+<script>
 const DATA = {
-  "version": 2,
+  "version": 3,
   "count": 7,
+  "items": [
+    {
+      "id": "core.scope-pipeline",
+      "type": "prompt",
+      "source_path": "prompts/scope-pipeline.md",
+      "title": "Scope pipeline (corpus → trust-tiered deliverable)",
+      "summary": "Run a deterministic scope pass on [CORPUS PATH] for [TRADE/DOMAIN]. Method, in order, no skipping: 1. **Ingest & hash** every file (streamed SHA-256, collapse exact duplicates, classify: spec / drawing / addendum / quote / other). Ledger anything skipped by ty",
+      "input_requirements": [
+        {
+          "label": "CORPUS PATH",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "TRADE/DOMAIN",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "TERM LIST",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "FP LIST",
+          "hint": "Fill this placeholder before running the prompt."
+        }
+      ],
+      "expected_output_format": "Scope pipeline (corpus → trust-tiered deliverable)",
+      "rules": "Run a deterministic scope pass on [CORPUS PATH] for [TRADE/DOMAIN].\nMethod, in order, no skipping:\n1. **Ingest & hash** every file (streamed SHA-256, collapse exact\nduplicates, classify: spec / drawing / addendum / quote / other).\nLedger anything skipped by type.\n2. **Sweep** every page for the anchor terms: [TERM LIST]. Include\nnegative controls for known false positives: [FP LIST]. Disposition\nevery hit — relevant, false positive, or RFI.\n3. **Order addenda chronologically** and extract every mutation sentence\n(REVISE/REPLACE/ADD/DELETE) touching the anchors. Latest supersedes.\n4. **Reconcile** into scope items. Authority order: latest addendum >\ndrawings (for qty/location) > base spec > vendor quote.\n5. **Verify gate:** re-resolve every citation on a fresh read; recompute\nevery number by code; hard-block emit on any failure.\n6. **Emit** with trust tiers: quoted prices verbatim; drawing-derived\ndimensions UNTRUSTED until shop-verified; conflicts become explicit\nqualifications or RFIs, never silent choices.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "scope",
+        "pipeline",
+        "corpus",
+        "trust",
+        "tiered",
+        "deliverable",
+        "prompts"
+      ],
+      "maturity": "hardened",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 100,
+      "related": [
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.adversarial-self-review",
+        "core.retrospective"
+      ]
+    },
+    {
+      "id": "core.decision-matrix",
+      "type": "prompt",
+      "source_path": "prompts/decision-matrix.md",
+      "title": "Decision matrix (high-stakes choice)",
+      "summary": "You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5]. CONSTRAINTS: [timeline/budget/team/dependencies]. TOP PRIORITIES: [3]. Produce: (1) weighted criteria matrix — 6–8 criteria including 3 I overlooked, weights totaling 100%, scores 1–10, ",
+      "input_requirements": [],
+      "expected_output_format": "Decision matrix (high-stakes choice)",
+      "rules": "You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5].\nCONSTRAINTS: [timeline/budget/team/dependencies]. TOP PRIORITIES: [3].\nProduce: (1) weighted criteria matrix — 6–8 criteria including 3 I\noverlooked, weights totaling 100%, scores 1–10, show the arithmetic\ncomputed by code; (2) top-3 risks per option with likelihood/impact and a\nspecific mitigation; (3) 6-month and 2-year second-order effects;\n(4) reversibility score 1–10 per option with reasoning; (5) pre-mortem on\nthe winner — three specific failure narratives; (6) recommendation with a\n\"proceed if…\" condition and a \"reconsider if…\" trigger, ending in one\nactionable sentence.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "decision",
+        "matrix",
+        "high",
+        "stakes",
+        "choice",
+        "prompts"
+      ],
+      "maturity": "draft",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 50,
+      "related": [
+        "core.scope-pipeline",
+        "core.design-direction-first",
+        "core.adversarial-self-review",
+        "core.retrospective"
+      ]
+    },
+    {
+      "id": "core.design-direction-first",
+      "type": "prompt",
+      "source_path": "prompts/design-direction-first.md",
+      "title": "Design direction first (UI work)",
+      "summary": "You are the design lead at a small studio known for unmistakable work. Build [THING] for [ONE SPECIFIC PERSON + EMOTIONAL STATE] whose single job is [THE ONE JOB]. Before any code: palette (4–6 named hex values with roles, contrast ratios computed, AA proven b",
+      "input_requirements": [
+        {
+          "label": "THING",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "THE ONE JOB",
+          "hint": "Fill this placeholder before running the prompt."
+        }
+      ],
+      "expected_output_format": "Design direction first (UI work)",
+      "rules": "You are the design lead at a small studio known for unmistakable work.\nBuild [THING] for [ONE SPECIFIC PERSON + EMOTIONAL STATE] whose single\njob is [THE ONE JOB]. Before any code: palette (4–6 named hex values with\nroles, contrast ratios computed, AA proven by the numbers), type pairing\nwith a rationale tied to this audience, ONE signature element it will be\nremembered by, one easing family with 2–3 fixed durations. Then critique\nyour own plan: any part you'd produce for a generic brief gets revised —\nsay what changed. Acceptance criteria, not vibes: progressive disclosure;\ndirect manipulation with live feedback; every empty state offers a\nspecific next step; undo on every destructive action; hierarchy by type\nand spacing, one accent color; microinteractions 150–250 ms transform/\nopacity only, behind prefers-reduced-motion; inline just-in-time guidance;\nno blank canvas — grounded starting actions from real state. Banned:\ngeneric gradients, emoji as UI, \"Welcome, user\", spinners where skeletons\nfit, tooltips repeating labels. Floor: WCAG AA including muted text, 44px\ntargets, visible focus, works at 390px. Before finishing: render or\nscreenshot it, walk all 8 criteria pass/fail with no hedging, then remove\none decorative thing.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "design",
+        "direction",
+        "first",
+        "work",
+        "prompts"
+      ],
+      "maturity": "usable",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 65,
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.adversarial-self-review",
+        "core.retrospective"
+      ]
+    },
+    {
+      "id": "core.adversarial-self-review",
+      "type": "prompt",
+      "source_path": "prompts/adversarial-self-review.md",
+      "title": "Adversarial self-review (before shipping)",
+      "summary": "Review the artifact you just produced as a hostile senior reviewer who did not build it. For each claim: where is the evidence, does the cited source actually say that, is the number recomputed or transcribed? List every internal cross-reference and verify it ",
+      "input_requirements": [],
+      "expected_output_format": "Adversarial self-review (before shipping)",
+      "rules": "Review the artifact you just produced as a hostile senior reviewer who\ndid not build it. For each claim: where is the evidence, does the cited\nsource actually say that, is the number recomputed or transcribed? List\nevery internal cross-reference and verify it resolves. Find the three\nweakest claims and either harden them with a fresh source read or\ndowngrade their stated trust tier. Report failures plainly.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "adversarial",
+        "self",
+        "review",
+        "before",
+        "shipping",
+        "prompts"
+      ],
+      "maturity": "usable",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 65,
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.retrospective"
+      ]
+    },
+    {
+      "id": "core.retrospective",
+      "type": "prompt",
+      "source_path": "prompts/retrospective.md",
+      "title": "Retrospective (project pause)",
+      "summary": "Pause and reflect on [PROJECT / SESSION] using the actual artifacts in [REPO OR WORKSPACE PATH]. Do not invent history. Produce: 1. **Keep doing:** the practices that worked, each backed by a file, command, result, or user decision. 2. **What broke:** symptom ",
+      "input_requirements": [
+        {
+          "label": "PROJECT / SESSION",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "REPO OR WORKSPACE PATH",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "ALLOWED PATHS",
+          "hint": "Fill this placeholder before running the prompt."
+        }
+      ],
+      "expected_output_format": "Retrospective (project pause)",
+      "rules": "Pause and reflect on [PROJECT / SESSION] using the actual artifacts in\n[REPO OR WORKSPACE PATH]. Do not invent history.\nProduce:\n1. **Keep doing:** the practices that worked, each backed by a file, command,\nresult, or user decision.\n2. **What broke:** symptom -> root cause -> rule adopted. If a rule belongs in\n`agent/ERRORS.md`, draft the exact entry and cite the evidence.\n3. **What's quietly wrong:** risks nobody hit yet. If a gap belongs in\n`agent/GAPS.md`, draft the exact entry, owner, and closing action.\n4. **Reversible improvements:** process, settings, prompts, or harness changes\nthat improve quality, speed, or token spend. Implement only changes that are\nreversible, local, and inside [ALLOWED PATHS].\n5. **Verification gate:** re-run the relevant local gate after any change and\nreport exact command output. If no gate exists, state the missing gate as a\ngap instead of claiming success.\nNever change credentials, network/security settings, production state, RDP,\nDefender, billing, or irreversible external systems from a retrospective. Route\nthose to a human approval item with the evidence needed to decide.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "retrospective",
+        "project",
+        "pause",
+        "prompts"
+      ],
+      "maturity": "hardened",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 100,
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.adversarial-self-review"
+      ]
+    },
+    {
+      "id": "core.adversarial-safety-red-team",
+      "type": "prompt",
+      "source_path": "prompts/adversarial-safety-red-team.md",
+      "title": "Adversarial safety red-team (shields, filters, validators)",
+      "summary": "You are attacking a safety control — a scam filter, an input validator, an allow/deny list — that was just changed. Do NOT read the diff to confirm it works; reading the diff is exactly how structural holes survive. Instead, try to get a bad input THROUGH. Enu",
+      "input_requirements": [],
+      "expected_output_format": "Adversarial safety red-team (shields, filters, validators)",
+      "rules": "You are attacking a safety control — a scam filter, an input validator, an\nallow/deny list — that was just changed. Do NOT read the diff to confirm it\nworks; reading the diff is exactly how structural holes survive. Instead, try\nto get a bad input THROUGH. Enumerate the categories the control must stop,\nand for each construct the specific input that reaches the user anyway: a\ntrusted brand name that rescues a scam, an unchecked non-remote path, a\nhomoglyph or zero-width evasion, the phrasing the vocabulary doesn't cover.\nRun each through the REAL function and record the verdict. Then run the\nNEGATIVE control: a legitimate input that collides with the new rule — it must\nstill pass, or the fix over-blocks a real user. Report as a table: every\ninput, its verdict, and whether it is a hole (bad got through) or an\nover-block (good got hidden). The control is verified only when every\nadversarial input is caught AND every legitimate input still passes — and the\nreceipt is the harness output an outsider can re-run, not your summary of it.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "adversarial",
+        "safety",
+        "red",
+        "team",
+        "shields",
+        "filters",
+        "validators",
+        "prompts"
+      ],
+      "maturity": "hardened",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 85,
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.adversarial-self-review"
+      ]
+    },
+    {
+      "id": "core.session-alignment",
+      "type": "prompt",
+      "source_path": "prompts/session-alignment.md",
+      "title": "Session kickoff — align to the delivery systems",
+      "summary": "You're starting a session that may do consequential, autonomous, or long-horizon work. Do NOT re-derive the systems — read the map and align. In order: 1. **Read the operating map** (canonical, in the agent-kit repo): `agent/ALIGNMENT-CARD.md` (the 6-move star",
+      "input_requirements": [],
+      "expected_output_format": "Session kickoff — align to the delivery systems",
+      "rules": "You're starting a session that may do consequential, autonomous, or long-horizon work.\nDo NOT re-derive the systems — read the map and align. In order:\n1. **Read the operating map** (canonical, in the agent-kit repo): `agent/ALIGNMENT-CARD.md`\n(the 6-move start + the full inventory of the verification / decision-routing / enforcement /\ncontinuity / domain / meta systems) and `agent/AUTONOMOUS-DELIVERY-LOOP.md` (the loop). On a\nfleet machine these also live at `~/.claude/playbooks/`.\n2. **State your operating envelope out loud:** allowed autonomously = reversible + auditable +\nversioned; gated/never = real money, un-rollbackable changes, credentials, network/security.\nPrefer archive>delete, pause>remove.\n3. **Scope by trigger:** trivial turn → skip the loop; consequential / persisted / long-horizon\n→ run the full loop. (Blanket application is theater.)\n4. **Delegate the doing, personally own the verifying.** A subagent's — or a cross-vendor\nmodel's — \"done\" is a *candidate*, verified by code or the live artifact, not accepted.\n5. **Trust-tier every claim; verify the LIVE thing.** Merged ≠ running. Recompute the number.\nNever dress a lower tier (asserted) as a higher one (verified).\n6. **Before you declare a consequential task done, run the gate:**\n`python agent/harness/playbook_check.py claims.json` (or `~/.claude/playbooks/playbook_check.py`)\n— it mechanically refuses a receipt-less \"done\".\nOne line to remember: an agent stays strong from a *system*, not willpower — inherited doctrine\n+ re-injected salience + deterministic gates + a verify-step that surfaces its own errors +\nexternalized state + human checkpoints. Doctrine and gates propagate to the next session;\nbehavior does not.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "session",
+        "kickoff",
+        "align",
+        "the",
+        "delivery",
+        "systems",
+        "prompts",
+        "alignment"
+      ],
+      "maturity": "usable",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 65,
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.adversarial-self-review"
+      ]
+    }
+  ],
   "prompts": [
     {
       "id": "core.scope-pipeline",
@@ -435,15 +823,47 @@ const DATA = {
   ]
 };
 const App = (() => {
-  const S = { dom:"ALL", q:"", prompts:[], state:"ok", lastFocus:null, palSel:0, palItems:[], curId:null };
+  const S = { view:"catalog", dom:"ALL", q:"", prompts:[], items:[], state:"ok", lastFocus:null, palSel:0, palItems:[], curId:null };
   const $ = (id) => document.getElementById(id);
   const esc = (s) => String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
   const LS = { get:(k,d)=>{ try{ return localStorage.getItem(k) ?? d; }catch(e){ return d; } }, set:(k,v)=>{ try{ localStorage.setItem(k,v); }catch(e){} } };
   function syncInert(){ const on=$("drawer").classList.contains("on")||$("pal").classList.contains("on"); ["main","hdr","foot"].forEach(id=>{ const el=$(id); if(!el) return; if(on){ el.setAttribute("inert",""); el.setAttribute("aria-hidden","true"); } else { el.removeAttribute("inert"); el.removeAttribute("aria-hidden"); } }); }
 
+  function itemToPrompt(item, index){
+    if(!item || typeof item!=="object") item={id:"item."+index,title:String(item==null?"Untitled":item),summary:"",rules:String(item==null?"":item)};
+    return {
+      id:item.id || ("item."+index),
+      volume:item.type || "prompt",
+      domain:item.domain || item.type || "Other",
+      num:index+1,
+      title:item.title || item.id || "Untitled",
+      summary:item.summary || "",
+      replaces:"",
+      when_to_use:item.expected_output_format || "",
+      inputs:Array.isArray(item.input_requirements)?item.input_requirements:[],
+      rules:item.rules || "",
+      enforceable:item.maturity==="hardened" || Number(item.score)>=60,
+      tags:[item.type].concat(Array.isArray(item.tags)?item.tags:[]).filter(Boolean),
+      related:Array.isArray(item.related)?item.related:[],
+      maturity:item.maturity || "legacy-unknown",
+      score:Number.isFinite(item.score)?item.score:null,
+      source_path:item.source_path || "",
+      created_at:item.created_at || "legacy-unknown",
+      updated_at:item.updated_at || "legacy-unknown",
+    };
+  }
   function _load(payload){
-    if (!payload || !Array.isArray(payload.prompts)){ S.prompts=[]; S.state="error"; render(); return; }
-    S.prompts = payload.prompts; S.state="ok"; render();
+    if (payload && Array.isArray(payload.items)){
+      S.items = payload.items;
+      S.prompts = payload.items.map(itemToPrompt);
+      S.state="ok"; render(); return;
+    }
+    if (payload && Array.isArray(payload.prompts)){
+      S.items = [];
+      S.prompts = payload.prompts;
+      S.state="ok"; render(); return;
+    }
+    S.items=[]; S.prompts=[]; S.state="error"; render();
   }
   function domains(){
     const m = new Map();
@@ -474,8 +894,10 @@ const App = (() => {
   }
   function renderGrid(){
     const g=$("grid"); const D=domains().length;
+    if (S.view!=="catalog"){ g.hidden=true; return; }
+    g.hidden=false;
     if (S.state==="loading"){ $("count").textContent=`${S.prompts.length} prompts · ${D} domains`; g.innerHTML=skeletons(6); return; }
-    if (S.state==="error"){ $("count").textContent="—"; g.innerHTML=`<div class="banner">Could not read the catalog. The payload is missing its <span class="mono">prompts</span> array. Drop a valid <span class="mono">prompt-library-index.json</span> to retry.</div>`; return; }
+    if (S.state==="error"){ $("count").textContent="--"; g.innerHTML=`<div class="banner">Could not read the catalog. The payload needs an <span class="mono">items</span> array or legacy <span class="mono">prompts</span> array. Drop a valid catalog JSON file to retry.</div>`; return; }
     const list=S.prompts.filter(match);
     const filtering=!!S.q||S.dom!=="ALL";
     $("count").textContent=filtering?`${list.length} of ${S.prompts.length} · ${D} domains`:`${S.prompts.length} prompts · ${D} domains`;
@@ -495,6 +917,17 @@ const App = (() => {
     }catch(e){}
   }
   function clearFilters(){ S.q=""; S.dom="ALL"; const q=$("q"); if(q) q.value=""; render(); writeHash(); }
+  function setView(view){
+    S.view=view==="tools"?"tools":"catalog";
+    const wrap=$("main");
+    if(wrap) wrap.classList.toggle("tools",S.view==="tools");
+    const evalPanel=$("evalPanel");
+    if(evalPanel) evalPanel.hidden=S.view!=="tools";
+    const catalogBtn=$("catalogBtn"), evalBtn=$("evalBtn");
+    if(catalogBtn){ catalogBtn.classList.toggle("on",S.view==="catalog"); catalogBtn.setAttribute("aria-selected",S.view==="catalog"?"true":"false"); }
+    if(evalBtn){ evalBtn.classList.toggle("on",S.view==="tools"); evalBtn.setAttribute("aria-selected",S.view==="tools"?"true":"false"); }
+    render();
+  }
   function asMarkdown(p){
     let m=`# ${p.title}\n\n`; if(p.replaces) m+=`*Replaces: ${p.replaces}*\n\n`; if(p.summary) m+=p.summary+"\n\n";
     if(Array.isArray(p.inputs)&&p.inputs.length){ m+="## Inputs\n"; for(const i of p.inputs) m+=`- [${i.label}]: ${i.hint||""}\n`; m+="\n"; }
@@ -536,6 +969,8 @@ const App = (() => {
   /* command palette */
   function commands(){
     const acts=[
+      {t:"Open catalog", d:"view", ic:"C", run:()=>setView("catalog")},
+      {t:"Open evaluator", d:"view", ic:"E", run:()=>setView("tools")},
       {t:"Toggle theme", d:"T", ic:"◐", run:toggleTheme},
       {t:"Toggle density", d:"D", ic:"≡", run:toggleDensity},
       {t:"Clear filters", d:"", ic:"⌫", run:clearFilters},
@@ -566,7 +1001,7 @@ const App = (() => {
   function applyDensity(d){ document.documentElement.setAttribute("data-density",d); LS.set("pos.density",d); const b=$("densBtn"); if(b) b.textContent=(d==="compact")?"Compact":"Comfortable"; }
   function toggleDensity(){ applyDensity(document.documentElement.getAttribute("data-density")==="compact"?"comfortable":"compact"); }
   function helpHTML(){ return `
-    <p>A single-file, zero-network browser for your prompt library — everything renders locally; no data leaves the page.</p>
+    <p>A single-file, zero-network browser for your prompt library and deterministic local evaluator.</p>
     <h4>Keyboard</h4>
     <div class="row"><span>Command palette</span><span class="kbd">Ctrl K</span></div>
     <div class="row"><span>Search</span><span class="kbd">/</span></div>
@@ -580,13 +1015,83 @@ const App = (() => {
       <li><b>Filter by domain</b> &mdash; click a domain in the left sidebar.</li>
       <li><b>Read &amp; copy a prompt</b> &mdash; click a card, then Copy to get it as Markdown.</li>
       <li><b>Load a different catalog</b> &mdash; drag a prompt-library-index.json file onto the window.</li>
+      <li><b>Evaluate an artifact</b> &mdash; open Evaluator, then paste or drop Markdown/JSON.</li>
       <li><b>Share a filtered view</b> &mdash; your domain + search live in the URL; copy the address bar.</li>
     </ul>`; }
   function openHelp(){ const h=$("help"); if(!h) return; const b=h.querySelector("#helpBody"); if(b) b.innerHTML=helpHTML(); h.removeAttribute("hidden"); const c=h.querySelector("#helpClose"); if(c&&c.focus) c.focus(); }
   function closeHelp(){ const h=$("help"); if(h) h.setAttribute("hidden",""); }
+  function factorLabel(key){
+    return {
+      title:"H1 title",
+      bodyLength:"Body length",
+      inputs:"Fill-in inputs",
+      verification:"Verification terms",
+      outputContract:"Output contract",
+      boundaries:"Boundary rules",
+    }[key]||key;
+  }
+  function runEvaluation(label){
+    const textEl=$("evalText"), out=$("evalResult");
+    if(!textEl||!out) return;
+    const raw=textEl.value.trim();
+    if(!raw){ out.innerHTML="No input to evaluate."; return; }
+    const scoring=globalThis.PromptOSScoring||{};
+    if(typeof scoring.scorePrompt!=="function"){ out.innerHTML="Scoring runtime unavailable. Run <span class='mono'>npm run catalog:build</span>."; return; }
+    let parsed=null;
+    if(/^\s*[\[{]/.test(raw)){ try{ parsed=JSON.parse(raw); }catch(e){ parsed=null; } }
+    if(parsed && (Array.isArray(parsed.items)||Array.isArray(parsed.prompts)||Array.isArray(parsed))){
+      renderCatalogEvaluation(parsed,label);
+      return;
+    }
+    const result=scoring.scorePrompt(raw);
+    const verdict=scoring.verdictForScore?scoring.verdictForScore(result.total):"scored";
+    const inputs=scoring.extractInputs?scoring.extractInputs(raw):[];
+    const rows=Object.entries(result.factors).map(([k,v])=>`<tr><td>${esc(factorLabel(k))}</td><td>${v}</td></tr>`).join("");
+    out.innerHTML=`<div class="eval-score"><strong>${result.total}/100</strong><span class="badge">${esc(verdict)}</span><span class="pill">${inputs.length} inputs</span>${label?`<span class="pill">${esc(label)}</span>`:""}</div>
+      <table class="eval-table"><thead><tr><th>Factor</th><th>Points</th></tr></thead><tbody>${rows}</tbody></table>`;
+  }
+  function renderCatalogEvaluation(payload,label){
+    const scoring=globalThis.PromptOSScoring||{};
+    const mode=Array.isArray(payload.items)?"items":Array.isArray(payload.prompts)?"prompts":"array";
+    const list=mode==="items"?payload.items:mode==="prompts"?payload.prompts:payload;
+    const required=["id","type","source_path","title","summary","input_requirements","expected_output_format","rules","domain","tags","maturity","created_at","updated_at","score","related"];
+    const rows=list.map((it,i)=>{
+      if(!it || typeof it!=="object") it={title:String(it==null?"Item "+(i+1):it),rules:String(it==null?"":it)};
+      const body=[it.title,it.summary,it.rules,it.when_to_use,it.expected_output_format].filter(Boolean).join("\n\n");
+      const score=Number.isFinite(it.score)?it.score:scoring.scorePrompt(body).total;
+      const gaps=[];
+      if(mode==="items"){
+        for(const key of required){
+          if(!(key in it)) gaps.push(key);
+        }
+        if(it.type&&!["prompt","workflow","playbook","runbook"].includes(it.type)) gaps.push("type");
+      }
+      return {title:it.title||it.id||("Item "+(i+1)),score,gaps};
+    });
+    const avg=rows.length?Math.round(rows.reduce((s,r)=>s+r.score,0)/rows.length):0;
+    const weak=rows.filter(r=>r.score<60).slice(0,5);
+    const gaps=rows.filter(r=>r.gaps.length).slice(0,8);
+    const out=$("evalResult");
+    const scoreRows=rows.slice(0,12).map(r=>`<tr><td>${esc(r.title)}</td><td>${r.score}/100</td><td>${r.gaps.length?esc(r.gaps.join(", ")):""}</td></tr>`).join("");
+    const issues=[];
+    if(weak.length) issues.push(`Weak items: ${weak.map(r=>r.title+" ("+r.score+")").join("; ")}`);
+    if(gaps.length) issues.push(`Schema gaps: ${gaps.map(r=>r.title+" ["+r.gaps.join(", ")+"]").join("; ")}`);
+    out.innerHTML=`<div class="eval-score"><strong>${avg}/100</strong><span class="badge">${esc(mode)}</span><span class="pill">${rows.length} artifacts</span>${label?`<span class="pill">${esc(label)}</span>`:""}</div>
+      <table class="eval-table"><thead><tr><th>Artifact</th><th>Score</th><th>Gaps</th></tr></thead><tbody>${scoreRows}</tbody></table>
+      <ul class="eval-issues">${issues.length?issues.map(x=>`<li>${esc(x)}</li>`).join(""):"<li>No score or typed-schema gaps in the first pass.</li>"}</ul>`;
+  }
+  function readEvalFile(file){
+    if(!file) return;
+    const r=new FileReader();
+    r.onload=()=>{ const t=$("evalText"); if(t) t.value=String(r.result||""); runEvaluation(file.name); toast("Evaluated "+file.name); };
+    r.onerror=()=>toast("Could not read "+file.name);
+    r.readAsText(file);
+  }
   /* render */
   function render(){
     const an=$("about-n"); if(an) an.textContent=S.prompts.length;
+    const wrap=$("main"); if(wrap) wrap.classList.toggle("tools",S.view==="tools");
+    const ep=$("evalPanel"); if(ep) ep.hidden=S.view!=="tools";
     renderNav(); renderGrid();
   }
   /* keyboard */
@@ -635,11 +1140,20 @@ const App = (() => {
   function init(){
     const t=LS.get("pos.theme",null); if(t) applyTheme(t); else { const b=$("themeBtn"); if(b) b.textContent=effectiveDark()?"Light":"Dark"; }
     const dn=LS.get("pos.density",null); if(dn) applyDensity(dn);
-    const foot=$("foot"); if(foot) foot.innerHTML="PromptOS Console v2 &mdash; generated from <span class='mono'>PROMPTS.md</span> and <span class='mono'>prompts/*.md</span>. Zero network, single file, full keyboard control. UI prefs (theme/density) persist locally; prompt data never leaves the page. Gate: <span class='mono'>npm run verify</span>.";
+    const foot=$("foot"); if(foot) foot.innerHTML="PromptOS Console v3 &mdash; generated from <span class='mono'>PROMPTS.md</span>, <span class='mono'>prompts/*.md</span>, and <span class='mono'>tools/scoring-core.mjs</span>. Zero network, single file, full keyboard control. UI prefs (theme/density) persist locally; prompt data never leaves the page. Gate: <span class='mono'>npm run verify</span>.";
     const q=$("q"); let qT=null; if(q) q.addEventListener("input",()=>{ S.q=q.value; if(S.state!=="ok") S.state="ok"; clearTimeout(qT); qT=setTimeout(()=>{ renderGrid(); writeHash(); },110); });
     $("themeBtn").addEventListener("click",toggleTheme);
     $("densBtn").addEventListener("click",toggleDensity);
     $("palBtn").addEventListener("click",openPal);
+    $("catalogBtn").addEventListener("click",()=>setView("catalog"));
+    $("evalBtn").addEventListener("click",()=>setView("tools"));
+    $("evalRun").addEventListener("click",()=>runEvaluation(""));
+    $("evalClear").addEventListener("click",()=>{ const t=$("evalText"), r=$("evalResult"); if(t) t.value=""; if(r) r.textContent="No evaluation run."; });
+    $("evalPick").addEventListener("click",()=>$("evalFile").click());
+    $("evalFile").addEventListener("change",(e)=>readEvalFile(e.target.files&&e.target.files[0]));
+    $("evalDrop").addEventListener("dragover",(e)=>{ e.preventDefault(); e.stopPropagation(); $("evalDrop").classList.add("on"); });
+    $("evalDrop").addEventListener("dragleave",(e)=>{ e.preventDefault(); e.stopPropagation(); $("evalDrop").classList.remove("on"); });
+    $("evalDrop").addEventListener("drop",(e)=>{ e.preventDefault(); e.stopPropagation(); $("evalDrop").classList.remove("on"); readEvalFile(e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]); });
     $("palIn").addEventListener("input",(e)=>{ S.palSel=0; renderPal(e.target.value); });
     $("grid").addEventListener("click",(e)=>{ const c=e.target.closest(".card[data-id]"); if(c) openDetail(c.getAttribute("data-id")); });
     $("grid").addEventListener("keydown",(e)=>{ if(e.key!=="Enter"&&e.key!==" ") return; const c=e.target.closest(".card[data-id]"); if(c){ e.preventDefault(); openDetail(c.getAttribute("data-id")); } });
@@ -659,6 +1173,7 @@ const App = (() => {
     // drag-drop a catalog json
     window.addEventListener("dragover",(e)=>{ e.preventDefault(); });
     window.addEventListener("drop",(e)=>{ e.preventDefault(); const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!f) return;
+      if(S.view==="tools"){ readEvalFile(f); return; }
       const r=new FileReader(); r.onload=()=>{ try{ _load(JSON.parse(r.result)); toast("Loaded "+f.name); }catch(err){ S.state="error"; render(); toast("Invalid JSON"); } }; r.readAsText(f); });
     // brief skeleton, then content (skipped under reduced motion)
     let reduce=false; try{ reduce=matchMedia("(prefers-reduced-motion: reduce)").matches; }catch(e){}
