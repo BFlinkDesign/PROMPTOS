@@ -210,7 +210,7 @@ export function evaluateCatalog(rootDir = process.cwd()) {
       try {
         const embeddedScoring = extractConsoleScoring(html);
         const generatedScoring = buildScoringRuntime(rootDir);
-        if (embeddedScoring !== generatedScoring) {
+        if (normalizeNewlines(embeddedScoring) !== normalizeNewlines(generatedScoring)) {
           errors.push('console scoring runtime is stale; run npm run catalog:build');
         }
       } catch (error) {
@@ -274,6 +274,10 @@ function stripMarkdown(value) {
     .replace(/\*\*/g, '')
     .replace(/`/g, '')
     .trim();
+}
+
+function normalizeNewlines(value) {
+  return String(value || '').replace(/\r\n/g, '\n');
 }
 
 function promptId(markdownPath) {
