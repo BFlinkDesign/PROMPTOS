@@ -396,10 +396,27 @@ const DATA = {
       "type": "prompt",
       "source_path": "prompts/decision-matrix.md",
       "title": "Decision matrix (high-stakes choice)",
-      "summary": "You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5]. CONSTRAINTS: [timeline/budget/team/dependencies]. TOP PRIORITIES: [3]. Produce: (1) weighted criteria matrix — 6–8 criteria including 3 I overlooked, weights totaling 100%, scores 1–10, ",
-      "input_requirements": [],
+      "summary": "You are a decision analyst. Evaluate [DECISION] across [OPTIONS]. Use [CONSTRAINTS] and [TOP PRIORITIES] as hard inputs, not decoration. First, restate the decision and list any missing evidence, ambiguous terms, or assumptions that could change the answer. If",
+      "input_requirements": [
+        {
+          "label": "DECISION",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "OPTIONS",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "CONSTRAINTS",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "TOP PRIORITIES",
+          "hint": "Fill this placeholder before running the prompt."
+        }
+      ],
       "expected_output_format": "Decision matrix (high-stakes choice)",
-      "rules": "You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5].\nCONSTRAINTS: [timeline/budget/team/dependencies]. TOP PRIORITIES: [3].\nProduce: (1) weighted criteria matrix — 6–8 criteria including 3 I\noverlooked, weights totaling 100%, scores 1–10, show the arithmetic\ncomputed by code; (2) top-3 risks per option with likelihood/impact and a\nspecific mitigation; (3) 6-month and 2-year second-order effects;\n(4) reversibility score 1–10 per option with reasoning; (5) pre-mortem on\nthe winner — three specific failure narratives; (6) recommendation with a\n\"proceed if…\" condition and a \"reconsider if…\" trigger, ending in one\nactionable sentence.",
+      "rules": "You are a decision analyst. Evaluate [DECISION] across [OPTIONS]. Use\n[CONSTRAINTS] and [TOP PRIORITIES] as hard inputs, not decoration.\nFirst, restate the decision and list any missing evidence, ambiguous terms, or\nassumptions that could change the answer. If a critical input is unknown, say\nwhat evidence would resolve it instead of inventing certainty.\nProduce:\n1. **Weighted criteria matrix:** 6–8 criteria, including 3 I likely\noverlooked. Weights must total 100%. Score each option 1–10 and recompute\nthe weighted totals by code or explicit arithmetic.\n2. **Risk table:** top 3 risks per option with likelihood, impact, trigger,\nand one specific mitigation.\n3. **Second-order effects:** likely effects at 6 months and 2 years.\n4. **Reversibility:** score 1–10 for each option, with the cost and time to\nunwind the choice.\n5. **Pre-mortem:** three concrete failure narratives for the apparent winner.\n6. **Recommendation:** one winner, one runner-up, and the evidence that would\nmake you switch.\nVerify gate before final answer: cite the source of every supplied fact, label\nassumptions, recompute the scoring totals, and never hide ties or near-ties.\nEnd with exactly two lines: `Proceed if ...` and `Reconsider if ...`.",
       "domain": "Core Prompt Blocks",
       "tags": [
         "decision",
@@ -409,10 +426,10 @@ const DATA = {
         "choice",
         "prompts"
       ],
-      "maturity": "draft",
+      "maturity": "hardened",
       "created_at": "legacy-unknown",
       "updated_at": "legacy-unknown",
-      "score": 50,
+      "score": 100,
       "related": [
         "core.scope-pipeline",
         "core.design-direction-first",
@@ -641,12 +658,29 @@ const DATA = {
       "domain": "Core Prompt Blocks",
       "num": 2,
       "title": "Decision matrix (high-stakes choice)",
-      "summary": "You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5]. CONSTRAINTS: [timeline/budget/team/dependencies]. TOP PRIORITIES: [3]. Produce: (1) weighted criteria matrix — 6–8 criteria including 3 I overlooked, weights totaling 100%, scores 1–10, ",
+      "summary": "You are a decision analyst. Evaluate [DECISION] across [OPTIONS]. Use [CONSTRAINTS] and [TOP PRIORITIES] as hard inputs, not decoration. First, restate the decision and list any missing evidence, ambiguous terms, or assumptions that could change the answer. If",
       "replaces": "",
       "when_to_use": "Decision matrix (high-stakes choice)",
-      "inputs": [],
-      "rules": "You are a decision analyst. MY DECISION: [2–4 sentences]. OPTIONS: [2–5].\nCONSTRAINTS: [timeline/budget/team/dependencies]. TOP PRIORITIES: [3].\nProduce: (1) weighted criteria matrix — 6–8 criteria including 3 I\noverlooked, weights totaling 100%, scores 1–10, show the arithmetic\ncomputed by code; (2) top-3 risks per option with likelihood/impact and a\nspecific mitigation; (3) 6-month and 2-year second-order effects;\n(4) reversibility score 1–10 per option with reasoning; (5) pre-mortem on\nthe winner — three specific failure narratives; (6) recommendation with a\n\"proceed if…\" condition and a \"reconsider if…\" trigger, ending in one\nactionable sentence.",
-      "enforceable": false,
+      "inputs": [
+        {
+          "label": "DECISION",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "OPTIONS",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "CONSTRAINTS",
+          "hint": "Fill this placeholder before running the prompt."
+        },
+        {
+          "label": "TOP PRIORITIES",
+          "hint": "Fill this placeholder before running the prompt."
+        }
+      ],
+      "rules": "You are a decision analyst. Evaluate [DECISION] across [OPTIONS]. Use\n[CONSTRAINTS] and [TOP PRIORITIES] as hard inputs, not decoration.\nFirst, restate the decision and list any missing evidence, ambiguous terms, or\nassumptions that could change the answer. If a critical input is unknown, say\nwhat evidence would resolve it instead of inventing certainty.\nProduce:\n1. **Weighted criteria matrix:** 6–8 criteria, including 3 I likely\noverlooked. Weights must total 100%. Score each option 1–10 and recompute\nthe weighted totals by code or explicit arithmetic.\n2. **Risk table:** top 3 risks per option with likelihood, impact, trigger,\nand one specific mitigation.\n3. **Second-order effects:** likely effects at 6 months and 2 years.\n4. **Reversibility:** score 1–10 for each option, with the cost and time to\nunwind the choice.\n5. **Pre-mortem:** three concrete failure narratives for the apparent winner.\n6. **Recommendation:** one winner, one runner-up, and the evidence that would\nmake you switch.\nVerify gate before final answer: cite the source of every supplied fact, label\nassumptions, recompute the scoring totals, and never hide ties or near-ties.\nEnd with exactly two lines: `Proceed if ...` and `Reconsider if ...`.",
+      "enforceable": true,
       "tags": [
         "decision",
         "matrix",
