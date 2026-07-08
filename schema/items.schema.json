@@ -1,0 +1,141 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BFlinkDesign/PROMPTOS/schema/items.schema.json",
+  "title": "PromptOS Catalog Items",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "count", "items"],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "minimum": 3
+    },
+    "count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/item"
+      }
+    },
+    "prompts": {
+      "type": "array",
+      "description": "Compatibility projection for the current browser console."
+    }
+  },
+  "$defs": {
+    "timestamp": {
+      "oneOf": [
+        {
+          "const": "legacy-unknown"
+        },
+        {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
+        }
+      ]
+    },
+    "inputRequirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "hint"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "hint": {
+          "type": "string"
+        }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "source_path",
+        "title",
+        "summary",
+        "input_requirements",
+        "expected_output_format",
+        "rules",
+        "domain",
+        "tags",
+        "maturity",
+        "created_at",
+        "updated_at",
+        "score",
+        "related"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+\\.[a-z0-9][a-z0-9-]*$"
+        },
+        "type": {
+          "enum": ["prompt", "workflow", "playbook", "runbook"]
+        },
+        "source_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string"
+        },
+        "input_requirements": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inputRequirement"
+          }
+        },
+        "expected_output_format": {
+          "type": "string"
+        },
+        "rules": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "maturity": {
+          "enum": ["draft", "usable", "hardened", "legacy-unknown"]
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

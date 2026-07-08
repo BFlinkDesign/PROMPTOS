@@ -5,13 +5,15 @@
     "catalog:build": "node tools/build-console-data.mjs --write",
     "catalog:evaluate": "node tools/evaluate-catalog.mjs",
     "eval:promptfoo": "promptfoo eval",
+    "schema:validate": "node tools/validate-items.mjs",
     "test:console": "playwright test",
     "tool:promptfoo": "promptfoo --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run catalog:evaluate && npm run eval:promptfoo && npm run test:console"
+    "verify": "npm run catalog:evaluate && npm run schema:validate && npm run eval:promptfoo && npm run test:console"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
+    "ajv": "^8.20.0",
     "promptfoo": "^0.121.17"
   }
 }
