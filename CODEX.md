@@ -186,3 +186,24 @@ The repo has the durable deterministic spine. Continue hardening in this order:
    feedback loop has more real cases.
 
 Keep each slice independently revertible and commit by concern.
+
+---
+
+### AGENT PERSISTENT MEMORY
+
+- Current baseline: `main` at `c7ec86d`
+  (`Harden decision matrix prompt quality (#19)`).
+- Hardened status: default local and GitHub gates were green after PR #19.
+- Current catalog baseline: 7 prompts, average score `83/100`;
+  `decision-matrix` is `100/100`.
+- Default workflow: read `PROJECT-STATE.md` first, then run only the narrow gate
+  needed for the task. Use `npm run verify` before behavior-changing commits.
+- Feedback workflow: stage raw failures in `feedback/*.json`, promote with
+  `npm run feedback:promote`, and verify with `npm run feedback:verify` or the
+  full `npm run verify` gate.
+- Do not re-audit hardened infrastructure by default, do not add
+  credentialed/model-judge evals to default CI, and do not change CI/workflow
+  logic unless a live gate is failing.
+- Next useful work: triage old draft PRs against the current schema, harden the
+  remaining lower-scoring prompts, backfill artifact timestamps from Git
+  history, and add real promoted failure cases when the console finds a miss.

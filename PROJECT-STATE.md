@@ -25,6 +25,12 @@ Default branch:
 main
 ```
 
+Current merged baseline:
+
+```text
+c7ec86d Harden decision matrix prompt quality (#19)
+```
+
 Use temporary worktrees for risky feature work, but do not bake temporary paths
 or branch names into repo docs after the branch is merged.
 
