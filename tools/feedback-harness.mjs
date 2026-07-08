@@ -59,7 +59,7 @@ export function verifyFeedbackHarness(rootDir = process.cwd()) {
     errors.push(`${GENERATED_TESTS_PATH} is missing; run npm run feedback:promote`);
   } else {
     const actualText = fs.readFileSync(testsPath, 'utf8');
-    if (actualText !== `${JSON.stringify(expectedTests, null, 2)}\n`) {
+    if (normalizeNewlines(actualText) !== `${JSON.stringify(expectedTests, null, 2)}\n`) {
       errors.push(`${GENERATED_TESTS_PATH} is stale; run npm run feedback:promote`);
     }
   }
@@ -262,4 +262,8 @@ function writeJson(filePath, value) {
 
 function slash(value) {
   return String(value || '').replace(/\\/g, '/');
+}
+
+function normalizeNewlines(value) {
+  return String(value || '').replace(/\r\n/g, '\n');
 }
