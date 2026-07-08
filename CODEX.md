@@ -167,22 +167,42 @@ PromptOS Console
 - Raw feedback lives in `feedback/*.json`; promoted regressions live in
   `tests/failures/*.json`. Run `npm run feedback:promote` after adding raw
   feedback, then `npm run verify`.
+- Keep the console browser-based. Do not add Electron, Tauri, or Nativefier to
+  the repo until native distribution has a concrete requirement. Nativefier is
+  acceptable only as an untracked personal launcher experiment.
 - `PromptOS Verify` CI uses Node 24 because the committed lockfile is generated
   by npm 11. A clean `npm ci` passed locally under Node 24/npm 11.
+
+## Browser-First File Access Direction
+
+The next high-leverage console slice is File System Access API support:
+
+1. Feature-detect `window.showDirectoryPicker` and `window.showOpenFilePicker`.
+2. Preserve current drop, paste, and file-input behavior as fallback.
+3. Let users open the local PromptOS folder, inspect prompt files, save raw
+   feedback to `feedback/*.json`, and export evaluation snapshots from explicit
+   user gestures.
+4. Do not silently promote browser-written feedback into
+   `tests/failures/*.json`; promotion remains the deterministic
+   `npm run feedback:promote` / `npm run verify` path unless the user chooses a
+   specific regression-save flow.
+5. Keep this implementable in the current Playwright console tests before
+   considering any native shell.
 
 ## Next Work Slice
 
 The repo has the durable deterministic spine. Continue hardening in this order:
 
-1. Add 3 to 5 high-value promptfoo regression cases beyond the current local
+1. Implement the browser-first File System Access API slice above.
+2. Add 3 to 5 high-value promptfoo regression cases beyond the current local
    echo smoke.
-2. Add first-class workflow, playbook, and runbook source directories once their
+3. Add first-class workflow, playbook, and runbook source directories once their
    content model is settled.
-3. Backfill real `created_at` and `updated_at` values from Git history instead
+4. Backfill real `created_at` and `updated_at` values from Git history instead
    of inventing dates.
-4. Add credential-gated model-judge examples only outside default CI; keep
+5. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.
-5. Record Inspect AI and DeepEval starter examples only after the deterministic
+6. Record Inspect AI and DeepEval starter examples only after the deterministic
    feedback loop has more real cases.
 
 Keep each slice independently revertible and commit by concern.
@@ -206,6 +226,10 @@ Keep each slice independently revertible and commit by concern.
 - Do not re-audit hardened infrastructure by default, do not add
   credentialed/model-judge evals to default CI, and do not change CI/workflow
   logic unless a live gate is failing.
-- Next useful work: triage old draft PRs against the current schema, harden the
-  remaining lower-scoring prompts, backfill artifact timestamps from Git
-  history, and add real promoted failure cases when the console finds a miss.
+- Architecture decision: stay browser-first. Build File System Access API
+  support before considering any native wrapper. Do not bless Nativefier as a
+  repo dependency.
+- Next useful work: implement File System Access API console support, triage old
+  draft PRs against the current schema, harden the remaining lower-scoring
+  prompts, backfill artifact timestamps from Git history, and add real promoted
+  failure cases when the console finds a miss.

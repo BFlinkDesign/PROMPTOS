@@ -102,6 +102,24 @@ The Evaluator tab accepts pasted text, file-picker input, or dropped Markdown /
 JSON. Markdown is scored with `tools/scoring-core.mjs`; catalog JSON reports item
 count, average score, weak items, and typed-schema gaps.
 
+## Browser-First Console Direction
+
+The next console architecture slice is File System Access API support, not an
+Electron app and not a blessed Nativefier wrapper. Keep Nativefier, if used at
+all, as a personal local launcher experiment outside the repo contract.
+
+Implementation contract:
+
+1. Feature-detect `window.showDirectoryPicker` and `window.showOpenFilePicker`.
+2. Keep existing drag/drop, paste, and file input flows as the fallback path.
+3. Prefer explicit user gestures for opening directories, writing feedback
+   files, and saving evaluation snapshots.
+4. Write raw real-world misses to `feedback/*.json` first. Promotion to
+   `tests/failures/*.json` remains gated by `npm run feedback:promote` and
+   `npm run verify` unless a user explicitly chooses a regression-save action.
+5. Keep the console browser-based and CI-verifiable until native distribution
+   has a concrete requirement.
+
 ## Feedback Regression Loop
 
 Raw real-world prompt failures can be staged in:
@@ -178,11 +196,13 @@ carries the older unrelated 159-item embedded catalog.
 
 ## Next Improvement Tasks
 
-1. Harden the remaining lower-scoring prompts, starting with prompts that have
+1. Add File System Access API support to the console using the browser-first
+   contract above.
+2. Harden the remaining lower-scoring prompts, starting with prompts that have
    no explicit inputs or verification language.
-2. Add first workflow/playbook/runbook source artifacts and wire them into the
+3. Add first workflow/playbook/runbook source artifacts and wire them into the
    generator.
-3. Backfill artifact timestamps from Git history.
-4. Add real promoted failure cases as soon as the console finds a real miss.
-5. Add credential-gated model-judge examples only outside default CI; keep
+4. Backfill artifact timestamps from Git history.
+5. Add real promoted failure cases as soon as the console finds a real miss.
+6. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.
