@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "id": "seed-decision-matrix-evidence-gate",
+  "prompt_id": "core.decision-matrix",
+  "prompt_path": "prompts/decision-matrix.md",
+  "source_feedback_path": "feedback/README.md#example",
+  "input": "Synthetic seed case: a decision prompt produced confident rankings without naming missing evidence or recomputing scores.",
+  "model_output": "The prompt asked for a weighted matrix but did not force evidence labels, assumptions, or recomputed totals.",
+  "user_complaint": "High-stakes decisions can look precise while hiding unsupported assumptions.",
+  "expected_behavior": "Decision matrix revisions must keep explicit evidence, assumption, and recomputation requirements.",
+  "required_terms": [
+    "Verify gate",
+    "assumptions",
+    "recompute",
+    "evidence"
+  ],
+  "forbidden_terms": [],
+  "observed_at": "legacy-unknown"
+}

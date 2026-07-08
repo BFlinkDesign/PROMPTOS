@@ -1,5 +1,33 @@
 [
   {
+    "description": "feedback seed-decision-matrix-evidence-gate: core.decision-matrix",
+    "vars": {
+      "prompt_path": "prompts/decision-matrix.md",
+      "failure_input": "Synthetic seed case: a decision prompt produced confident rankings without naming missing evidence or recomputing scores.",
+      "observed_output": "The prompt asked for a weighted matrix but did not force evidence labels, assumptions, or recomputed totals.",
+      "user_complaint": "High-stakes decisions can look precise while hiding unsupported assumptions.",
+      "expected_behavior": "Decision matrix revisions must keep explicit evidence, assumption, and recomputation requirements."
+    },
+    "assert": [
+      {
+        "type": "contains",
+        "value": "Verify gate"
+      },
+      {
+        "type": "contains",
+        "value": "assumptions"
+      },
+      {
+        "type": "contains",
+        "value": "recompute"
+      },
+      {
+        "type": "contains",
+        "value": "evidence"
+      }
+    ]
+  },
+  {
     "description": "feedback seed-scope-pipeline-verification: core.scope-pipeline",
     "vars": {
       "prompt_path": "prompts/scope-pipeline.md",

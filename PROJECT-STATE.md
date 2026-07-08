@@ -113,9 +113,10 @@ structured case to `tests/failures/*.json`, and refreshes
 that the generated promptfoo regression matrix is current and runs it through
 the local deterministic `echo` provider.
 
-The current seed case is synthetic and labeled as such:
+The current seed cases are synthetic and labeled as such:
 
 ```text
+tests/failures/seed-decision-matrix-evidence-gate.json
 tests/failures/seed-scope-pipeline-verification.json
 ```
 
@@ -137,10 +138,10 @@ Commands run from `C:\GitHub-Repos\PROMPTOS`:
 
 ```text
 npm ci -> clean install passed under Node 24 / npm 11
-npm run feedback:promote -> 0 staged feedback files, 1 promptfoo regression test
-npm run feedback:verify -> 1 failures, 1 promptfoo regression test
-npm run eval:promptfoo -> 2 passed, 0 failed, local echo provider
-npm run verify -> catalog 7 prompts, schema valid, feedback 1 failure/1 regression, promptfoo 2 passed, Playwright 4 passed
+npm run feedback:promote -> 0 staged feedback files, 2 promptfoo regression tests
+npm run feedback:verify -> 2 failures, 2 promptfoo regression tests
+npm run eval:promptfoo -> 3 passed, 0 failed, local echo provider
+npm run verify -> catalog 7 prompts, average score 83/100, schema valid, feedback 2 failures/2 regressions, promptfoo 3 passed, Playwright 4 passed
 go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/review-pipeline.yml .github/workflows/evals.yml -> pass
 npm audit --omit=dev -> found 0 vulnerabilities
 git diff --check -> pass
