@@ -25,11 +25,14 @@ Default branch:
 main
 ```
 
-Current merged baseline:
+Last verified hardening baseline:
 
 ```text
 c7ec86d Harden decision matrix prompt quality (#19)
 ```
+
+Later docs-only handoff commits may sit on top of this baseline. Use
+`git log -1 --oneline` for the current checkout commit.
 
 Use temporary worktrees for risky feature work, but do not bake temporary paths
 or branch names into repo docs after the branch is merged.

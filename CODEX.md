@@ -191,8 +191,10 @@ Keep each slice independently revertible and commit by concern.
 
 ### AGENT PERSISTENT MEMORY
 
-- Current baseline: `main` at `c7ec86d`
+- Last verified hardening baseline: `c7ec86d`
   (`Harden decision matrix prompt quality (#19)`).
+- Current checkout commit is always the live `git log -1 --oneline` value; do
+  not treat this handoff block as a substitute for that one command.
 - Hardened status: default local and GitHub gates were green after PR #19.
 - Current catalog baseline: 7 prompts, average score `83/100`;
   `decision-matrix` is `100/100`.
