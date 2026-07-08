@@ -20,10 +20,12 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 4. `prompts/*.md` for individual prompt blocks.
 5. `schema/items.schema.json` for the typed artifact contract.
 6. `tools/scoring-core.mjs` for the shared deterministic scoring rules.
-7. `console/promptos-console.html` for the static local browser console.
-8. `audits/*.md` for dated quality and architecture assessments.
-9. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
-10. `.github/workflows/` for remote security scanning and verification.
+7. `feedback/` for raw failure staging.
+8. `tests/failures/` and `tests/promptfoo-regression.json` for promoted regressions.
+9. `console/promptos-console.html` for the static local browser console.
+10. `audits/*.md` for dated quality and architecture assessments.
+11. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
+12. `.github/workflows/` for remote security scanning and verification.
 
 ## Platform Boundary
 
@@ -102,6 +104,8 @@ Catalog and console hardening:
 npm run catalog:build
 npm run catalog:evaluate
 npm run schema:validate
+npm run feedback:promote
+npm run feedback:verify
 ```
 
 Installer smoke:
@@ -160,6 +164,11 @@ PromptOS Console
 - The in-browser Evaluator uses a generated copy of `tools/scoring-core.mjs`.
   If scoring logic changes, `npm run verify` fails until `npm run catalog:build`
   refreshes the embedded runtime.
+- Raw feedback lives in `feedback/*.json`; promoted regressions live in
+  `tests/failures/*.json`. Run `npm run feedback:promote` after adding raw
+  feedback, then `npm run verify`.
+- `PromptOS Verify` CI uses Node 24 because the committed lockfile is generated
+  by npm 11. A clean `npm ci` passed locally under Node 24/npm 11.
 
 ## Next Work Slice
 
@@ -171,7 +180,9 @@ The repo has the durable deterministic spine. Continue hardening in this order:
    content model is settled.
 3. Backfill real `created_at` and `updated_at` values from Git history instead
    of inventing dates.
-4. Record Inspect AI and DeepEval starter examples only after the deterministic
-   and promptfoo lanes are working.
+4. Add credential-gated model-judge examples only outside default CI; keep
+   `npm run verify` deterministic.
+5. Record Inspect AI and DeepEval starter examples only after the deterministic
+   feedback loop has more real cases.
 
 Keep each slice independently revertible and commit by concern.

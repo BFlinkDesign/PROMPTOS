@@ -1,7 +1,7 @@
 description: PromptOS local no-API prompt smoke
 
 prompts:
-  - file://prompts/scope-pipeline.md
+  - file://tools/promptfoo-dynamic-prompt.js
 
 providers:
   - id: echo
@@ -9,6 +9,8 @@ providers:
 
 tests:
   - description: scope pipeline preserves deterministic verification requirements
+    vars:
+      prompt_path: prompts/scope-pipeline.md
     assert:
       - type: contains
         value: Verify gate
@@ -16,3 +18,4 @@ tests:
         value: trust tiers
       - type: contains
         value: recompute
+  - file://tests/promptfoo-regression.json

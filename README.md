@@ -59,9 +59,9 @@ npm run verify
 ```
 
 The verify gate checks the generated console catalog, validates the typed
-`items[]` schema, runs a local promptfoo smoke through the no-API `echo`
-provider, and launches Playwright Chromium against the static console and
-Evaluator tab.
+`items[]` schema, validates promoted feedback regressions, runs local promptfoo
+smokes through the no-API `echo` provider, and launches Playwright Chromium
+against the static console and Evaluator tab.
 
 Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
 
@@ -87,3 +87,17 @@ The console catalog is generated as `items[]` with typed artifacts:
 `prompt`, `workflow`, `playbook`, or `runbook`. The compatibility `prompts[]`
 projection remains embedded for older consumers, but `items[]` is the canonical
 schema validated by `npm run schema:validate`.
+
+## Feedback regressions
+
+Raw real-world failures go in `feedback/*.json`. Promote them into durable test
+cases with:
+
+```powershell
+npm run feedback:promote
+npm run verify
+```
+
+Promoted cases live in `tests/failures/` and regenerate
+`tests/promptfoo-regression.json`, which promptfoo runs through the local
+deterministic provider.

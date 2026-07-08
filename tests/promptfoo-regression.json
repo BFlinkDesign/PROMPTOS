@@ -1,0 +1,22 @@
+[
+  {
+    "description": "feedback seed-scope-pipeline-verification: core.scope-pipeline",
+    "vars": {
+      "prompt_path": "prompts/scope-pipeline.md",
+      "failure_input": "Synthetic seed case: a scope prompt revision removed deterministic verification language.",
+      "observed_output": "The prompt no longer required the agent to recompute or gate citations before emitting scope.",
+      "user_complaint": "The prompt became easier to run but weaker under bid-document stress.",
+      "expected_behavior": "Scope pipeline revisions must keep explicit verification and recomputation requirements."
+    },
+    "assert": [
+      {
+        "type": "contains",
+        "value": "Verify gate"
+      },
+      {
+        "type": "contains",
+        "value": "recompute"
+      }
+    ]
+  }
+]
