@@ -73,6 +73,11 @@ npm run catalog:build
 
 - [Prompt library audit - 2026-07-06](audits/prompt-library-audit-2026-07-06.md)
 
+## Standards
+
+- [Outcome Governance Standard](standards/outcome-governance-standard.md) -
+  universal decision architecture for outcome-first AI systems.
+
 ## Adding a prompt
 
 1. Add `prompts/your-block.md` with the fill-in-the-bracket template.

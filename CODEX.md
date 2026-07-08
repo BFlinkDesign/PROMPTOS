@@ -16,16 +16,17 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 
 1. `PROJECT-STATE.md` for current branch, PR, gates, caveats, and next actions.
 2. `README.md` for repo purpose and workflow.
-3. `PROMPTS.md` for the tracked prompt catalog.
-4. `prompts/*.md` for individual prompt blocks.
-5. `schema/items.schema.json` for the typed artifact contract.
-6. `tools/scoring-core.mjs` for the shared deterministic scoring rules.
-7. `feedback/` for raw failure staging.
-8. `tests/failures/` and `tests/promptfoo-regression.json` for promoted regressions.
-9. `console/promptos-console.html` for the static local browser console.
-10. `audits/*.md` for dated quality and architecture assessments.
-11. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
-12. `.github/workflows/` for remote security scanning and verification.
+3. `standards/*.md` for governing decision and evaluation standards.
+4. `PROMPTS.md` for the tracked prompt catalog.
+5. `prompts/*.md` for individual prompt blocks.
+6. `schema/items.schema.json` for the typed artifact contract.
+7. `tools/scoring-core.mjs` for the shared deterministic scoring rules.
+8. `feedback/` for raw failure staging.
+9. `tests/failures/` and `tests/promptfoo-regression.json` for promoted regressions.
+10. `console/promptos-console.html` for the static local browser console.
+11. `audits/*.md` for dated quality and architecture assessments.
+12. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
+13. `.github/workflows/` for remote security scanning and verification.
 
 ## Platform Boundary
 
@@ -189,6 +190,25 @@ The next high-leverage console slice is File System Access API support:
 5. Keep this implementable in the current Playwright console tests before
    considering any native shell.
 
+## Outcome Governance Direction
+
+`standards/outcome-governance-standard.md` is the governing response and
+decision standard. Build evaluator UX around outcome language, not confidence
+language:
+
+```text
+Action
+Evidence
+Authority
+Blockers
+Next Checkpoint
+Fallback
+```
+
+Do not let user preference, model output, a document, a measurement, or a test
+self-certify. Authority is domain-bound, and measurements become authoritative
+only after passing the measurement verification gate.
+
 ## Next Work Slice
 
 The repo has the durable deterministic spine. Continue hardening in this order:
@@ -229,6 +249,9 @@ Keep each slice independently revertible and commit by concern.
 - Architecture decision: stay browser-first. Build File System Access API
   support before considering any native wrapper. Do not bless Nativefier as a
   repo dependency.
+- Outcome decision: evaluator output should follow the Outcome Governance
+  Standard contract: action, evidence, authority, blockers, next checkpoint,
+  fallback. Do not expose confidence theater as user-facing value.
 - Next useful work: implement File System Access API console support, triage old
   draft PRs against the current schema, harden the remaining lower-scoring
   prompts, backfill artifact timestamps from Git history, and add real promoted
