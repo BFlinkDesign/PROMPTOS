@@ -22,7 +22,7 @@ name: Review Pipeline
 
 on:
   workflow_run:
-    workflows: ["CodeQL Advanced"]
+    workflows: ["CodeQL Advanced", "PromptOS Verify"]
     types: [completed]
   pull_request:
     types: [closed]
