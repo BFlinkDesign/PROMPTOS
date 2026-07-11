@@ -4,6 +4,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const { test, expect } = require('@playwright/test');
+const { expected_catalog_count: expectedCatalogCount } = require('./prompt-quality-contracts.json');
 
 const consoleUrl = pathToFileURL(path.join(process.cwd(), 'console', 'promptos-console.html')).href;
 
@@ -48,6 +49,24 @@ test('normalizes prompt source newlines before embedding catalog data', async ()
   }
 });
 
+test('fingerprints the exact embedded source set deterministically', async () => {
+  const { buildConsoleData } = await import('../tools/catalog.mjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'promptos-fingerprint-'));
+  try {
+    fs.mkdirSync(path.join(root, 'prompts'));
+    fs.writeFileSync(path.join(root, 'prompts', 'sample.md'), '# Sample\n\nRun [TASK] and verify the source.\n');
+    fs.writeFileSync(path.join(root, 'PROMPTS.md'), '| 1 | Sample | [open](prompts/sample.md) |\n');
+    const first = buildConsoleData(root);
+    const second = buildConsoleData(root);
+    expect(first.catalog_meta.source_fingerprint).toMatch(/^sha256:[a-f0-9]{64}$/);
+    expect(second.catalog_meta.source_fingerprint).toBe(first.catalog_meta.source_fingerprint);
+    fs.appendFileSync(path.join(root, 'prompts', 'sample.md'), '\nProduce an auditable output.\n');
+    expect(buildConsoleData(root).catalog_meta.source_fingerprint).not.toBe(first.catalog_meta.source_fingerprint);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('escapes prompt data before embedding it in the console script', async () => {
   const { extractConsoleData, replaceConsoleData } = await import('../tools/catalog.mjs');
   const shell = '<script>const DATA = {"count":0,"items":[],"prompts":[]};</script>';
@@ -66,9 +85,24 @@ test('renders the tracked PromptOS catalog', async ({ page }) => {
   await page.goto(consoleUrl);
 
   await expect(page).toHaveTitle('PromptOS Console');
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
+  await expect(page.locator('.skel')).toHaveCount(0);
+  await expect(page.locator('#sourceBar')).toContainText(`${expectedCatalogCount} reviewed artifacts`);
+  await expect(page.locator('#sourceBar')).toContainText(/source [a-f0-9]{12}/);
   await expect(page.getByText('Scope pipeline')).toBeVisible();
   await expect(page.getByText('Decision matrix')).toBeVisible();
+});
+
+test('shows canonical, pending, and retired ecosystem sources', async ({ page }) => {
+  await page.goto(consoleUrl);
+  await page.getByRole('tab', { name: 'Sources' }).click();
+
+  await expect(page.locator('#sourcesPanel')).toBeVisible();
+  await expect(page.locator('#sourceGrid .source-row')).toHaveCount(12);
+  await expect(page.locator('#sourceGrid')).toContainText('promptos');
+  await expect(page.locator('#sourceGrid')).toContainText('operatoros-agentic-playbook-v1');
+  await expect(page.locator('#sourceGrid')).toContainText('promptos-desktop-snapshot');
+  await expect(page.locator('#sourceSummary')).toContainText('6 action required');
 });
 
 test('filters prompts and opens a drawer without network access', async ({ page }) => {
@@ -102,6 +136,17 @@ Verify the evidence, cite the source, produce a short matrix, and never invent m
   await expect(page.locator('#evalResult')).toContainText('Fill-in inputs');
   await expect(page.locator('#evalResult')).toContainText('Verification terms');
   await expect(page.locator('#evalResult')).toContainText('Output contract');
+});
+
+test('evaluates edits reactively without moving focus from the input', async ({ page }) => {
+  await page.goto(consoleUrl);
+  await page.getByRole('tab', { name: 'Evaluator' }).click();
+  const input = page.locator('#evalText');
+  await input.fill(`# Live evaluation\n\nRun [TASK] against [SOURCE]. Verify evidence, produce an auditable report, and never invent missing facts.`);
+
+  await expect(page.locator('#evalResult')).toContainText('/100');
+  await expect(input).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Save receipt' })).toBeEnabled();
 });
 
 test('loads a prompt file into the evaluator', async ({ page }) => {
@@ -139,7 +184,7 @@ test('reports complete item-schema gaps for a dropped items catalog', async ({ p
     }],
   };
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
   await page.getByRole('tab', { name: 'Evaluator' }).click();
   await page.locator('#evalText').fill(JSON.stringify(payload));
   await page.getByRole('button', { name: 'Evaluate' }).click();
@@ -155,7 +200,7 @@ test('fails closed when Web Crypto SHA-256 is unavailable', async ({ page }) => 
     Object.defineProperty(globalThis, 'crypto', { configurable: true, value: {} });
   });
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
   await page.getByRole('tab', { name: 'Evaluator' }).click();
   await page.locator('#evalText').fill('# Crypto gate\n\nRun [TASK], verify evidence, produce output, and never invent facts.');
   await page.getByRole('button', { name: 'Evaluate' }).click();
@@ -189,6 +234,7 @@ test('evaluates a catalog prompt into an exact provenance receipt and returns to
 
   await page.goto(consoleUrl);
   await page.locator('#q').fill('decision matrix');
+  await expect(page.locator('.card')).toHaveCount(1);
   await page.locator('.card').click();
   await page.getByRole('button', { name: 'Evaluate this prompt' }).click();
 
@@ -237,11 +283,6 @@ test('evaluates a catalog prompt into an exact provenance receipt and returns to
 
   const editedSource = `${source.replace(/\r\n/g, '\n')}\n\nRe-evaluate this edited source.`;
   await page.locator('#evalText').fill(editedSource);
-  await expect(page.getByRole('button', { name: 'Save receipt' })).toBeDisabled();
-  await expect(page.locator('#evalResult')).toHaveText('Source changed. Evaluate again to generate a current receipt.');
-  expect(await page.evaluate(() => globalThis.__APP._receipt())).toBeNull();
-
-  await page.getByRole('button', { name: 'Evaluate' }).click();
   const editedHash = `sha256:${crypto.createHash('sha256').update(editedSource, 'utf8').digest('hex')}`;
   await expect.poll(() => page.evaluate(() => globalThis.__APP._receipt()?.source_hash)).toBe(editedHash);
   await expect(page.getByRole('button', { name: 'Save receipt' })).toBeEnabled();
@@ -391,7 +432,7 @@ test('writes a receipt to snapshots only after the explicit save click', async (
   }, source);
 
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
   await page.getByRole('tab', { name: 'Evaluator' }).click();
   await page.getByRole('button', { name: 'Open PromptOS folder' }).click();
   await page.getByLabel('Prompt from connected folder').selectOption('prompts/saved-prompt.md');
@@ -450,7 +491,7 @@ test('preserves the receipt and performs no write when directory permission is d
   }, source);
 
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
   await page.getByRole('tab', { name: 'Evaluator' }).click();
   await page.getByRole('button', { name: 'Open PromptOS folder' }).click();
   await page.getByLabel('Prompt from connected folder').selectOption('prompts/permission-test.md');
@@ -498,7 +539,7 @@ test('does not save a different receipt after an async permission prompt', async
   }, source);
 
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
   await page.getByRole('tab', { name: 'Evaluator' }).click();
   await page.getByRole('button', { name: 'Open PromptOS folder' }).click();
   await page.getByLabel('Prompt from connected folder').selectOption('prompts/save-race.md');
@@ -555,7 +596,7 @@ test('clears the previous directory after a newly selected folder fails validati
   }, source);
 
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(15);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
   await page.getByRole('tab', { name: 'Evaluator' }).click();
   await page.getByRole('button', { name: 'Open PromptOS folder' }).click();
   await page.getByLabel('Prompt from connected folder').selectOption('prompts/folder-a.md');
