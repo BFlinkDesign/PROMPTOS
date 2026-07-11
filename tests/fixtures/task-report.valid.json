@@ -1,0 +1,28 @@
+{
+  "outcome": "The bounded task completed and its verification gate passed.",
+  "files_changed": [
+    {
+      "path": "prompts/example.md",
+      "purpose": "Added the approved prompt behavior."
+    }
+  ],
+  "user_visible_behavior": "The catalog exposes the new prompt.",
+  "verification": [
+    {
+      "command_or_interaction": "npm run verify",
+      "environment": "local deterministic harness",
+      "result": "passed"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "criterion": "The prompt is cataloged and validated.",
+      "status": "passed",
+      "evidence": "npm run verify"
+    }
+  ],
+  "authority": "Approved task and repository contracts.",
+  "blockers": [],
+  "risks_and_limitations": "Target-host behavior was not part of this fixture.",
+  "follow_up": "Run the next bounded task."
+}

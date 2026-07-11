@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BFlinkDesign/PROMPTOS/schema/task-report.schema.json",
+  "title": "PromptOS Task Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "outcome",
+    "files_changed",
+    "user_visible_behavior",
+    "verification",
+    "acceptance_criteria",
+    "authority",
+    "blockers",
+    "risks_and_limitations",
+    "follow_up"
+  ],
+  "properties": {
+    "outcome": {
+      "type": "string",
+      "minLength": 1
+    },
+    "files_changed": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "purpose"],
+        "properties": {
+          "path": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "user_visible_behavior": {
+      "type": "string"
+    },
+    "verification": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["command_or_interaction", "environment", "result"],
+        "properties": {
+          "command_or_interaction": { "type": "string", "minLength": 1 },
+          "environment": { "type": "string" },
+          "result": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["criterion", "status", "evidence"],
+        "properties": {
+          "criterion": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["passed", "failed", "unverified"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "authority": {
+      "type": "string"
+    },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "risks_and_limitations": {
+      "type": "string"
+    },
+    "follow_up": {
+      "type": "string"
+    }
+  }
+}
