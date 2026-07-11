@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BFlinkDesign/PROMPTOS/skills/dcc-asset-pipeline/schema/job.schema.json",
+  "title": "DCC Asset Pipeline Job",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "job_id", "operator_id", "target", "assets"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "job_id": { "$ref": "#/$defs/slug" },
+    "operator_id": { "type": "string", "minLength": 1 },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engine",
+        "platform",
+        "export_format",
+        "default_triangle_budget",
+        "default_texture_max",
+        "lods_required",
+        "collision_required",
+        "lightmap_uv_required",
+        "commercial_project"
+      ],
+      "properties": {
+        "engine": { "type": "string", "minLength": 1 },
+        "platform": { "type": "string", "minLength": 1 },
+        "export_format": {
+          "enum": ["glb", "gltf", "fbx", "usd", "usdz", "blend", "prefab", "uasset"]
+        },
+        "default_triangle_budget": { "type": "integer", "minimum": 1 },
+        "default_texture_max": { "type": "integer", "minimum": 1, "maximum": 16384 },
+        "lods_required": { "type": "boolean" },
+        "collision_required": { "type": "boolean" },
+        "lightmap_uv_required": { "type": "boolean" },
+        "commercial_project": { "type": "boolean" }
+      }
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["asset_id", "source_path", "asset_class", "provenance"],
+        "properties": {
+          "asset_id": { "$ref": "#/$defs/slug" },
+          "source_path": { "type": "string", "minLength": 1 },
+          "asset_class": {
+            "enum": [
+              "complex-architecture",
+              "hero-prop",
+              "small-prop",
+              "background-filler",
+              "animated-skinned"
+            ]
+          },
+          "provenance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["generator", "model", "license", "commercial_use_allowed", "reference"],
+            "properties": {
+              "generator": { "type": "string", "minLength": 1 },
+              "model": { "type": "string", "minLength": 1 },
+              "license": { "type": "string", "minLength": 1 },
+              "commercial_use_allowed": { "type": "boolean" },
+              "reference": { "type": "string", "minLength": 1 }
+            }
+          },
+          "triangle_budget": { "type": "integer", "minimum": 1 },
+          "texture_max": { "type": "integer", "minimum": 1, "maximum": 16384 },
+          "normal_map_required": { "type": "boolean" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]*$"
+    }
+  }
+}
