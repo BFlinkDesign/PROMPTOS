@@ -1,0 +1,8 @@
+{
+  "metrics": {
+    "final_triangles": 39000
+  },
+  "outputs": {
+    "optimized_mesh": "optimized/stone-house.blend"
+  }
+}
