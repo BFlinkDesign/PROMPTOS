@@ -209,7 +209,7 @@ npm run verify -> exit 0
 - schemas: 15 generated and 15 embedded items valid; task-report positive and negative controls passed
 - feedback: 2 failure cases and 2 promptfoo regression tests valid
 - promptfoo: 3 passed, 0 failed, 0 errors
-- Playwright Chromium: 21 passed
+- Playwright Chromium: 22 passed
 ```
 
 The console renders the 15 tracked prompt blocks from `PROMPTS.md`; it no longer

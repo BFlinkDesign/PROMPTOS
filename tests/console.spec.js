@@ -33,6 +33,21 @@ test('rejects prompt sources larger than the catalog embedding limit', async () 
   }
 });
 
+test('normalizes prompt source newlines before embedding catalog data', async () => {
+  const { buildConsoleData } = await import('../tools/catalog.mjs');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'promptos-newline-boundary-'));
+  try {
+    fs.mkdirSync(path.join(root, 'prompts'));
+    fs.writeFileSync(path.join(root, 'prompts', 'windows.md'), '# Windows\r\n\r\nRun [TASK] and verify the source.\r\n');
+    fs.writeFileSync(path.join(root, 'PROMPTS.md'), '| 1 | Windows | [open](prompts/windows.md) |\n');
+    const data = buildConsoleData(root);
+    expect(data.prompts[0].source_text).toBe('# Windows\n\nRun [TASK] and verify the source.\n');
+    expect(data.prompts[0].source_text).not.toContain('\r');
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test('escapes prompt data before embedding it in the console script', async () => {
   const { extractConsoleData, replaceConsoleData } = await import('../tools/catalog.mjs');
   const shell = '<script>const DATA = {"count":0,"items":[],"prompts":[]};</script>';
@@ -153,7 +168,7 @@ test('fails closed when Web Crypto SHA-256 is unavailable', async ({ page }) => 
 test('evaluates a catalog prompt into an exact provenance receipt and returns to it', async ({ page }) => {
   const evaluatedAt = '2026-07-11T15:30:00.000Z';
   const sourcePath = 'prompts/decision-matrix.md';
-  const source = fs.readFileSync(path.join(process.cwd(), sourcePath), 'utf8');
+  const source = fs.readFileSync(path.join(process.cwd(), sourcePath), 'utf8').replace(/\r\n/g, '\n');
   const sourceHash = `sha256:${crypto.createHash('sha256').update(source, 'utf8').digest('hex')}`;
   const requests = [];
   page.on('request', (request) => requests.push(request.url()));

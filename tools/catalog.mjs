@@ -40,7 +40,7 @@ export function loadPromptEntries(rootDir = process.cwd()) {
     if (exists && fs.statSync(absolutePath).size > MAX_PROMPT_SOURCE_BYTES) {
       throw new Error(`prompt source exceeds ${MAX_PROMPT_SOURCE_BYTES} bytes: ${markdownPath}`);
     }
-    const body = exists ? readText(absolutePath) : '';
+    const body = exists ? normalizeNewlines(readText(absolutePath)) : '';
     const title = extractTitle(body) || row.catalogTitle;
     return {
       ...row,

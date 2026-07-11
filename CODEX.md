@@ -245,7 +245,7 @@ Keep each slice independently revertible and commit by concern.
 - Hardened status: default local and GitHub gates were green after PR #19.
 - Current feature-branch catalog baseline: 15 prompts, average score `99/100`,
   every prompt at least `85/100`, and 9 adversarial contract cases covered.
-- Current console baseline: 21 Playwright tests covering the browser receipt,
+- Current console baseline: 22 Playwright tests covering the browser receipt,
   file-access, explicit-save, fallback, no-network, and mobile-overflow paths.
 - Default workflow: read `PROJECT-STATE.md` first, then run only the narrow gate
   needed for the task. Use `npm run verify` before behavior-changing commits.
