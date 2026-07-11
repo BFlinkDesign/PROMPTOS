@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "id": "dcc-asset-pipeline",
+  "version": "1.0.0",
+  "title": "DCC Asset Pipeline",
+  "description": "Convert AI-generated 3D meshes into validated engine-ready assets with deterministic phase gates, explicit budgets, quarantine, and independent verification.",
+  "created_at": "2026-07-11T06:13:28Z",
+  "updated_at": "2026-07-11T06:13:28Z",
+  "execution_mode": "deterministic-single-agent",
+  "entrypoint": "SKILL.md",
+  "state_machine": "tools/state-machine.mjs",
+  "schemas": {
+    "job": "schema/job.schema.json",
+    "state": "schema/state.schema.json"
+  },
+  "roles": {
+    "operator": "agents/operator.md",
+    "verifier": "agents/verifier.md"
+  },
+  "guides": {
+    "triage_playbook": "playbooks/asset-triage.md",
+    "blender_runbook": "runbooks/blender-high-to-low.md"
+  },
+  "templates": {
+    "job": "templates/job.example.json",
+    "preserved_patch": "templates/patches/01-preserved.json",
+    "inspected_patch": "templates/patches/02-inspected.json",
+    "optimized_patch": "templates/patches/03-optimized.json",
+    "baked_patch": "templates/patches/04-baked.json",
+    "packaged_patch": "templates/patches/05-packaged.json",
+    "reimported_patch": "templates/patches/06-reimported.json",
+    "verified_patch": "templates/patches/07-verified.json",
+    "complete_patch": "templates/patches/08-complete.json"
+  },
+  "tests": [
+    "tests/state-machine.test.mjs",
+    "tests/hash-file.test.mjs"
+  ],
+  "supported_surfaces": [
+    "Blender MCP",
+    "Blender Python",
+    "Unity",
+    "Unreal Engine",
+    "GLB/FBX/USD viewers"
+  ],
+  "utilities": {
+    "hash_file": "tools/hash-file.mjs",
+    "blender_inventory": "tools/blender-inventory.py"
+  }
+}
