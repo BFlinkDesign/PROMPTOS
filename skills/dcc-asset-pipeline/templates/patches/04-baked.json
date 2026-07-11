@@ -1,0 +1,10 @@
+{
+  "outputs": {
+    "textures": {
+      "base_color": "textures/stone-house-basecolor-4k.png",
+      "normal": "textures/stone-house-normal-4k.png",
+      "ao": "textures/stone-house-ao-4k.png",
+      "max_dimension": 4096
+    }
+  }
+}
