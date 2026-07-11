@@ -1,0 +1,19 @@
+{
+  "verification": {
+    "operator_id": "operator-session-001",
+    "verifier_id": "verifier-session-002",
+    "result": "pass",
+    "checks": [
+      {
+        "name": "mesh-budget",
+        "status": "pass",
+        "evidence": "39000 <= 40000"
+      },
+      {
+        "name": "engine-reimport",
+        "status": "pass",
+        "evidence": "unity/StoneHouse.prefab"
+      }
+    ]
+  }
+}
