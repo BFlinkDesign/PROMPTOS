@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PromptOS Prompt Engine</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="shell header">
+    <div>
+      <p class="eyebrow">PromptOS</p>
+      <h1>Prompt Engine</h1>
+      <p class="lede">Generate, improve, benchmark, and release prompts through a bounded agent team and deterministic evidence gates.</p>
+    </div>
+    <span id="health" class="status" aria-live="polite">Checking service…</span>
+  </header>
+
+  <main class="shell layout">
+    <section class="panel" aria-labelledby="optimize-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Development run</p>
+          <h2 id="optimize-title">Generate or improve</h2>
+        </div>
+        <button id="loadExample" type="button" class="secondary">Load verified example</button>
+      </div>
+
+      <form id="optimizeForm">
+        <label>
+          Mode
+          <select id="mode">
+            <option value="improve">Improve an existing prompt</option>
+            <option value="generate">Generate from a task objective</option>
+          </select>
+        </label>
+        <label>
+          Objective
+          <textarea id="objective" rows="3" required></textarea>
+        </label>
+        <label>
+          Baseline prompt
+          <textarea id="baseline" rows="6" spellcheck="false"></textarea>
+        </label>
+        <details>
+          <summary>Benchmark request JSON</summary>
+          <p class="hint">Training and validation may guide optimization. Holdout cases remain concealed from all builder and critic roles.</p>
+          <textarea id="requestJson" class="code" rows="18" spellcheck="false" aria-label="Benchmark request JSON"></textarea>
+        </details>
+        <div class="actions">
+          <button id="runOptimize" type="submit">Run bounded optimization</button>
+          <span id="runState" class="hint" aria-live="polite"></span>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel results" aria-labelledby="result-title">
+      <p class="eyebrow">Evidence</p>
+      <h2 id="result-title">Run result</h2>
+      <div id="metrics" class="metrics" aria-live="polite">
+        <p class="empty">No run completed.</p>
+      </div>
+      <h3>Winning prompt</h3>
+      <pre id="winningPrompt" tabindex="0">No candidate selected.</pre>
+      <details>
+        <summary>Full report</summary>
+        <pre id="fullReport" tabindex="0">No report.</pre>
+      </details>
+    </section>
+
+    <section class="panel wide" aria-labelledby="campaign-title">
+      <p class="eyebrow">Release claim gate</p>
+      <h2 id="campaign-title">Independent benchmark campaign</h2>
+      <p>Paste an array of completed run reports. A superiority claim is blocked unless the cross-provider, cross-model, cross-suite evidence contract passes.</p>
+      <form id="campaignForm">
+        <label>
+          Run reports JSON array
+          <textarea id="campaignReports" class="code" rows="10" spellcheck="false">[]</textarea>
+        </label>
+        <label>
+          Policy JSON
+          <textarea id="campaignPolicy" class="code" rows="8" spellcheck="false"></textarea>
+        </label>
+        <div class="actions">
+          <button type="submit">Evaluate campaign</button>
+          <span id="campaignState" class="hint" aria-live="polite"></span>
+        </div>
+      </form>
+      <pre id="campaignResult" tabindex="0">No campaign evaluated.</pre>
+    </section>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
