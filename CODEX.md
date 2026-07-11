@@ -29,6 +29,14 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 13. `.github/workflows/` for remote security scanning and verification.
 14. `ecosystem/registry.json` and `docs/PROMPTOS-ECOSYSTEM.md` for product
     ownership, integration, migration, and retirement boundaries.
+15. `docs/PRODUCT-CONTRACT.md` and `docs/TARGET-ARCHITECTURE.md` for the
+    normative product boundary and accepted desktop/core direction.
+16. `governance/capabilities.json` for every verified, partial, missing,
+    intake, superseded, and retired capability.
+17. `docs/EVALUATION-BENCHMARK.md` and `benchmarks/*.json` for current
+    official-source capability parity and adversarial structural-lint limits.
+18. `intake/legacy-console-v1/` for the preserved 159-record historical
+    catalog; intake is never active or authoritative without promotion gates.
 
 ## Ecosystem Boundary
 
@@ -176,12 +184,16 @@ PromptOS Console
 - The in-browser Evaluator uses a generated copy of `tools/scoring-core.mjs`.
   If scoring logic changes, `npm run verify` fails until `npm run catalog:build`
   refreshes the embedded runtime.
+- The 0-100 value is deterministic structure lint. It is not prompt quality,
+  effectiveness, maturity, or release authority. Behavioral claims require a
+  versioned dataset, declared graders, an accepted baseline, and a reproducible
+  experiment receipt.
 - Raw feedback lives in `feedback/*.json`; promoted regressions live in
   `tests/failures/*.json`. Run `npm run feedback:promote` after adding raw
   feedback, then `npm run verify`.
-- Keep the console browser-based. Do not add Electron, Tauri, or Nativefier to
-  the repo until native distribution has a concrete requirement. Nativefier is
-  acceptable only as an untracked personal launcher experiment.
+- The target desktop architecture is a narrow Tauri 2 shell around the shared
+  workbench and Core contracts. Do not add Electron or Nativefier. Do not claim
+  desktop support until Windows and macOS target-host release gates pass.
 - Windows and macOS desktop requirements in the prompt suite are delivery
   contracts, not native target-host proof for this browser console. CI remains
   Ubuntu plus Chromium until PromptOS ships a real native desktop artifact.
@@ -256,25 +268,27 @@ Keep each slice independently revertible and commit by concern.
   (`Harden decision matrix prompt quality (#19)`).
 - Current checkout commit is always the live `git log -1 --oneline` value; do
   not treat this handoff block as a substitute for that one command.
-- Hardened status: default local and GitHub gates were green after PR #19.
-- Current catalog baseline: 16 prompts, average score `99/100`, every prompt at
-  least `85/100`, and 9 adversarial contract cases covered.
-- Current console baseline: 22 Playwright tests covering the browser receipt,
+- Verified narrow status: source generation, schemas, local structural lint,
+  capability inventory, and browser workflows pass. Behavioral effectiveness
+  remains unverified.
+- Current catalog baseline: 16 active source-backed prompts plus 159 historical
+  intake records. The active catalog averages `99/100` structure lint; that
+  value has no effectiveness or release authority.
+- Current console baseline: 25 Playwright tests covering the browser receipt,
   file-access, explicit-save, fallback, no-network, and mobile-overflow paths.
 - Default workflow: read `PROJECT-STATE.md` first, then run only the narrow gate
   needed for the task. Use `npm run verify` before behavior-changing commits.
 - Feedback workflow: stage raw failures in `feedback/*.json`, promote with
   `npm run feedback:promote`, and verify with `npm run feedback:verify` or the
   full `npm run verify` gate.
-- Do not re-audit hardened infrastructure by default, do not add
-  credentialed/model-judge evals to default CI, and do not change CI/workflow
-  logic unless a live gate is failing.
-- Architecture decision: stay browser-first. File System Access API support is
-  implemented; do not bless Nativefier as a repo dependency.
+- Keep credentialed/model-judge evals outside default offline CI. Re-audit when
+  a capability claim, benchmark, source, dependency, or runtime path changes.
+- Architecture decision: share one React/TypeScript workbench across the browser
+  fallback and a narrow Tauri 2 Windows/macOS shell. Do not add Nativefier or
+  Electron without a measured capability blocker.
 - Outcome decision: evaluator output should follow the Outcome Governance
   Standard contract: action, evidence, authority, blockers, next checkpoint,
   fallback. Do not expose confidence theater as user-facing value.
-- Next useful work: independently review and land the current receipt/prompt
-  suite, then triage old draft PRs against the current schema, backfill artifact
-  timestamps from Git history, add real promoted failure cases, and repair the
-  unmerged Prompt Engine before any optimizer claim or merge.
+- Next useful work: add versioned behavioral datasets and graders, then compare
+  candidate prompt versions against immutable accepted baselines before
+  repairing or importing the unmerged Prompt Engine.

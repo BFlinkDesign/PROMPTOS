@@ -257,7 +257,7 @@ export function evaluateCatalog(rootDir = process.cwd()) {
       errors.push(`prompt body is too short in ${entry.markdownPath}`);
     }
     if (entry.score.total < 50) {
-      warnings.push(`low structure score ${entry.score.total}/100 for ${entry.markdownPath}`);
+      warnings.push(`low structure lint ${entry.score.total}/100 for ${entry.markdownPath}`);
     }
   }
 

@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptos.local/schema/capabilities.schema.json",
+  "title": "PromptOS capability ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "updated_at", "capabilities"],
+  "properties": {
+    "version": { "const": 1 },
+    "updated_at": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
+    },
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/capability" }
+    }
+  },
+  "$defs": {
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id", "domain", "capability", "owner", "status", "trust", "source",
+        "evidence", "gate", "user_impact", "next_action", "replacement"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9.-]+$" },
+        "domain": {
+          "enum": ["catalog", "evaluation", "workbench", "desktop", "operations", "ecosystem", "governance"]
+        },
+        "capability": { "type": "string", "minLength": 1 },
+        "owner": { "type": "string", "minLength": 1 },
+        "status": {
+          "enum": ["verified", "partial", "draft", "missing", "blocked", "intake", "retired", "superseded"]
+        },
+        "trust": { "enum": ["VERIFIED", "ASSERTED", "DRAFT", "UNTRUSTED"] },
+        "source": { "type": "string", "minLength": 1 },
+        "evidence": { "type": "string", "minLength": 1 },
+        "gate": { "type": "string", "minLength": 1 },
+        "user_impact": { "type": "string", "minLength": 1 },
+        "next_action": { "type": "string", "minLength": 1 },
+        "replacement": { "type": ["string", "null"] }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "enum": ["retired", "superseded"] } } },
+          "then": { "properties": { "replacement": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    }
+  }
+}

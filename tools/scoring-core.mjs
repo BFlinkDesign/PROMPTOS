@@ -58,15 +58,16 @@ export function scorePrompt(body) {
 }
 
 export function maturityForScore(score) {
-  if (score >= 85) return 'hardened';
-  if (score >= 60) return 'usable';
+  // Structural lint cannot establish behavioral maturity. Keep the score
+  // parameter for compatibility with generated browser consumers.
+  void score;
   return 'draft';
 }
 
 export function verdictForScore(score) {
-  if (score >= 85) return 'ready';
-  if (score >= 60) return 'needs-review';
-  return 'revise';
+  if (score >= 85) return 'structural-complete';
+  if (score >= 60) return 'structural-partial';
+  return 'structural-incomplete';
 }
 
 export async function buildEvaluationReceipt({
@@ -87,22 +88,26 @@ export async function buildEvaluationReceipt({
     source_path: sourcePath || 'local/pasted-prompt.md',
     source_hash: `sha256:${await sha256Hex(source)}`,
     evaluated_at: evaluatedAt || new Date().toISOString(),
+    evaluation_scope: 'structural-lint',
+    effectiveness: 'not-evaluated',
+    release_authority: false,
     score: result.total,
     verdict: verdictForScore(result.total),
     factors: { ...result.factors },
     action: blockers.length
-      ? `Resolve ${blockers.length} structural ${blockers.length === 1 ? 'gap' : 'gaps'} before relying on this prompt.`
-      : 'Use this prompt with its required inputs and preserve the receipt with the resulting work.',
+      ? `Resolve ${blockers.length} structural ${blockers.length === 1 ? 'gap' : 'gaps'}, then run behavioral evaluation before relying on this prompt.`
+      : 'Run this prompt against a versioned behavioral dataset before relying on it or releasing it.',
     evidence,
     authority: {
       runtime: 'tools/scoring-core.mjs',
-      method: 'deterministic structural scoring',
+      method: 'deterministic structural lint',
+      limitation: 'Does not evaluate model output, correctness, safety, cost, latency, or real-world effectiveness.',
     },
     blockers,
     next_checkpoint: blockers.length
       ? 'Address the listed blockers, then re-run the PromptOS Evaluator.'
-      : 'Re-evaluate after any substantive prompt edit.',
-    fallback: 'If the evaluator is unavailable, retain the source and hash and review the same six factors manually.',
+      : 'Run a versioned behavioral dataset with declared graders and compare the result with an accepted baseline.',
+    fallback: 'If behavioral evaluation is unavailable, keep the artifact in draft and do not claim readiness.',
   };
 }
 
