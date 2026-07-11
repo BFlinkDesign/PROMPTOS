@@ -49,6 +49,9 @@ function validateEcosystemSemantics(registry) {
     if (['stale-duplicate', 'retirement-candidate'].includes(asset.status) && asset.disposition === 'keep') {
       semanticFailures.push(`${asset.id} cannot be both ${asset.status} and keep`);
     }
+    if ((asset.status === 'retired') !== (asset.disposition === 'retired')) {
+      semanticFailures.push(`${asset.id} must use retired status and disposition together`);
+    }
   }
   return semanticFailures;
 }

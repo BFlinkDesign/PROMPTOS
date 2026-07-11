@@ -144,8 +144,8 @@ Current decisions:
   read-only snapshot or deep link;
 - keep agent-kit separate until dev-setup can prove a generated release and
   parity contract;
-- retire the desktop PromptOS HTML snapshot after main and launch pointers are
-  verified;
+- the desktop PromptOS HTML snapshot was removed on 2026-07-11 after main
+  verification and a shortcut-target check;
 - migrate unique adapter behavior from `C:\Scripts\console-kit\newswatcher`,
   then retire that prototype;
 - treat `promptforge` and `promptvault-ai` as archive candidates after their
