@@ -160,7 +160,7 @@
       "capability": "Windows and macOS package, signing, update, and clean-host lifecycle",
       "reference": "https://www.electronjs.org/docs/latest/tutorial/distribution-overview",
       "status": "missing",
-      "evidence": "No desktop shell or target-host release proof exists; Electron versus Tauri 2 remains pending a repository-grounded ADR.",
+      "evidence": "ADR-0001 selects Electron for desktop v1, but no desktop shell or target-host release proof exists.",
       "gate": "No Windows or macOS release gate has passed."
     }
   ]

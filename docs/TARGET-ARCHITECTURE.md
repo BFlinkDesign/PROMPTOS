@@ -1,6 +1,6 @@
 # PromptOS Target Architecture
 
-Status: core and workbench direction accepted; desktop shell decision pending.
+Status: core, workbench, and Electron desktop direction accepted; implementation pending.
 
 ```text
 Artifact sources and imported failures
@@ -40,12 +40,12 @@ or release decisions in UI-only code.
 
 ### Desktop Shell
 
-The production shell is not selected yet. Electron and Tauri 2 remain candidate
-adapters around the same React/TypeScript workbench and framework-neutral Core.
-The selection ADR must inventory the real Node runtime, filesystem, Git, process,
-provider, packaging, signing, update, and target-host requirements before it can
-approve either shell. No working TypeScript behavior may be duplicated in Rust
-merely to satisfy a shell choice. The first accepted shell proof must include:
+ADR-0001 selects Electron as the Windows and macOS desktop adapter around the
+same React/TypeScript workbench and framework-neutral Core. The decision is based
+on the intended local Node evaluator and provider/harness runner. It does not
+approve the unmerged Prompt Engine or claim a desktop build exists. No working
+TypeScript behavior may be duplicated in Rust merely to satisfy a shell choice.
+The first accepted shell proof must include:
 
 - a read-only folder connection and explicit user-selected receipt write;
 - no unrestricted shell or home-directory access;
@@ -55,8 +55,9 @@ merely to satisfy a shell choice. The first accepted shell proof must include:
 - crash recovery, offline behavior, keyboard access, accessibility, and rollback.
 
 The browser remains a supported fallback. Nativefier is not part of the
-production contract. Electron or Tauri becomes authoritative only after the ADR
-and measured spike gates pass.
+production contract. Electron becomes a shipped capability only after the
+prerequisites and target-host gates in
+[`ADR-0001`](adr/0001-electron-desktop-runtime.md) pass.
 
 ### Headless Runner
 
@@ -80,8 +81,9 @@ adapters or generated releases.
 3. Add versioned behavioral datasets and deterministic graders.
 4. Add provider matrices, immutable baselines, pairwise comparison, and budgets.
 5. Add production failure capture, human review, and failure promotion.
-6. Complete the desktop runtime ADR, then prove the selected shell on Windows and
-   macOS without coupling Core packages to that shell.
+6. Repair and accept the Node Prompt Engine, extract the shared workbench/Core,
+   then prove Electron on Windows and macOS without coupling Core packages to
+   that shell.
 7. Connect the verified headless contract to the `dev-setup` repair/release loop.
 
 No later stage may be represented as shipped because an earlier stage exists.

@@ -52,6 +52,7 @@ may appear through bounded read-only adapters or links.
 - [Machine-readable ecosystem registry](ecosystem/registry.json)
 - [Normative product contract](docs/PRODUCT-CONTRACT.md)
 - [Target architecture](docs/TARGET-ARCHITECTURE.md)
+- [Electron desktop runtime decision](docs/adr/0001-electron-desktop-runtime.md)
 - [Official-source evaluation benchmark](docs/EVALUATION-BENCHMARK.md)
 - [Machine-readable capability ledger](governance/capabilities.json)
 

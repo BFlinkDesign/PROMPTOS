@@ -130,11 +130,11 @@ The supported product is a browser-first local console that runs on Windows and
 macOS. File System Access APIs are progressive enhancement; open-file, drag,
 drop, paste, save-picker, and JSON-download fallbacks preserve the workflow.
 
-Do not add Electron, Tauri, Nativefier, WinUI, AppKit, or SwiftUI merely to make
-the console look installed. A native shell becomes justified only when a
-concrete requirement cannot be met by the browser product, such as managed
-distribution, background services, privileged filesystem watching, or native
-enterprise policy.
+Do not wrap the monolithic console merely to make it look installed. ADR-0001
+selects Electron for the eventual Windows/macOS shell because the intended local
+Node evaluator and provider runner would otherwise require a second runtime or
+sidecar. Implementation remains blocked until the Node engine is repaired and
+the shared React/TypeScript workbench and Core are extracted.
 
 ## Open Pull Request Disposition
 
