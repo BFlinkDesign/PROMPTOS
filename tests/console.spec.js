@@ -8,9 +8,10 @@ test('renders the tracked PromptOS catalog', async ({ page }) => {
   await page.goto(consoleUrl);
 
   await expect(page).toHaveTitle('PromptOS Console');
-  await expect(page.locator('.card')).toHaveCount(7);
+  await expect(page.locator('.card')).toHaveCount(8);
   await expect(page.getByText('Scope pipeline')).toBeVisible();
   await expect(page.getByText('Decision matrix')).toBeVisible();
+  await expect(page.getByText('Adaptive product design')).toBeVisible();
 });
 
 test('filters prompts and opens a drawer without network access', async ({ page }) => {

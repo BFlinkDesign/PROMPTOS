@@ -20,6 +20,7 @@ capable LLM.
 | 5 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
 | 6 | Adversarial safety red-team (shields, filters, validators) | [prompts/adversarial-safety-red-team.md](prompts/adversarial-safety-red-team.md) |
 | 7 | Session kickoff — align to the delivery systems | [prompts/session-alignment.md](prompts/session-alignment.md) |
+| 8 | Adaptive product design (risk-routed repository execution) | [prompts/adaptive-product-design.md](prompts/adaptive-product-design.md) |
 
 ## Console
 
@@ -27,5 +28,5 @@ Browse and copy prompts in the browser: open [console/promptos-console.html](con
 
 ## Used by
 
-- [agent-kit](https://github.com/BFlinkDesign/agent-kit) — `AGENTS.md` §5 references the scope pipeline block
+- [agent-kit](https://github.com/BFlinkDesign/agent-kit) — `AGENTS.md` references the scope pipeline and adaptive product-design blocks
 - Per-repo installs get a thin pointer at `agent/PROMPTS.md` (not a copy)

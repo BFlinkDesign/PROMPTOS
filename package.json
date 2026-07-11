@@ -9,10 +9,11 @@
     "feedback:promote": "node tools/promote.js",
     "feedback:verify": "node tools/verify-feedback.mjs",
     "schema:validate": "node tools/validate-items.mjs",
+    "test:adaptive-product-design": "node tests/adaptive-product-design-policy.test.mjs",
     "test:console": "playwright test",
     "tool:promptfoo": "promptfoo --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run eval:promptfoo && npm run test:console"
+    "verify": "npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run test:adaptive-product-design && npm run eval:promptfoo && npm run test:console"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

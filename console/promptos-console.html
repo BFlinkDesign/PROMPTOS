@@ -342,7 +342,7 @@ globalThis.PromptOSScoring = Object.freeze({
 <script>
 const DATA = {
   "version": 3,
-  "count": 7,
+  "count": 8,
   "items": [
     {
       "id": "core.scope-pipeline",
@@ -604,6 +604,37 @@ const DATA = {
         "core.design-direction-first",
         "core.adversarial-self-review"
       ]
+    },
+    {
+      "id": "core.adaptive-product-design",
+      "type": "prompt",
+      "source_path": "prompts/adaptive-product-design.md",
+      "title": "Adaptive Product Design Repository Execution Protocol",
+      "summary": "The product should behave like [specific operating quality] because users must [observed task], while the system absorbs [underlying complexity] and makes [critical state or decision] unmistakable.",
+      "input_requirements": [],
+      "expected_output_format": "Adaptive product design (risk-routed repository execution)",
+      "rules": "The product should behave like [specific operating quality] because users must [observed task], while the system absorbs [underlying complexity] and makes [critical state or decision] unmistakable.",
+      "domain": "Core Prompt Blocks",
+      "tags": [
+        "adaptive",
+        "product",
+        "design",
+        "risk",
+        "routed",
+        "repository",
+        "execution",
+        "prompts"
+      ],
+      "maturity": "hardened",
+      "created_at": "legacy-unknown",
+      "updated_at": "legacy-unknown",
+      "score": 85,
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.adversarial-self-review"
+      ]
     }
   ],
   "prompts": [
@@ -846,6 +877,35 @@ const DATA = {
         "systems",
         "prompts",
         "alignment"
+      ],
+      "related": [
+        "core.scope-pipeline",
+        "core.decision-matrix",
+        "core.design-direction-first",
+        "core.adversarial-self-review"
+      ]
+    },
+    {
+      "id": "core.adaptive-product-design",
+      "volume": "core",
+      "domain": "Core Prompt Blocks",
+      "num": 8,
+      "title": "Adaptive Product Design Repository Execution Protocol",
+      "summary": "The product should behave like [specific operating quality] because users must [observed task], while the system absorbs [underlying complexity] and makes [critical state or decision] unmistakable.",
+      "replaces": "",
+      "when_to_use": "Adaptive product design (risk-routed repository execution)",
+      "inputs": [],
+      "rules": "The product should behave like [specific operating quality] because users must [observed task], while the system absorbs [underlying complexity] and makes [critical state or decision] unmistakable.",
+      "enforceable": true,
+      "tags": [
+        "adaptive",
+        "product",
+        "design",
+        "risk",
+        "routed",
+        "repository",
+        "execution",
+        "prompts"
       ],
       "related": [
         "core.scope-pipeline",

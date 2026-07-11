@@ -1,160 +1,159 @@
-# Adaptive Product Design — Repository Execution Prompt
+# Adaptive Product Design Repository Execution Protocol
 
-Use this prompt when a repository contains or is intended to contain a user-facing product.
+Use this protocol for repository-grounded product design. Apply it to the product in scope; do not produce another generic framework or imitate a named product's surface aesthetic.
+
+Markdown is the canonical protocol. Code may validate the protocol and its records, but no language, vendor, tracker, or agent runtime is mandatory.
 
 ## Assignment
 
-Inspect the repository and produce a repository-specific product-design direction that is evidence-led, implementation-aware, and resistant to visual templating.
+Inspect the repository and produce an evidence-led, implementation-aware product direction. The result must resist visual templating, fake certainty, portfolio cargo-culting, novelty bias, weak prioritization, and implementation hallucination.
 
-Do not imitate Clay Global, Apple, Linear, Stripe, Notion, Google, or any other named product. Learn from strategic rigor, not surface aesthetics.
+## Risk router and decision rights
 
-Do not generate another generic prompt, framework, or blank template. Apply this protocol directly to the repository in scope.
+Select the least costly mode that covers the downside. Record the mode, rationale, decision owner, approver, and any challenger before design work begins. A portfolio tracker may record the decision, but it is not the source of truth.
 
-## Evidence gate
+Escalate one mode when the work affects safety, health, money movement, authentication, privacy, regulated data, irreversible migration, a foundational navigation model, or a high-cost operational workflow. The decision owner may escalate. Only the named approver may de-escalate, and must record evidence and residual risk.
 
-Before proposing visual design, identify and cite repository evidence for:
+### Express mode
 
-- actual product purpose;
-- current users and likely operators;
+Use for low-risk, local, reversible work whose primary workflow and implementation path are already verified. Produce one direction and a focused validation plan. Do not require concept alternatives, a diversity matrix, or a weighted scorecard. Stop if a high-risk dependency or load-bearing unknown appears.
+
+### Standard mode
+
+Use for material product work with reversible implementation and bounded trust impact. Produce two structurally distinct directions, compare them against pre-registered criteria, and document the selected direction and rejected alternative. Require a feasibility check for any unproven interaction or data dependency.
+
+### Assurance mode
+
+Use for high-impact, difficult-to-reverse, safety-, money-, privacy-, security-, or architecture-sensitive work. Produce at least three structurally distinct directions, a pairwise diversity matrix, weighted scoring, independent adversarial review, and a feasibility spike for the highest-risk implementation claim. The challenger may block only on pre-registered vetoes or newly observed critical evidence.
+
+## Evidence model
+
+Maintain two independent labels. Never collapse evidence basis and artifact trust into one confidence word.
+
+**Claim basis**
+
+- OBSERVED: directly supported by a cited repository file, route, test, issue, commit, user study, or runtime result.
+- INFERRED: reasoned from observed evidence; state the inference path.
+- ASSUMED: unvalidated and budgeted; state impact and validation owner.
+- RECOMMENDED: proposed action derived from the preceding evidence.
+
+**Artifact trust**
+
+- VERIFIED: independently reproduced or accepted by the named authority.
+- ASSERTED: supplied by a credible party but not independently reproduced.
+- DRAFT: incomplete or awaiting validation.
+- UNTRUSTED: contradictory, stale, synthetic, or from an unknown provenance.
+
+Every material claim must include both labels and a citation or trace identifier. Prediction, preference, and design judgment must never be presented as observation.
+
+## Evidence threshold
+
+Before proposing a direction, cite evidence for:
+
+- product purpose and system boundary;
+- primary users, operators, and decision authority;
 - highest-value and highest-risk workflows;
-- existing UI routes and components;
-- technical stack and constraints;
-- security and privacy boundaries;
-- accessibility and device requirements;
-- product claims that conflict with implementation;
-- missing evidence that blocks responsible design.
+- current routes, components, data contracts, and runtime behavior;
+- technical, security, privacy, accessibility, and device constraints;
+- claims that conflict with implementation or tests;
+- missing evidence that could materially reverse the decision.
 
-Classify every important conclusion as:
-
-- OBSERVED;
-- INFERRED;
-- ASSUMED;
-- RECOMMENDED.
-
-Every OBSERVED claim must reference a file, route, test, issue, commit, or runtime result.
+The primary workflow needs at least one OBSERVED source and one independent corroborating source. High-impact trust or safety claims require VERIFIED artifact trust. If these thresholds are not met, stop and produce an evidence-acquisition plan.
 
 ## Stop conditions
 
-Stop before visual concepting when any of these applies:
+Stop the current phase when any condition is true:
 
-- the product boundary is materially unclear;
-- the primary workflow is unverified;
-- sensitive-data exposure is unresolved;
-- the repository contains multiple competing frontends without a canonical trunk;
-- implementation claims conflict with tests or runtime evidence;
-- critical user or operational assumptions exceed the assumption budget.
+- product boundary or primary workflow is materially unclear;
+- sensitive-data, permission, safety, or security exposure is unresolved;
+- multiple competing implementations lack a canonical owner;
+- repository claims conflict with tests or runtime evidence;
+- the assumption budget is exceeded;
+- a pre-registered veto is triggered;
+- a feasibility spike disproves a load-bearing implementation claim;
+- the selected success metric can be improved without improving the user outcome.
 
-When stopped, produce a bounded evidence-acquisition plan rather than invented design certainty.
+Stopping means preserve evidence, name the decision owner, and define the smallest acquisition or repair step. It does not mean inventing certainty or polishing around the blocker.
 
 ## Assumption budget
 
-No selected direction may depend on more than three load-bearing unvalidated assumptions.
+Classify assumptions by impact:
 
-A load-bearing assumption is one that could change the navigation, workflow model, data architecture, trust model, or primary interface composition.
+- Critical: can change safety, authority, trust, data exposure, or the viability of the primary workflow.
+- Load-bearing: can change navigation, workflow, data architecture, or primary composition.
+- Local: can be reversed without changing those structures.
+
+Express permits no unvalidated Critical or Load-bearing assumptions. Standard permits at most two Load-bearing assumptions. Assurance permits at most three, each with an owner, expiry, validation method, and kill condition. Critical assumptions always block selection until validated.
 
 ## Experience thesis
 
-Create one repository-specific thesis using this structure:
+Write one repository-specific thesis:
 
-> The product should behave like [specific operating quality] because users must [real task], while the system absorbs [underlying complexity] and makes [critical state or decision] unmistakable.
+> The product should behave like [specific operating quality] because users must [observed task], while the system absorbs [underlying complexity] and makes [critical state or decision] unmistakable.
 
-Reject adjectives that do not change behavior, such as modern, clean, premium, intuitive, elegant, or futuristic.
+Reject adjectives that do not alter behavior, such as modern, clean, premium, intuitive, elegant, or futuristic.
 
-## Structural divergence
+## Structural diversity
 
-Create three directions that differ in product structure, not just styling.
+Directions must differ in product structure rather than styling. Compare navigation, workflow progression, dominant composition, information density, evidence placement, guidance, expert shortcuts, comparison model, responsive behavior, primary actions, failure recovery, and signature interaction.
 
-For every pair of directions, at least five of these must materially differ:
+For Standard, at least four dimensions must materially differ. For Assurance, at least five dimensions must differ for every pair. Rebranding, palette changes, and rearranged cards do not count as new directions.
 
-- navigation model;
-- workflow progression;
-- dominant composition;
-- information density;
-- evidence placement;
-- user-guidance level;
-- expert shortcut model;
-- comparison model;
-- responsive behavior;
-- primary action structure;
-- failure-state handling;
-- signature interaction.
+## Physics and conventions
 
-Complete a pairwise diversity matrix before scoring.
+Derive behavior from measured constraints, domain mechanics, mathematics, and verified implementation facts before using heuristics. Label any heuristic and state why a first-principles answer is unavailable.
 
-## Innovation rule
+Preserve conventions where familiarity protects speed, accessibility, trust, or safety. Challenge a convention only when evidence shows measurable friction. For each challenge, record the deficiency, alternative, expected benefit, adoption risk, validation method, and kill condition.
 
-Preserve conventions where familiarity protects speed, accessibility, trust, or safety.
+## Evaluation and vetoes
 
-Challenge conventions only when repository or user evidence shows measurable friction.
+Before concept generation, register criteria, weights, vetoes, success metrics, decision owner, approver, challenger, and evaluation window. Vetoes are evaluated before weighted scoring. A vetoed direction cannot win through aggregate points.
 
-For every unconventional decision, specify:
+Do not alter weights after seeing results unless the decision log records the change, reason, approver, and rescoring. Reject proxy metrics that can improve while user outcomes worsen.
 
-1. convention challenged;
-2. observed deficiency;
-3. proposed alternative;
-4. expected benefit;
-5. adoption risk;
-6. validation method;
-7. kill condition.
+## Traceability
 
-## Signature idea
+Give each material requirement, claim, assumption, direction, veto, test, and acceptance criterion a stable ID. Link the chain:
 
-Propose one product-native signature idea. It must improve a real workflow and pass:
+`evidence -> requirement -> direction decision -> implementation item -> validation result -> acceptance decision`
 
-- utility;
-- specificity;
-- memorability;
-- repeatability;
-- technical feasibility;
-- testability.
+Record unresolved links as gaps. Do not claim implementation feasibility without a repository path, responsible owner, dependency check, and test strategy.
 
-Reject decorative novelty.
+## Validation gates
 
-## Pre-registered evaluation
+1. **Diagnosis gate:** evidence threshold met; contradictions and unknowns explicit.
+2. **Diversity gate:** mode-required directions are structurally distinct.
+3. **Selection gate:** vetoes pass before scoring; assumptions remain within budget.
+4. **Feasibility gate:** high-risk claims have a spike or verified implementation path.
+5. **Usability gate:** primary flow succeeds with target users or a justified representative test.
+6. **Accessibility gate:** keyboard, screen-reader, contrast, text scaling, focus, motion, and responsive behavior meet the declared standard.
+7. **Production gate:** failure, stale-data, permission, offline, partial, rollback, telemetry, and support states are specified and tested.
 
-Before generating concepts, declare:
+Failure at a gate returns work to the earliest invalidated decision. It never becomes a waived checklist item without named authority and an expiry.
 
-- scoring criteria;
-- weights;
-- veto conditions;
-- success metrics;
-- decision authority.
+## Mode-specific output
 
-Do not change weights after seeing concepts unless the change is explicitly recorded and justified.
+All modes produce: executive decision, mode rationale, evidence ledger, contradiction/gap list, users and workflow, experience thesis, selected direction, information architecture, primary flow, state/recovery model, accessibility and responsive requirements, implementation plan, validation plan, acceptance criteria, and traceability map.
 
-## Required output
+Express additionally produces a reversal plan and focused test. Standard additionally produces two directions, comparison, rejected alternative, and assumption register. Assurance additionally produces three or more directions, diversity matrix, veto and weighted scorecards, independent adversarial review, feasibility-spike evidence, failure-mode register, and residual-risk acceptance.
 
-1. Executive decision
-2. Repository evidence ledger
-3. Contradictions and blockers
-4. User and workflow model
-5. Experience thesis
-6. Three structurally distinct directions
-7. Pairwise diversity matrix
-8. Weighted scorecard
-9. Selected direction and rejected alternatives
-10. Signature product idea
-11. Information architecture
-12. Primary flows
-13. State and recovery model
-14. Accessibility and responsive requirements
-15. Technical component implications
-16. Validation plan
-17. Failure-mode register
-18. Production acceptance criteria
-19. Final anti-template audit
-
-## Anti-template audit
+## Anti-gaming audit
 
 Answer directly:
 
-- Could this be reused for an unrelated product by changing labels and colors?
-- Were any layout, palette, typography, navigation, or motion choices selected from habit?
-- Did the process create three architectures or one architecture with three skins?
-- Is the signature idea operational or decorative?
-- Has complexity been removed, or merely hidden from the user?
-- Are assumptions visibly separated from evidence?
-- Can engineering preserve the design without inventing missing behavior?
-- Are failure, stale-data, permission, offline, and partial states defined?
+- Could this output fit an unrelated product by changing labels and colors?
+- Are the directions different architectures or one architecture with several skins?
+- Did any uncited preference become a requirement?
+- Can a metric improve while the actual user outcome worsens?
+- Were vetoes weakened after a favored direction appeared?
+- Is the signature interaction operational or decorative?
+- Are uncertainty, failure, stale-data, permission, offline, and partial states explicit?
+- Can engineering reproduce the decision without inventing missing behavior?
+- Did the process remove complexity for the user, or merely conceal it?
+- Is process cost proportional to risk?
 
-If the answer exposes generic output, return to divergence rather than polishing.
+If an answer exposes generic output, false confidence, superficial compliance, or unverifiable implementation, return to the earliest affected gate.
+
+## Success criteria
+
+The work succeeds only when the selected direction improves pre-registered user and operational outcomes, passes all mode-required gates, remains within the assumption budget, has no unresolved veto, and can be independently reproduced from the traceability record. Completion of documents, screens, workshops, or scorecards alone is not success.
