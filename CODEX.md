@@ -27,6 +27,20 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 11. `audits/*.md` for dated quality and architecture assessments.
 12. `package.json`, `package-lock.json`, and `requirements-dev.txt` for eval tool setup.
 13. `.github/workflows/` for remote security scanning and verification.
+14. `ecosystem/registry.json` and `docs/PROMPTOS-ECOSYSTEM.md` for product
+    ownership, integration, migration, and retirement boundaries.
+
+## Ecosystem Boundary
+
+PromptOS owns reusable prompt artifacts, their catalog, evaluator, receipts,
+schemas, and browser console. It does not own dev-setup runtime policy,
+agent-kit bootstrap contracts, self-prompting automation, NewsWatch ingestion,
+or a general operations cockpit.
+
+Do not install OperatorOS or any other consolidation bundle into this repo. Use
+the validated ecosystem registry to route each candidate artifact to its actual
+owner, then import only the normalized prompt/workflow/playbook/runbook content
+that passes PromptOS quality and regression gates.
 
 ## Platform Boundary
 

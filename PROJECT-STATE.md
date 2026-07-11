@@ -130,6 +130,34 @@ The separate Prompt Engine branch remains unmerged and unproven. It is outside
 this catalog-evaluator workflow slice and no Prompt Engine runtime behavior is
 claimed here.
 
+## Ecosystem Consolidation Boundary
+
+PromptOS is the single owner of reusable prompt artifacts, the catalog,
+evaluator, receipts, schemas, and the browser console. The verified ecosystem
+map is [`docs/PROMPTOS-ECOSYSTEM.md`](docs/PROMPTOS-ECOSYSTEM.md), backed by the
+validated [`ecosystem/registry.json`](ecosystem/registry.json).
+
+Current decisions:
+
+- keep `frontier-ai-radar` and `self-prompt-lab` in dev-setup;
+- keep NewsWatch as a separate application and integrate only through a
+  read-only snapshot or deep link;
+- keep agent-kit separate until dev-setup can prove a generated release and
+  parity contract;
+- retire the desktop PromptOS HTML snapshot after main and launch pointers are
+  verified;
+- migrate unique adapter behavior from `C:\Scripts\console-kit\newswatcher`,
+  then retire that prototype;
+- treat `promptforge` and `promptvault-ai` as archive candidates after their
+  explicit no-consumer gates pass;
+- do not delete either duplicate dev-setup checkout while it contains divergent
+  branches or uncommitted work.
+
+The next console extension is a bounded Sources view, not a merged console hub.
+Start with the frontier radar's static export. NewsWatch integration remains
+blocked on cleanup of a credential-shaped value in tracked NewsWatch project
+documentation and reconciliation of its dirty checkout.
+
 ## Outcome Governance Standard
 
 `OGS.md` is now the normative governing standard for decision and evaluator
@@ -236,5 +264,6 @@ carries the older unrelated 159-item embedded catalog.
 2. Backfill artifact timestamps from Git history.
 3. Add first workflow/playbook/runbook source artifacts and wire them into the
    generator.
-4. Add credential-gated model-judge examples only outside default CI; keep
+4. Implement the first read-only Sources adapter from the frontier radar export.
+5. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.

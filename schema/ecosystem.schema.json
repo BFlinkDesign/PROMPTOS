@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/BFlinkDesign/PROMPTOS/schema/ecosystem.schema.json",
+  "title": "PromptOS Ecosystem Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "canonical_product_id", "assets"],
+  "properties": {
+    "version": {
+      "const": 1
+    },
+    "canonical_product_id": {
+      "const": "promptos"
+    },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/asset"
+      }
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "status",
+        "owner",
+        "canonical_source",
+        "observed_paths",
+        "integration",
+        "disposition",
+        "rationale",
+        "destructive_gate"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*$"
+        },
+        "kind": {
+          "enum": ["repository", "subproject", "prototype", "snapshot", "checkout"]
+        },
+        "status": {
+          "enum": [
+            "canonical",
+            "source-system",
+            "candidate-source",
+            "adapter-prototype",
+            "stale-duplicate",
+            "retirement-candidate",
+            "duplicate-checkout"
+          ]
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1
+        },
+        "canonical_source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observed_paths": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "integration": {
+          "enum": ["native", "read-only-adapter", "link-only", "generated-release", "none"]
+        },
+        "disposition": {
+          "enum": ["keep", "migrate-then-retire", "retire-after-gate", "retain-until-owner-audit"]
+        },
+        "rationale": {
+          "type": "string",
+          "minLength": 1
+        },
+        "destructive_gate": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

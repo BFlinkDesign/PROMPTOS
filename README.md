@@ -1,7 +1,7 @@
 # PROMPTOS
 
-Portable, tool-agnostic prompt library for AI coding agents. One canonical
-home for reusable prompt blocks — not copied into every repo.
+Portable, tool-agnostic prompt library and evaluator for AI coding agents. One
+canonical home for reusable prompt artifacts and one canonical browser console.
 
 Born from the EagleScope build day: scope pipeline, decision matrix,
 design-first UI, adversarial review, and retrospective patterns extracted
@@ -41,6 +41,20 @@ C:\Eagle\agent-kit\install.ps1 -Target "C:\path\to\repo"
 C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"
 ```
 
+## Ecosystem boundary
+
+PromptOS owns prompt artifacts, the catalog, the evaluator, receipts, schemas,
+and regression gates. It does not own the developer-agent control plane,
+self-prompting automation, or news ingestion. Those systems remain separate and
+may appear through bounded read-only adapters or links.
+
+- [PromptOS ecosystem consolidation](docs/PROMPTOS-ECOSYSTEM.md)
+- [Machine-readable ecosystem registry](ecosystem/registry.json)
+
+The registry names one canonical product and records the migration or retirement
+gate for known duplicate folders and repositories. It is validated by
+`npm run schema:validate` and the default `npm run verify` gate.
+
 ## The prompts
 
 The catalog contains 15 tracked prompts. `PROMPTS.md` is the canonical index;
@@ -63,7 +77,7 @@ npm run verify
 ```
 
 The verify gate runs prompt quality first, checks the generated console catalog,
-validates the typed `items[]` and task-report schemas, validates promoted
+validates the typed `items[]`, task-report, and ecosystem schemas, validates promoted
 feedback regressions, runs local promptfoo smokes through the no-API `echo`
 provider, and launches Playwright Chromium against the static console and
 Evaluator tab.
