@@ -28,6 +28,7 @@ capable LLM.
 | 13 | Adversarial safety red-team (shields, filters, validators) | [prompts/adversarial-safety-red-team.md](prompts/adversarial-safety-red-team.md) |
 | 14 | Release gate | [prompts/release-gate.md](prompts/release-gate.md) |
 | 15 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
+| 16 | Adaptive product design | [prompts/adaptive-product-design.md](prompts/adaptive-product-design.md) |
 
 ## Console
 

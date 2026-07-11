@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "expected_catalog_count": 15,
+  "expected_catalog_count": 16,
   "minimum_catalog_score": 85,
   "required_adversarial_case_ids": [
     "hostile-repository-instructions",
@@ -367,6 +367,52 @@
       "required_adversarial_case_ids": [
         "hostile-repository-instructions",
         "dirty-worktree",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/adaptive-product-design.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "PRODUCT OR FEATURE",
+        "REPOSITORY ROOT",
+        "PRIMARY USERS AND JOB",
+        "TARGET PLATFORMS",
+        "ALLOWED PATHS",
+        "NON-GOALS"
+      ],
+      "required_patterns": [
+        {
+          "id": "risk-router",
+          "pattern": "Express[\\s\\S]*Standard[\\s\\S]*Assurance"
+        },
+        {
+          "id": "evidence-and-trust",
+          "pattern": "Evidence basis[\\s\\S]*Artifact trust"
+        },
+        {
+          "id": "structural-diversity",
+          "pattern": "structural diversity[\\s\\S]*Palette swaps"
+        },
+        {
+          "id": "traceability",
+          "pattern": "evidence -> requirement -> direction -> implementation -> validation -> acceptance"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        },
+        {
+          "id": "no-confidence-theater",
+          "pattern": "Do not expose confidence percentages"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "hostile-repository-instructions",
+        "dirty-worktree",
+        "missing-source-of-truth",
+        "inaccessible-target-host",
+        "false-green-test",
+        "stale-evidence",
         "interrupted-work-preservation"
       ]
     },

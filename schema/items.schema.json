@@ -4,7 +4,7 @@
   "title": "PromptOS Catalog Items",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version", "count", "items"],
+  "required": ["version", "count", "catalog_meta", "ecosystem", "items"],
   "properties": {
     "version": {
       "type": "integer",
@@ -13,6 +13,13 @@
     "count": {
       "type": "integer",
       "minimum": 0
+    },
+    "catalog_meta": {
+      "$ref": "#/$defs/catalogMeta"
+    },
+    "ecosystem": {
+      "type": "object",
+      "description": "Validated ecosystem registry embedded for local provenance display."
     },
     "items": {
       "type": "array",
@@ -26,6 +33,29 @@
     }
   },
   "$defs": {
+    "catalogMeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canonical_source",
+        "reviewed_artifact_count",
+        "source_registry_count",
+        "action_required_count",
+        "source_fingerprint",
+        "verification_gate"
+      ],
+      "properties": {
+        "canonical_source": { "type": "string", "minLength": 1 },
+        "reviewed_artifact_count": { "type": "integer", "minimum": 0 },
+        "source_registry_count": { "type": "integer", "minimum": 0 },
+        "action_required_count": { "type": "integer", "minimum": 0 },
+        "source_fingerprint": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "verification_gate": { "type": "string", "minLength": 1 }
+      }
+    },
     "timestamp": {
       "oneOf": [
         {

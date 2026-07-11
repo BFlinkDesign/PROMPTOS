@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -79,6 +80,7 @@ export function resolvePromptSourcePath(rootDir, sourcePath) {
 
 export function buildConsoleData(rootDir = process.cwd()) {
   const entries = loadPromptEntries(rootDir);
+  const ecosystem = loadEcosystemRegistry(rootDir);
   const ids = entries.map((entry) => promptId(entry.markdownPath));
   const items = entries.map((entry, index) => ({
     id: ids[index],
@@ -114,7 +116,48 @@ export function buildConsoleData(rootDir = process.cwd()) {
     source_path: item.source_path,
     source_text: entries[index].body,
   }));
-  return { version: 3, count: items.length, items, prompts };
+  const actionRequiredStatuses = new Set([
+    'candidate-source',
+    'adapter-prototype',
+    'retirement-candidate',
+    'duplicate-checkout',
+  ]);
+  const sourceMaterial = [
+    normalizeNewlines(readText(path.join(rootDir, 'PROMPTS.md'))),
+    ...entries.map((entry) => `${entry.markdownPath}\n${entry.body}`),
+    readOptionalText(path.join(rootDir, 'tools', 'scoring-core.mjs')),
+    JSON.stringify(ecosystem),
+  ].join('\n---promptos-source---\n');
+  const sourceFingerprint = crypto.createHash('sha256').update(sourceMaterial, 'utf8').digest('hex');
+  const assets = Array.isArray(ecosystem.assets) ? ecosystem.assets : [];
+  const catalogMeta = {
+    canonical_source: 'PROMPTS.md + prompts/*.md',
+    reviewed_artifact_count: items.length,
+    source_registry_count: assets.length,
+    action_required_count: assets.filter((asset) => actionRequiredStatuses.has(asset.status)).length,
+    source_fingerprint: `sha256:${sourceFingerprint}`,
+    verification_gate: 'npm run verify',
+  };
+  return {
+    version: 3,
+    count: items.length,
+    catalog_meta: catalogMeta,
+    ecosystem,
+    items,
+    prompts,
+  };
+}
+
+function loadEcosystemRegistry(rootDir) {
+  const registryPath = path.join(rootDir, 'ecosystem', 'registry.json');
+  if (!fs.existsSync(registryPath)) {
+    return { version: 1, canonical_product_id: 'promptos', assets: [] };
+  }
+  return JSON.parse(readText(registryPath));
+}
+
+function readOptionalText(filePath) {
+  return fs.existsSync(filePath) ? normalizeNewlines(readText(filePath)) : '';
 }
 
 export function extractConsoleData(html) {

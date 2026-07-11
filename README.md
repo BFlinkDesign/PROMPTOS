@@ -57,14 +57,14 @@ gate for known duplicate folders and repositories. It is validated by
 
 ## The prompts
 
-The catalog contains 15 tracked prompts. `PROMPTS.md` is the canonical index;
-`npm run prompt:quality` enforces the 15-prompt baseline, a minimum deterministic
+The catalog contains 16 tracked prompts. `PROMPTS.md` is the canonical index;
+`npm run prompt:quality` enforces the 16-prompt baseline, a minimum deterministic
 score of 85/100 for every prompt, and the required adversarial cases.
 
 | Workflow stage | Prompt coverage |
 | --- | --- |
 | Align and take over | Session alignment, repository takeover |
-| Plan and decide | Scope pipeline, decision matrix, task plan, design direction first |
+| Plan and decide | Scope pipeline, decision matrix, task plan, design direction first, adaptive product design |
 | Implement and debug | Full-stack delivery, task implement, UI fidelity, reproduce-trace-patch |
 | Review and release | Independent diff review, adversarial self-review, adversarial safety red-team, release gate |
 | Learn | Retrospective |
@@ -121,6 +121,13 @@ file-input fallback, drag/drop, or paste. Every prompt receipt records the exact
 SHA-256 of the text actually evaluated and the Outcome Governance fields:
 Action, Evidence, Authority, Blockers, Next Checkpoint, and Fallback. Receipts
 use deterministic scores and verdicts, not confidence percentages.
+
+The header also displays a deterministic SHA-256 fingerprint of the exact
+embedded catalog, prompt sources, scoring runtime, and ecosystem registry. The
+Sources tab distinguishes canonical, source-system, retired, and action-required
+artifacts so the catalog cannot imply that pending intake has already been
+reviewed or merged. Evaluation reruns after edits while receipt writes remain
+explicit and permission-gated.
 
 Writes require an explicit **Save receipt** click. With a connected directory,
 the console writes only under `snapshots/`; it never writes `feedback/` or
