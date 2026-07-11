@@ -19,16 +19,16 @@
     {
       "id": "promptos-desktop-snapshot",
       "kind": "snapshot",
-      "status": "stale-duplicate",
+      "status": "retired",
       "owner": "local workstation",
       "canonical_source": "BFlinkDesign/PROMPTOS history: console/promptos-console.html",
       "observed_paths": [
         "C:\\Users\\Brady.EAGLE\\Desktop\\promptos-console\\promptos-console.html"
       ],
       "integration": "none",
-      "disposition": "retire-after-gate",
-      "rationale": "The file is byte-for-byte a historical PromptOS console Git object and contains no unique source work.",
-      "destructive_gate": "Delete only after the current canonical console is merged to main, opens successfully from the canonical checkout, and any desktop shortcut points to that checkout."
+      "disposition": "retired",
+      "rationale": "The file was byte-for-byte a historical PromptOS console Git object and contained no unique source work. It was removed on 2026-07-11 after the canonical main console passed verification.",
+      "destructive_gate": "Satisfied on 2026-07-11: canonical main verified, no PromptOS shortcut target found, and the stale Desktop folder was removed."
     },
     {
       "id": "operatoros-agentic-playbook-v1",

@@ -60,7 +60,7 @@ turning one repository into every system.
 | Asset | Verified role | Decision |
 | --- | --- | --- |
 | `BFlinkDesign/PROMPTOS` | Catalog, evaluator, receipts, prompt quality gates | **Canonical product.** |
-| Desktop `promptos-console.html` | Historical 159-item PromptOS console snapshot | **Retire after launch-pointer gate.** It is byte-for-byte a PromptOS Git object and has no unique source. |
+| Desktop `promptos-console.html` | Historical 159-item PromptOS console snapshot | **Retired 2026-07-11.** It was byte-for-byte a PromptOS Git object, the canonical main console passed verification, no shortcut targeted it, and the stale folder was removed. |
 | OperatorOS Agentic Playbook v1 ZIP | Uncommitted doctrine, prompts, schemas, installers, and migration proposal | **DRAFT source package. Do not install.** Salvage artifacts only after owner-specific review and stronger gates. |
 | dev-setup `frontier-ai-radar/` | Tool intake, evidence, quarantine, adoption | **Keep in dev-setup.** Add a read-only export adapter only when the Sources view is implemented. |
 | dev-setup `self-prompt-lab/` | Bounded self-prompting automation reference | **Keep in dev-setup.** Link or display status; do not merge runtime code. |
@@ -156,13 +156,11 @@ the exact PRs and list the content that still needs a destination.
 ## Cleanup Gates
 
 1. Merge the canonical catalog/evaluator implementation and verify main.
-2. Update any desktop shortcut to the canonical checkout.
-3. Delete the stale desktop HTML snapshot only after opening the canonical file.
-4. Audit `console-kit/newswatcher` against NewsWatch; migrate only unique,
+2. Audit `console-kit/newswatcher` against NewsWatch; migrate only unique,
    non-secret adapter behavior.
-5. Archive `promptforge` and `promptvault-ai` only after checking releases,
+3. Archive `promptforge` and `promptvault-ai` only after checking releases,
    packages, deployments, open product PRs, and external consumers.
-6. Reconcile duplicate dev-setup checkouts in a separate task. They currently
+4. Reconcile duplicate dev-setup checkouts in a separate task. They currently
    contain divergent branches or uncommitted work and are not safe to remove.
 
 ## Security Blocker Outside PromptOS

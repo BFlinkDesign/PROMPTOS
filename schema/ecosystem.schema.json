@@ -52,7 +52,8 @@
             "adapter-prototype",
             "stale-duplicate",
             "retirement-candidate",
-            "duplicate-checkout"
+            "duplicate-checkout",
+            "retired"
           ]
         },
         "owner": {
@@ -75,7 +76,7 @@
           "enum": ["native", "read-only-adapter", "link-only", "generated-release", "none"]
         },
         "disposition": {
-          "enum": ["keep", "migrate-then-retire", "retire-after-gate", "retain-until-owner-audit"]
+          "enum": ["keep", "migrate-then-retire", "retire-after-gate", "retain-until-owner-audit", "retired"]
         },
         "rationale": {
           "type": "string",
