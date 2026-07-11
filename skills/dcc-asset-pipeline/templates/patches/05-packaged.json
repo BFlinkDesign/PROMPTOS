@@ -1,0 +1,11 @@
+{
+  "outputs": {
+    "export_path": "exports/stone-house.glb",
+    "lods": [
+      "exports/stone-house-lod1.glb",
+      "exports/stone-house-lod2.glb"
+    ],
+    "collision_mesh": "exports/stone-house-collider.glb",
+    "lightmap_uv": true
+  }
+}
