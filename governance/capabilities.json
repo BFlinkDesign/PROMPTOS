@@ -219,11 +219,11 @@
       "owner": "PromptOS",
       "status": "draft",
       "trust": "DRAFT",
-      "source": "docs/TARGET-ARCHITECTURE.md",
-      "evidence": "A shared React/TypeScript workbench is accepted; Electron versus Tauri 2 remains undecided and no target-host build exists.",
+      "source": "docs/adr/0001-electron-desktop-runtime.md",
+      "evidence": "ADR-0001 selects Electron for desktop v1 after inventorying current main and the unmerged Node Prompt Engine; no target-host build exists.",
       "gate": "No target-host gate has passed.",
       "user_impact": "PromptOS is not currently an installed desktop product.",
-      "next_action": "Inventory the real Node and process runtime, approve a desktop-shell ADR, then build bounded Electron and/or Tauri evidence spikes without coupling Core packages to the shell.",
+      "next_action": "Repair and accept the Node Prompt Engine, extract framework-neutral TypeScript Core and React workbench packages, then build the bounded Electron proof without coupling Core packages to the shell.",
       "replacement": null
     },
     {

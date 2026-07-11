@@ -68,10 +68,10 @@ but it remains discoverable and dispositioned.
 
 - **Shared workbench:** one UI and one core contract for catalog, evaluation,
   comparison, evidence, and receipts.
-- **Windows and macOS desktop:** a narrow shell around the shared workbench is
-  required. Electron and Tauri 2 remain candidates until a repository-grounded
-  ADR inventories the Node runtime and proves packaging, signing, updating,
-  security, and target-host behavior. Core packages cannot depend on either shell.
+- **Windows and macOS desktop:** ADR-0001 selects a narrow Electron shell around
+  the shared workbench and local Node runner. Core packages cannot depend on
+  Electron. Desktop remains DRAFT until packaging, signing, updating, security,
+  and target-host behavior pass on Windows and macOS.
 - **Browser:** offline-capable fallback for reading, paste/drop evaluation, and
   explicit file operations. Browser permission grants are not represented as
   permanent filesystem authority.
