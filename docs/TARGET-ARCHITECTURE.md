@@ -1,6 +1,6 @@
 # PromptOS Target Architecture
 
-Status: accepted direction; implementation gates remain capability-specific.
+Status: core and workbench direction accepted; desktop shell decision pending.
 
 ```text
 Artifact sources and imported failures
@@ -19,7 +19,7 @@ Artifact sources and imported failures
         |          +--------+--------+
         |          |                 |
         v          v                 v
- dev-setup       Browser          Tauri 2 shell
+ dev-setup       Browser        Desktop adapter
  control plane   fallback       Windows + macOS
 ```
 
@@ -29,8 +29,8 @@ Artifact sources and imported failures
 
 Pure, testable modules own artifact parsing, schemas, structural lint, dataset
 contracts, grader contracts, experiment comparison, release policy, receipts, and
-lineage. Core code must not depend on the browser DOM, Tauri, GitHub Actions, or a
-specific model provider.
+lineage. Core code must not depend on the browser DOM, Electron, Tauri, GitHub
+Actions, or a specific model provider.
 
 ### Workbench
 
@@ -40,8 +40,12 @@ or release decisions in UI-only code.
 
 ### Desktop Shell
 
-Tauri 2 is the target because it can reuse the workbench while constraining IPC
-with window- and platform-scoped capabilities. The first proof must include:
+The production shell is not selected yet. Electron and Tauri 2 remain candidate
+adapters around the same React/TypeScript workbench and framework-neutral Core.
+The selection ADR must inventory the real Node runtime, filesystem, Git, process,
+provider, packaging, signing, update, and target-host requirements before it can
+approve either shell. No working TypeScript behavior may be duplicated in Rust
+merely to satisfy a shell choice. The first accepted shell proof must include:
 
 - a read-only folder connection and explicit user-selected receipt write;
 - no unrestricted shell or home-directory access;
@@ -50,8 +54,9 @@ with window- and platform-scoped capabilities. The first proof must include:
   Gatekeeper, install, and update proof;
 - crash recovery, offline behavior, keyboard access, accessibility, and rollback.
 
-The browser remains a supported fallback. Electron and Nativefier are not part of
-the production contract.
+The browser remains a supported fallback. Nativefier is not part of the
+production contract. Electron or Tauri becomes authoritative only after the ADR
+and measured spike gates pass.
 
 ### Headless Runner
 
@@ -75,7 +80,8 @@ adapters or generated releases.
 3. Add versioned behavioral datasets and deterministic graders.
 4. Add provider matrices, immutable baselines, pairwise comparison, and budgets.
 5. Add production failure capture, human review, and failure promotion.
-6. Prove the Tauri shell on Windows, then on macOS.
+6. Complete the desktop runtime ADR, then prove the selected shell on Windows and
+   macOS without coupling Core packages to that shell.
 7. Connect the verified headless contract to the `dev-setup` repair/release loop.
 
 No later stage may be represented as shipped because an earlier stage exists.

@@ -158,9 +158,9 @@
     {
       "id": "desktop-lifecycle",
       "capability": "Windows and macOS package, signing, update, and clean-host lifecycle",
-      "reference": "https://v2.tauri.app/distribute/",
+      "reference": "https://www.electronjs.org/docs/latest/tutorial/distribution-overview",
       "status": "missing",
-      "evidence": "No Tauri app or target-host release proof exists.",
+      "evidence": "No desktop shell or target-host release proof exists; Electron versus Tauri 2 remains pending a repository-grounded ADR.",
       "gate": "No Windows or macOS release gate has passed."
     }
   ]

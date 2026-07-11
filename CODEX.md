@@ -191,9 +191,10 @@ PromptOS Console
 - Raw feedback lives in `feedback/*.json`; promoted regressions live in
   `tests/failures/*.json`. Run `npm run feedback:promote` after adding raw
   feedback, then `npm run verify`.
-- The target desktop architecture is a narrow Tauri 2 shell around the shared
-  workbench and Core contracts. Do not add Electron or Nativefier. Do not claim
-  desktop support until Windows and macOS target-host release gates pass.
+- The target desktop architecture is a narrow adapter around the shared
+  React/TypeScript workbench and Core contracts. Electron and Tauri 2 remain
+  candidates pending a repository-grounded runtime ADR. Do not add Nativefier or
+  claim desktop support until Windows and macOS target-host release gates pass.
 - Windows and macOS desktop requirements in the prompt suite are delivery
   contracts, not native target-host proof for this browser console. CI remains
   Ubuntu plus Chromium until PromptOS ships a real native desktop artifact.
@@ -284,8 +285,9 @@ Keep each slice independently revertible and commit by concern.
 - Keep credentialed/model-judge evals outside default offline CI. Re-audit when
   a capability claim, benchmark, source, dependency, or runtime path changes.
 - Architecture decision: share one React/TypeScript workbench across the browser
-  fallback and a narrow Tauri 2 Windows/macOS shell. Do not add Nativefier or
-  Electron without a measured capability blocker.
+  fallback and a narrow Windows/macOS shell. Select Electron or Tauri 2 only
+  after inventorying the real Node/process requirements and running measured
+  security, packaging, update, and target-host spikes. Do not add Nativefier.
 - Outcome decision: evaluator output should follow the Outcome Governance
   Standard contract: action, evidence, authority, blockers, next checkpoint,
   fallback. Do not expose confidence theater as user-facing value.

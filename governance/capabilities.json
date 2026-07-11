@@ -220,10 +220,10 @@
       "status": "draft",
       "trust": "DRAFT",
       "source": "docs/TARGET-ARCHITECTURE.md",
-      "evidence": "Tauri 2 is an accepted direction; no application scaffold or target-host build exists.",
+      "evidence": "A shared React/TypeScript workbench is accepted; Electron versus Tauri 2 remains undecided and no target-host build exists.",
       "gate": "No target-host gate has passed.",
       "user_impact": "PromptOS is not currently an installed desktop product.",
-      "next_action": "Build a minimal read-only Tauri spike only after Core contracts and capability display land.",
+      "next_action": "Inventory the real Node and process runtime, approve a desktop-shell ADR, then build bounded Electron and/or Tauri evidence spikes without coupling Core packages to the shell.",
       "replacement": null
     },
     {
