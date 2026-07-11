@@ -1,0 +1,17 @@
+{
+  "baselineId": "anthropic-prompt-improver",
+  "minimumReports": 9,
+  "minimumProviders": 2,
+  "minimumModels": 3,
+  "minimumSuites": 3,
+  "minimumSeeds": 3,
+  "minimumPairedCases": 300,
+  "minimumRunWinRate": 0.75,
+  "minimumAbsoluteGain": 0,
+  "minimumRobustnessGain": 0,
+  "confidenceLevel": 0.95,
+  "bootstrapIterations": 10000,
+  "maxCostRatio": 1.25,
+  "maxLatencyRatio": 1.25,
+  "requireAnthropicProvenance": true
+}

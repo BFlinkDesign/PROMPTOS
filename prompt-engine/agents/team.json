@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "id": "promptos.prompt-engine-team",
+  "orchestrator": "deterministic-state-machine",
+  "releaseGovernor": "code-only",
+  "roles": [
+    {
+      "id": "architect",
+      "purpose": "Convert the task, constraints, and training examples into a structured specification.",
+      "canRead": ["objective", "constraints", "training"],
+      "cannotRead": ["holdout"]
+    },
+    {
+      "id": "generator",
+      "purpose": "Produce a diverse initial candidate population.",
+      "canRead": ["spec", "baseline", "training"],
+      "cannotRead": ["holdout"]
+    },
+    {
+      "id": "target",
+      "purpose": "Execute a frozen prompt on one benchmark case.",
+      "canRead": ["candidate", "one-case"],
+      "cannotRead": ["other-candidate-scores"]
+    },
+    {
+      "id": "critic",
+      "purpose": "Diagnose measured validation failures and structural gaps.",
+      "canRead": ["spec", "candidate", "validation-failures"],
+      "cannotRead": ["holdout"]
+    },
+    {
+      "id": "reviser",
+      "purpose": "Apply the smallest evidence-backed repair to one candidate.",
+      "canRead": ["spec", "candidate", "critique"],
+      "cannotRead": ["holdout"]
+    },
+    {
+      "id": "judge",
+      "purpose": "Score subjective outputs against a blinded rubric.",
+      "canRead": ["case", "response", "rubric", "expected"],
+      "cannotRead": ["author", "search-history", "candidate-rank"]
+    }
+  ],
+  "gates": [
+    "request-contract",
+    "model-call-budget",
+    "holdout-isolation",
+    "critical-case-regression",
+    "pareto-selection",
+    "paired-bootstrap",
+    "independent-campaign"
+  ]
+}

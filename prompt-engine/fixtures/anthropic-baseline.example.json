@@ -1,0 +1,13 @@
+{
+  "id": "anthropic-prompt-improver",
+  "prompt": "PASTE THE EXACT ANTHROPIC PROMPT IMPROVER OUTPUT HERE",
+  "provenance": {
+    "vendor": "Anthropic",
+    "tool": "prompt-improver",
+    "capturedAt": "2026-07-11T00:00:00Z",
+    "sourceHash": "REPLACE_WITH_SHA256_OF_THE_VERBATIM_OUTPUT",
+    "inputBundleHash": "REPLACE_WITH_SHA256_OF_ORIGINAL_PROMPT_FEEDBACK_EXAMPLES_AND_VARIABLES",
+    "evidenceUri": "REPLACE_WITH_IMMUTABLE_ARCHIVE_OR_SCREENSHOT_REFERENCE",
+    "attestation": "Operator-captured baseline; verify before campaign use."
+  }
+}

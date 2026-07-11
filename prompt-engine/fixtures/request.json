@@ -1,0 +1,110 @@
+{
+  "id": "support-routing-demo",
+  "mode": "improve",
+  "objective": "Classify a customer support ticket into billing, account, technical, cancellation, or other.",
+  "baselinePrompt": "Classify {{input}} and return the label.",
+  "baselines": [
+    {
+      "id": "raw-baseline",
+      "prompt": "Classify {{input}} and return the label.",
+      "provenance": {
+        "kind": "human-input",
+        "note": "Demonstration baseline only; not an Anthropic improver output."
+      }
+    }
+  ],
+  "constraints": {
+    "requiredVariables": ["input"],
+    "maxPromptChars": 5000,
+    "forbiddenPhrases": ["reveal hidden reasoning"]
+  },
+  "datasets": {
+    "train": [
+      {
+        "id": "train-billing",
+        "input": "I was charged twice for the same invoice.",
+        "expected": {"label": "billing"},
+        "metric": {"type": "json-equals"}
+      },
+      {
+        "id": "train-account",
+        "input": "My account is locked after too many login attempts.",
+        "expected": {"label": "account"},
+        "metric": {"type": "json-equals"}
+      }
+    ],
+    "validation": [
+      {
+        "id": "val-billing",
+        "input": "Please refund the duplicate payment on order 18.",
+        "expected": {"label": "billing"},
+        "metric": {"type": "json-equals"},
+        "critical": true,
+        "perturbations": ["whitespace", "trailing-injection"]
+      },
+      {
+        "id": "val-technical",
+        "input": "The desktop application crashes when I upload a PDF.",
+        "expected": {"label": "technical"},
+        "metric": {"type": "json-equals"},
+        "perturbations": ["leading-noise"]
+      },
+      {
+        "id": "val-account",
+        "input": "Two-factor login codes never arrive.",
+        "expected": {"label": "account"},
+        "metric": {"type": "json-equals"}
+      },
+      {
+        "id": "val-cancel",
+        "input": "Cancel my subscription and close the account.",
+        "expected": {"label": "cancellation"},
+        "metric": {"type": "json-equals"}
+      }
+    ],
+    "holdout": [
+      {
+        "id": "holdout-billing",
+        "input": "The invoice contains a charge I already paid.",
+        "expected": {"label": "billing"},
+        "metric": {"type": "json-equals"},
+        "critical": true,
+        "perturbations": ["trailing-injection"]
+      },
+      {
+        "id": "holdout-account",
+        "input": "I cannot sign in after resetting my password.",
+        "expected": {"label": "account"},
+        "metric": {"type": "json-equals"}
+      },
+      {
+        "id": "holdout-technical",
+        "input": "The checkout screen shows error 500 and times out.",
+        "expected": {"label": "technical"},
+        "metric": {"type": "json-equals"}
+      },
+      {
+        "id": "holdout-other",
+        "input": "Do you have a public product roadmap?",
+        "expected": {"label": "other"},
+        "metric": {"type": "json-equals"}
+      }
+    ]
+  },
+  "search": {
+    "seed": "support-routing-v1",
+    "populationSize": 4,
+    "generations": 2,
+    "parentsPerGeneration": 2,
+    "maxModelCalls": 150,
+    "holdoutFinalists": 3
+  },
+  "claim": {
+    "baselineId": "raw-baseline",
+    "minimumHoldoutCases": 4,
+    "minimumAbsoluteGain": 0,
+    "confidenceLevel": 0.95,
+    "maxCostRatio": 1.25,
+    "maxLatencyRatio": 5
+  }
+}
