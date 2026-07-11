@@ -10,9 +10,12 @@
     "feedback:verify": "node tools/verify-feedback.mjs",
     "schema:validate": "node tools/validate-items.mjs",
     "test:console": "playwright test",
+    "prompt-engine:test": "node --test prompt-engine/test/*.test.mjs",
+    "prompt-engine:demo": "node prompt-engine/src/cli.mjs optimize prompt-engine/fixtures/request.json --provider heuristic",
+    "prompt-engine:serve": "node prompt-engine/src/cli.mjs serve --provider heuristic --port 8787",
     "tool:promptfoo": "promptfoo --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run eval:promptfoo && npm run test:console"
+    "verify": "npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run eval:promptfoo && npm run test:console && npm run prompt-engine:test"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
