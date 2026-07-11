@@ -60,14 +60,35 @@ npm run verify
 
 The verify gate checks the generated console catalog, validates the typed
 `items[]` schema, validates promoted feedback regressions, runs local promptfoo
-smokes through the no-API `echo` provider, and launches Playwright Chromium
-against the static console and Evaluator tab.
+smokes through the no-API `echo` provider, launches Playwright Chromium
+against the static console and Evaluator tab, and runs the Prompt Engine's
+deterministic agent-team tests.
 
 Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
 
 ```powershell
 npm run catalog:build
 ```
+
+## Prompt Engine
+
+[`prompt-engine/`](prompt-engine/) is the measured prompt-generation and
+prompt-improvement subsystem. A skill, CLI, HTTP API, and browser UI invoke a
+code-owned deterministic orchestrator that coordinates bounded specialist
+agents, conceals holdouts, evaluates downstream behavior, performs Pareto
+selection, and blocks unsupported superiority claims.
+
+```powershell
+npm run prompt-engine:test
+npm run prompt-engine:demo
+npm run prompt-engine:serve
+```
+
+The implementation can establish a one-run `BASELINE-WIN`. It cannot claim
+"better than Anthropic" or independent superiority unless the multi-provider,
+multi-model, multi-suite campaign gate in
+[`prompt-engine/docs/BENCHMARK-CONTRACT.md`](prompt-engine/docs/BENCHMARK-CONTRACT.md)
+passes with frozen baseline provenance and concealed paired holdouts.
 
 ## Audits
 
