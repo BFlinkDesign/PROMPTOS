@@ -1,0 +1,15 @@
+{
+  "metrics": {
+    "reimport_triangles": 39000
+  },
+  "outputs": {
+    "engine_asset": "unity/StoneHouse.prefab"
+  },
+  "evidence": {
+    "reimport": {
+      "close": "screenshots/stone-house-reimport-close.png",
+      "medium": "screenshots/stone-house-reimport-medium.png",
+      "far": "screenshots/stone-house-reimport-far.png"
+    }
+  }
+}
