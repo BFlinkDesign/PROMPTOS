@@ -9,6 +9,8 @@ import {
   scorePrompt,
 } from './scoring-core.mjs';
 
+const MAX_PROMPT_SOURCE_BYTES = 1024 * 1024;
+
 export function readText(filePath) {
   return fs.readFileSync(filePath, 'utf8');
 }
@@ -33,12 +35,17 @@ export function parsePromptCatalog(rootDir = process.cwd()) {
 
 export function loadPromptEntries(rootDir = process.cwd()) {
   return parsePromptCatalog(rootDir).map((row) => {
-    const absolutePath = path.join(rootDir, row.filePath);
+    const { absolutePath, markdownPath } = resolvePromptSourcePath(rootDir, row.markdownPath);
     const exists = fs.existsSync(absolutePath);
-    const body = exists ? readText(absolutePath) : '';
+    if (exists && fs.statSync(absolutePath).size > MAX_PROMPT_SOURCE_BYTES) {
+      throw new Error(`prompt source exceeds ${MAX_PROMPT_SOURCE_BYTES} bytes: ${markdownPath}`);
+    }
+    const body = exists ? normalizeNewlines(readText(absolutePath)) : '';
     const title = extractTitle(body) || row.catalogTitle;
     return {
       ...row,
+      filePath: markdownPath.replaceAll('/', path.sep),
+      markdownPath,
       absolutePath,
       exists,
       body,
@@ -49,6 +56,25 @@ export function loadPromptEntries(rootDir = process.cwd()) {
       score: scorePrompt(body),
     };
   });
+}
+
+export function resolvePromptSourcePath(rootDir, sourcePath) {
+  const markdownPath = String(sourcePath || '').replaceAll('\\', '/');
+  const normalized = path.posix.normalize(markdownPath);
+  if (
+    markdownPath !== normalized
+    || !/^prompts\/[a-z0-9._-]+\.md$/i.test(markdownPath)
+    || path.posix.isAbsolute(markdownPath)
+  ) {
+    throw new Error(`catalog prompt path must match prompts/*.md: ${JSON.stringify(sourcePath)}`);
+  }
+
+  const promptRoot = path.resolve(rootDir, 'prompts');
+  const absolutePath = path.resolve(rootDir, ...markdownPath.split('/'));
+  if (!absolutePath.startsWith(`${promptRoot}${path.sep}`)) {
+    throw new Error(`catalog prompt path escapes prompts/: ${JSON.stringify(sourcePath)}`);
+  }
+  return { absolutePath, markdownPath };
 }
 
 export function buildConsoleData(rootDir = process.cwd()) {
@@ -85,6 +111,8 @@ export function buildConsoleData(rootDir = process.cwd()) {
     enforceable: item.maturity !== 'draft',
     tags: item.tags,
     related: relatedIds(ids, index),
+    source_path: item.source_path,
+    source_text: entries[index].body,
   }));
   return { version: 3, count: items.length, items, prompts };
 }
@@ -108,7 +136,7 @@ export function replaceConsoleData(html, data) {
   }
   const jsonStart = start + marker.length;
   const jsonEnd = findJsonEnd(html, jsonStart);
-  const serialized = JSON.stringify(data, null, 2);
+  const serialized = serializeForInlineScript(data);
   return `${html.slice(0, jsonStart)}${serialized}${html.slice(jsonEnd)}`;
 }
 
@@ -125,6 +153,7 @@ globalThis.PromptOSScoring = Object.freeze({
   scorePrompt,
   maturityForScore,
   verdictForScore,
+  buildEvaluationReceipt,
   normalizeText,
 });`;
 }
@@ -278,6 +307,15 @@ function stripMarkdown(value) {
 
 function normalizeNewlines(value) {
   return String(value || '').replace(/\r\n/g, '\n');
+}
+
+function serializeForInlineScript(value) {
+  return JSON.stringify(value, null, 2)
+    .replace(/&/g, '\\u0026')
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
 }
 
 function promptId(markdownPath) {

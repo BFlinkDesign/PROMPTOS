@@ -1,6 +1,6 @@
 # PromptOS Project State
 
-Last verified: 2026-07-08 America/Chicago
+Last verified: 2026-07-11 America/Chicago
 
 This file is an operating snapshot, not a substitute for live state. Start every
 session by refreshing Git and GitHub:
@@ -42,6 +42,7 @@ or branch names into repo docs after the branch is merged.
 The repo now has a local, no-API verification spine:
 
 ```powershell
+npm run prompt:quality
 npm run catalog:build
 npm run catalog:evaluate
 npm run schema:validate
@@ -54,11 +55,12 @@ npm run verify
 
 `npm run verify` is the default local gate. It runs:
 
-1. deterministic catalog evaluation,
-2. typed `items[]` JSON Schema validation,
-3. promoted feedback regression validation,
-4. promptfoo smokes through the documented local `echo` provider,
-5. Playwright Chromium tests against the static console and Evaluator tab.
+1. the 15-prompt quality contract and adversarial-case coverage,
+2. deterministic catalog evaluation and generated-data freshness,
+3. typed `items[]` validation plus task-report schema compilation,
+4. promoted feedback regression validation,
+5. promptfoo smokes through the documented local `echo` provider,
+6. Playwright Chromium tests against the static console and Evaluator tab.
 
 ## Generated Console Contract
 
@@ -96,29 +98,65 @@ Each item carries `type`, `source_path`, `title`, `summary`,
 
 `prompts[]` remains embedded as a compatibility projection only.
 
-## Console Evaluator
+## Browser-First Evaluation Receipts
 
-The Evaluator tab accepts pasted text, file-picker input, or dropped Markdown /
-JSON. Markdown is scored with `tools/scoring-core.mjs`; catalog JSON reports item
-count, average score, weak items, and typed-schema gaps.
+The Evaluator accepts catalog prompts, a connected PromptOS directory, native
+open-file selection, hidden file-input fallback, drag/drop, paste, and catalog
+JSON. Catalog cards can enter the Evaluator and return to the same prompt.
 
-## Browser-First Console Direction
+Markdown is scored by the generated browser copy of `tools/scoring-core.mjs`.
+Each receipt contains the exact SHA-256 of the evaluated text, deterministic
+score and verdict, factor evidence, and the OGS fields Action, Evidence,
+Authority, Blockers, Next Checkpoint, and Fallback. Confidence percentages are
+not part of the receipt contract.
 
-The next console architecture slice is File System Access API support, not an
-Electron app and not a blessed Nativefier wrapper. Keep Nativefier, if used at
-all, as a personal local launcher experiment outside the repo contract.
+All writes require an explicit user click. A connected PromptOS directory can
+write receipts only beneath `snapshots/`; the console never writes `feedback/`
+or `tests/failures/`. Without directory access, save falls back to
+`showSaveFilePicker` and then a JSON download. Unsupported open APIs fall back
+to the file input. The console remains a zero-network, single-file browser app.
 
-Implementation contract:
+## Supporting Task Contracts
 
-1. Feature-detect `window.showDirectoryPicker` and `window.showOpenFilePicker`.
-2. Keep existing drag/drop, paste, and file input flows as the fallback path.
-3. Prefer explicit user gestures for opening directories, writing feedback
-   files, and saving evaluation snapshots.
-4. Write raw real-world misses to `feedback/*.json` first. Promotion to
-   `tests/failures/*.json` remains gated by `npm run feedback:promote` and
-   `npm run verify` unless a user explicitly chooses a regression-save action.
-5. Keep the console browser-based and CI-verifiable until native distribution
-   has a concrete requirement.
+`templates/task-report.md` is the human-readable task-report shape and
+`schema/task-report.schema.json` is the JSON contract compiled by
+`npm run schema:validate`. `guides/global-agent-instructions.example.md` is a
+non-authoritative example of separating global working agreements from
+repo-local facts, gates, and architecture.
+
+## Prompt Engine Boundary
+
+The separate Prompt Engine branch remains unmerged and unproven. It is outside
+this catalog-evaluator workflow slice and no Prompt Engine runtime behavior is
+claimed here.
+
+## Ecosystem Consolidation Boundary
+
+PromptOS is the single owner of reusable prompt artifacts, the catalog,
+evaluator, receipts, schemas, and the browser console. The verified ecosystem
+map is [`docs/PROMPTOS-ECOSYSTEM.md`](docs/PROMPTOS-ECOSYSTEM.md), backed by the
+validated [`ecosystem/registry.json`](ecosystem/registry.json).
+
+Current decisions:
+
+- keep `frontier-ai-radar` and `self-prompt-lab` in dev-setup;
+- keep NewsWatch as a separate application and integrate only through a
+  read-only snapshot or deep link;
+- keep agent-kit separate until dev-setup can prove a generated release and
+  parity contract;
+- retire the desktop PromptOS HTML snapshot after main and launch pointers are
+  verified;
+- migrate unique adapter behavior from `C:\Scripts\console-kit\newswatcher`,
+  then retire that prototype;
+- treat `promptforge` and `promptvault-ai` as archive candidates after their
+  explicit no-consumer gates pass;
+- do not delete either duplicate dev-setup checkout while it contains divergent
+  branches or uncommitted work.
+
+The next console extension is a bounded Sources view, not a merged console hub.
+Start with the frontier radar's static export. NewsWatch integration remains
+blocked on cleanup of a credential-shaped value in tracked NewsWatch project
+documentation and reconciliation of its dirty checkout.
 
 ## Outcome Governance Standard
 
@@ -190,48 +228,42 @@ C:\Python313\python.exe -m venv .venv
 
 ## Last Verified Evidence
 
-Commands run from `C:\GitHub-Repos\PROMPTOS`:
+Commands run from the active feature worktree:
 
 ```text
-npm ci -> clean install passed under Node 24 / npm 11
-npm run feedback:promote -> 0 staged feedback files, 2 promptfoo regression tests
-npm run feedback:verify -> 2 failures, 2 promptfoo regression tests
-npm run eval:promptfoo -> 3 passed, 0 failed, local echo provider
-npm run verify -> catalog 7 prompts, average score 83/100, schema valid, feedback 2 failures/2 regressions, promptfoo 3 passed, Playwright 4 passed
-go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/review-pipeline.yml .github/workflows/evals.yml -> pass
-npm audit --omit=dev -> found 0 vulnerabilities
-git diff --check -> pass
-npm ci --dry-run -> pass
-HTTP Playwright smoke -> title PromptOS Console, 7 cards, Evaluator 85/100 READY
+npm run verify -> exit 0
+- prompt quality: 15 prompts checked, minimum 85/100, 9 adversarial cases covered
+- catalog evaluation: 15 prompts, average 99/100; every prompt at least 85/100
+- schemas: 15 generated and 15 embedded items valid; task-report positive and negative controls passed
+- feedback: 2 failure cases and 2 promptfoo regression tests valid
+- promptfoo: 3 passed, 0 failed, 0 errors
+- Playwright Chromium: 22 passed
 ```
 
-The console renders the 7 tracked prompt blocks from `PROMPTS.md`; it no longer
+The console renders the 15 tracked prompt blocks from `PROMPTS.md`; it no longer
 carries the older unrelated 159-item embedded catalog.
 
 ## Known Caveats
 
-- Full dev `npm audit` reports moderate transitive findings through promptfoo's
-  dependency chain. `npm audit --omit=dev` is the production-relevant check for
-  this repo shape.
+- Full `npm audit` is clean after the promptfoo `0.121.18` patch update.
 - `npm install-scripts ls` may report pending install-script approvals for
   dependency packages used by Playwright, SWC, or ONNX. Review before approving.
 - Existing timestamps are still `legacy-unknown`; backfill with Git history
   before treating dates as provenance.
-- The schema supports workflows, playbooks, and runbooks, but the current
-  generated source set is still the 7 prompt files listed in `PROMPTS.md`.
+- The schema supports workflows, playbooks, and runbooks, while the current
+  generated source set is 15 prompt files listed in `PROMPTS.md`.
+- Windows and macOS desktop requirements are prompt delivery contracts, not
+  target-host proof for the browser console; current CI is Ubuntu + Chromium.
 - `PromptOS Verify` CI uses Node 24 because the lockfile is generated by npm 11.
   Earlier Node 22 CI failed at `npm ci` with a stale-lock error even though the
   local gate passed.
 
 ## Next Improvement Tasks
 
-1. Add File System Access API support to the console using the browser-first
-   contract above.
-2. Harden the remaining lower-scoring prompts, starting with prompts that have
-   no explicit inputs or verification language.
+1. Add real promoted failure cases as soon as the console finds a real miss.
+2. Backfill artifact timestamps from Git history.
 3. Add first workflow/playbook/runbook source artifacts and wire them into the
    generator.
-4. Backfill artifact timestamps from Git history.
-5. Add real promoted failure cases as soon as the console finds a real miss.
-6. Add credential-gated model-judge examples only outside default CI; keep
+4. Implement the first read-only Sources adapter from the frontier radar export.
+5. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.

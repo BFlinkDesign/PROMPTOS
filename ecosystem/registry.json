@@ -1,0 +1,168 @@
+{
+  "version": 1,
+  "canonical_product_id": "promptos",
+  "assets": [
+    {
+      "id": "promptos",
+      "kind": "repository",
+      "status": "canonical",
+      "owner": "BFlinkDesign/PROMPTOS",
+      "canonical_source": "https://github.com/BFlinkDesign/PROMPTOS",
+      "observed_paths": [
+        "C:\\GitHub-Repos\\PROMPTOS"
+      ],
+      "integration": "native",
+      "disposition": "keep",
+      "rationale": "Owns reusable prompt, workflow, playbook, and runbook artifacts plus the catalog, evaluator, receipts, schemas, and regression gates.",
+      "destructive_gate": "Not applicable. This is the canonical product."
+    },
+    {
+      "id": "promptos-desktop-snapshot",
+      "kind": "snapshot",
+      "status": "stale-duplicate",
+      "owner": "local workstation",
+      "canonical_source": "BFlinkDesign/PROMPTOS history: console/promptos-console.html",
+      "observed_paths": [
+        "C:\\Users\\Brady.EAGLE\\Desktop\\promptos-console\\promptos-console.html"
+      ],
+      "integration": "none",
+      "disposition": "retire-after-gate",
+      "rationale": "The file is byte-for-byte a historical PromptOS console Git object and contains no unique source work.",
+      "destructive_gate": "Delete only after the current canonical console is merged to main, opens successfully from the canonical checkout, and any desktop shortcut points to that checkout."
+    },
+    {
+      "id": "operatoros-agentic-playbook-v1",
+      "kind": "prototype",
+      "status": "candidate-source",
+      "owner": "uncommitted package artifact",
+      "canonical_source": "SHA-256 a19a288c03bf8872f1dc8f7ebea64603325a213618c54b4639733f17fd634a53",
+      "observed_paths": [
+        "C:\\Users\\Brady.EAGLE\\Downloads\\OperatorOS-Agentic-Playbook-v1.0.0.zip"
+      ],
+      "integration": "none",
+      "disposition": "retain-until-owner-audit",
+      "rationale": "Contains useful prompt, playbook, record, and migration ideas, but conflicts with the live dev-setup control-plane owner and its installer overwrites platform-owned files.",
+      "destructive_gate": "Do not install. Extract individual artifacts only after semantic comparison, schema-backed validation, platform-boundary repair, adversarial tests, and assignment to PromptOS, dev-setup, or agent-kit."
+    },
+    {
+      "id": "dev-setup-frontier-ai-radar",
+      "kind": "subproject",
+      "status": "source-system",
+      "owner": "BFlinkDesign/dev-setup",
+      "canonical_source": "https://github.com/BFlinkDesign/dev-setup/tree/infra/production/frontier-ai-radar",
+      "observed_paths": [
+        "C:\\Users\\Brady.EAGLE\\dev-setup\\frontier-ai-radar"
+      ],
+      "integration": "read-only-adapter",
+      "disposition": "keep",
+      "rationale": "Owns evidence-backed tool intake, adoption, quarantine, and benchmark decisions for the developer-agent control plane.",
+      "destructive_gate": "Not applicable. PromptOS may consume an exported catalog but must not become the authoring source."
+    },
+    {
+      "id": "dev-setup-self-prompt-lab",
+      "kind": "subproject",
+      "status": "source-system",
+      "owner": "BFlinkDesign/dev-setup",
+      "canonical_source": "https://github.com/BFlinkDesign/dev-setup/tree/infra/production/self-prompt-lab",
+      "observed_paths": [
+        "C:\\Users\\Brady.EAGLE\\dev-setup\\self-prompt-lab"
+      ],
+      "integration": "link-only",
+      "disposition": "keep",
+      "rationale": "Owns a bounded self-prompting automation reference and safety envelope, not catalog content or PromptOS runtime behavior.",
+      "destructive_gate": "Not applicable. Expose status or documentation by link; do not copy the automation into the browser console."
+    },
+    {
+      "id": "agent-kit",
+      "kind": "repository",
+      "status": "source-system",
+      "owner": "BFlinkDesign/agent-kit",
+      "canonical_source": "https://github.com/BFlinkDesign/agent-kit",
+      "observed_paths": [],
+      "integration": "generated-release",
+      "disposition": "retain-until-owner-audit",
+      "rationale": "Owns the portable operating contract, bootstrap, trust tiers, verify gates, and repo ledgers. It does not own reusable prompts or the PromptOS console.",
+      "destructive_gate": "Keep separate until dev-setup proves a generated release path and parity check for every agent-kit contract."
+    },
+    {
+      "id": "newswatch",
+      "kind": "repository",
+      "status": "source-system",
+      "owner": "BFlinkDesign/newswatch",
+      "canonical_source": "https://github.com/BFlinkDesign/newswatch",
+      "observed_paths": [
+        "C:\\Users\\Brady.EAGLE\\Desktop\\Sort\\newswatch"
+      ],
+      "integration": "read-only-adapter",
+      "disposition": "keep",
+      "rationale": "Owns ingestion, ranking, storage, and presentation of external news signals. PromptOS may display a bounded signal snapshot or deep link, but must not absorb the application.",
+      "destructive_gate": "Not applicable. Any adapter must be read-only, provenance-labeled, and unable to expose NewsWatch credentials."
+    },
+    {
+      "id": "console-kit-newswatcher",
+      "kind": "prototype",
+      "status": "adapter-prototype",
+      "owner": "local workstation",
+      "canonical_source": "C:\\Scripts\\console-kit\\newswatcher",
+      "observed_paths": [
+        "C:\\Scripts\\console-kit\\newswatcher"
+      ],
+      "integration": "read-only-adapter",
+      "disposition": "migrate-then-retire",
+      "rationale": "Contains a static producer-to-catalog adapter prototype and prior-art notes. Its reusable contract should be extracted, not preserved as a second console product.",
+      "destructive_gate": "Inventory source configuration and producer behavior against NewsWatch, migrate unique non-secret adapter logic, verify equivalent output, then retire the prototype."
+    },
+    {
+      "id": "promptforge",
+      "kind": "repository",
+      "status": "retirement-candidate",
+      "owner": "BFlinkDesign/promptforge",
+      "canonical_source": "https://github.com/BFlinkDesign/promptforge",
+      "observed_paths": [],
+      "integration": "none",
+      "disposition": "retire-after-gate",
+      "rationale": "The repository contains an aspirational README and fleet boilerplate, with no unique product implementation to merge.",
+      "destructive_gate": "Confirm no releases, packages, deployments, open product PRs, or external consumers, then archive the GitHub repository with a pointer to PromptOS."
+    },
+    {
+      "id": "promptvault-ai",
+      "kind": "repository",
+      "status": "retirement-candidate",
+      "owner": "BFlinkDesign/promptvault-ai",
+      "canonical_source": "https://github.com/BFlinkDesign/promptvault-ai",
+      "observed_paths": [],
+      "integration": "none",
+      "disposition": "retire-after-gate",
+      "rationale": "The repository contains an aspirational README and fleet boilerplate, with no unique product implementation to merge.",
+      "destructive_gate": "Confirm no releases, packages, deployments, open product PRs, or external consumers, then archive the GitHub repository with a pointer to PromptOS."
+    },
+    {
+      "id": "dev-setup-desktop-checkout",
+      "kind": "checkout",
+      "status": "duplicate-checkout",
+      "owner": "BFlinkDesign/dev-setup",
+      "canonical_source": "https://github.com/BFlinkDesign/dev-setup",
+      "observed_paths": [
+        "C:\\Users\\Brady.EAGLE\\Desktop\\dev-setup"
+      ],
+      "integration": "none",
+      "disposition": "retain-until-owner-audit",
+      "rationale": "A separate dev-setup checkout contains related subprojects but is not the canonical PromptOS product.",
+      "destructive_gate": "Reconcile its branch, unpushed commits, worktrees, and uncommitted changes against the authoritative dev-setup checkout before removal."
+    },
+    {
+      "id": "dev-setup-github-repos-checkout",
+      "kind": "checkout",
+      "status": "duplicate-checkout",
+      "owner": "BFlinkDesign/dev-setup",
+      "canonical_source": "https://github.com/BFlinkDesign/dev-setup",
+      "observed_paths": [
+        "C:\\GitHub-Repos\\dev-setup\\dev-setup"
+      ],
+      "integration": "none",
+      "disposition": "retain-until-owner-audit",
+      "rationale": "A separate dev-setup checkout contains related subprojects but is not the canonical PromptOS product.",
+      "destructive_gate": "Reconcile its branch, unpushed commits, worktrees, and uncommitted changes against the authoritative dev-setup checkout before removal."
+    }
+  ]
+}

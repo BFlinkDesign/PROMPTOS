@@ -1,7 +1,7 @@
 # PROMPTOS
 
-Portable, tool-agnostic prompt library for AI coding agents. One canonical
-home for reusable prompt blocks — not copied into every repo.
+Portable, tool-agnostic prompt library and evaluator for AI coding agents. One
+canonical home for reusable prompt artifacts and one canonical browser console.
 
 Born from the EagleScope build day: scope pipeline, decision matrix,
 design-first UI, adversarial review, and retrospective patterns extracted
@@ -41,15 +41,33 @@ C:\Eagle\agent-kit\install.ps1 -Target "C:\path\to\repo"
 C:\Eagle\PROMPTOS\install.ps1 -Target "C:\path\to\repo"
 ```
 
+## Ecosystem boundary
+
+PromptOS owns prompt artifacts, the catalog, the evaluator, receipts, schemas,
+and regression gates. It does not own the developer-agent control plane,
+self-prompting automation, or news ingestion. Those systems remain separate and
+may appear through bounded read-only adapters or links.
+
+- [PromptOS ecosystem consolidation](docs/PROMPTOS-ECOSYSTEM.md)
+- [Machine-readable ecosystem registry](ecosystem/registry.json)
+
+The registry names one canonical product and records the migration or retirement
+gate for known duplicate folders and repositories. It is validated by
+`npm run schema:validate` and the default `npm run verify` gate.
+
 ## The prompts
 
-| Block | Use when |
+The catalog contains 15 tracked prompts. `PROMPTS.md` is the canonical index;
+`npm run prompt:quality` enforces the 15-prompt baseline, a minimum deterministic
+score of 85/100 for every prompt, and the required adversarial cases.
+
+| Workflow stage | Prompt coverage |
 | --- | --- |
-| Scope pipeline | Corpus extraction, bid scoping, spec/plan reconciliation |
-| Decision matrix | Architecture or vendor choice with real tradeoffs |
-| Design direction first | UI/UX before any code |
-| Adversarial self-review | Pre-ship quality gate |
-| Retrospective | Project pause, errors/gaps ledger update |
+| Align and take over | Session alignment, repository takeover |
+| Plan and decide | Scope pipeline, decision matrix, task plan, design direction first |
+| Implement and debug | Full-stack delivery, task implement, UI fidelity, reproduce-trace-patch |
+| Review and release | Independent diff review, adversarial self-review, adversarial safety red-team, release gate |
+| Learn | Retrospective |
 
 ## Verify locally
 
@@ -58,10 +76,11 @@ npm ci
 npm run verify
 ```
 
-The verify gate checks the generated console catalog, validates the typed
-`items[]` schema, validates promoted feedback regressions, runs local promptfoo
-smokes through the no-API `echo` provider, and launches Playwright Chromium
-against the static console and Evaluator tab.
+The verify gate runs prompt quality first, checks the generated console catalog,
+validates the typed `items[]`, task-report, and ecosystem schemas, validates promoted
+feedback regressions, runs local promptfoo smokes through the no-API `echo`
+provider, and launches Playwright Chromium against the static console and
+Evaluator tab.
 
 Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
 
@@ -92,6 +111,36 @@ The console catalog is generated as `items[]` with typed artifacts:
 `prompt`, `workflow`, `playbook`, or `runbook`. The compatibility `prompts[]`
 projection remains embedded for older consumers, but `items[]` is the canonical
 schema validated by `npm run schema:validate`.
+
+## Evaluation receipts
+
+The zero-network console supports a browser-first catalog-to-evaluator workflow.
+Open a catalog card and choose **Evaluate this prompt**, or load local source
+through a connected PromptOS directory, the native open-file picker, the hidden
+file-input fallback, drag/drop, or paste. Every prompt receipt records the exact
+SHA-256 of the text actually evaluated and the Outcome Governance fields:
+Action, Evidence, Authority, Blockers, Next Checkpoint, and Fallback. Receipts
+use deterministic scores and verdicts, not confidence percentages.
+
+Writes require an explicit **Save receipt** click. With a connected directory,
+the console writes only under `snapshots/`; it never writes `feedback/` or
+`tests/failures/`. Without directory access, it uses the native save picker when
+available and otherwise downloads the JSON receipt.
+
+## Supporting contracts
+
+- [`templates/task-report.md`](templates/task-report.md) is the human-readable
+  implementation report template.
+- [`schema/task-report.schema.json`](schema/task-report.schema.json) is its JSON
+  contract and is compiled by `npm run schema:validate`.
+- [`guides/global-agent-instructions.example.md`](guides/global-agent-instructions.example.md)
+  is a non-authoritative example that separates global working agreements from
+  repo-local facts and gates.
+
+## Scope boundary
+
+The separate Prompt Engine branch remains unmerged and unproven. It is not part
+of this catalog, adversarial prompt suite, or evaluation-receipt slice.
 
 ## Feedback regressions
 

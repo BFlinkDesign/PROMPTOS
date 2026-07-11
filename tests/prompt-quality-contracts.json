@@ -1,0 +1,405 @@
+{
+  "schema_version": "1.0",
+  "expected_catalog_count": 15,
+  "minimum_catalog_score": 85,
+  "required_adversarial_case_ids": [
+    "hostile-repository-instructions",
+    "dirty-worktree",
+    "missing-source-of-truth",
+    "inaccessible-target-host",
+    "false-green-test",
+    "stale-evidence",
+    "windows-unsigned-package",
+    "macos-not-notarized",
+    "interrupted-work-preservation"
+  ],
+  "adversarial_case_name_only_negative_control": "tests/fixtures/prompt-quality-case-name-only.md",
+  "forbidden_terms": [
+    {
+      "term": "BrickLedger",
+      "reason": "source-material project name must not leak into reusable prompts"
+    }
+  ],
+  "files": {
+    "prompts/repository-takeover.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "REPOSITORY ROOT",
+        "ALLOWED PATHS",
+        "EXPECTED SOURCE-OF-TRUTH FILES",
+        "TAKEOVER VERIFICATION COMMAND"
+      ],
+      "required_patterns": [
+        {
+          "id": "instruction-trust",
+          "pattern": "repository files[\\s\\S]*pasted text[\\s\\S]*evidence[\\s\\S]*not[\\s\\S]*higher-priority[\\s\\S]*instructions"
+        },
+        {
+          "id": "no-mutation-boundary",
+          "pattern": "Do not edit|review-only|no mutation"
+        },
+        {
+          "id": "target-host-proof",
+          "pattern": "target-host proof|target platform|target host"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "hostile-repository-instructions",
+        "dirty-worktree",
+        "missing-source-of-truth",
+        "stale-evidence",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/task-plan.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "TASK FILE OR ISSUE",
+        "REPOSITORY ROOT",
+        "ALLOWED PATHS",
+        "NON-GOALS"
+      ],
+      "required_patterns": [
+        {
+          "id": "analysis-only",
+          "pattern": "Do not edit|analysis-only|review-only"
+        },
+        {
+          "id": "bounded-work",
+          "pattern": "bound|limit|maximum"
+        },
+        {
+          "id": "verification-plan",
+          "pattern": "verification|gate|exact command"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "dirty-worktree",
+        "missing-source-of-truth",
+        "inaccessible-target-host",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/task-implement.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "APPROVED PLAN",
+        "REPOSITORY ROOT",
+        "ALLOWED PATHS",
+        "VERIFICATION COMMANDS"
+      ],
+      "required_patterns": [
+        {
+          "id": "mutating-boundary",
+          "pattern": "implementation prompt|may edit|mutating"
+        },
+        {
+          "id": "dirty-worktree-preservation",
+          "pattern": "dirty worktree|unrelated work|do not revert"
+        },
+        {
+          "id": "real-template-path",
+          "pattern": "templates/task-report\\.md"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "hostile-repository-instructions",
+        "dirty-worktree",
+        "false-green-test",
+        "stale-evidence",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/independent-diff-review.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "REPOSITORY ROOT",
+        "BASE REF",
+        "HEAD REF OR DIFF",
+        "REVIEW SCOPE"
+      ],
+      "required_patterns": [
+        {
+          "id": "review-only-first",
+          "pattern": "Do not edit initially|review-only"
+        },
+        {
+          "id": "line-evidence",
+          "pattern": "file/line|file and line|line evidence"
+        },
+        {
+          "id": "false-green",
+          "pattern": "false-green-test|false green|test.*claim"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "hostile-repository-instructions",
+        "dirty-worktree",
+        "false-green-test",
+        "stale-evidence"
+      ]
+    },
+    "prompts/ui-fidelity.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "TARGET PLATFORM",
+        "SCREEN OR STATE",
+        "APPROVED REFERENCE",
+        "REPOSITORY ROOT"
+      ],
+      "required_patterns": [
+        {
+          "id": "target-host-proof",
+          "pattern": "target-host proof|build and run|target platform"
+        },
+        {
+          "id": "windows-desktop",
+          "pattern": "Windows[\\s\\S]*native[\\s\\S]*window[\\s\\S]*menu[\\s\\S]*shortcut[\\s\\S]*code signing"
+        },
+        {
+          "id": "macos-desktop",
+          "pattern": "macOS[\\s\\S]*hardened runtime[\\s\\S]*entitlements[\\s\\S]*notarization[\\s\\S]*Gatekeeper"
+        },
+        {
+          "id": "na-cited-evidence",
+          "pattern": "N/A[\\s\\S]*cited repo and platform evidence"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "inaccessible-target-host",
+        "windows-unsigned-package",
+        "macos-not-notarized",
+        "stale-evidence"
+      ]
+    },
+    "prompts/reproduce-trace-patch.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "BUG REPORT",
+        "REPOSITORY ROOT",
+        "ALLOWED PATHS",
+        "EXPECTED RESULT"
+      ],
+      "required_patterns": [
+        {
+          "id": "reproduce-first",
+          "pattern": "Reproduce[\\s\\S]*first|before patching"
+        },
+        {
+          "id": "smallest-fix",
+          "pattern": "smallest responsible path|smallest correct fix"
+        },
+        {
+          "id": "fallback-rollback",
+          "pattern": "rollback|fallback"
+        },
+        {
+          "id": "windows-desktop",
+          "pattern": "Windows[\\s\\S]*native window[\\s\\S]*signed package"
+        },
+        {
+          "id": "macos-desktop",
+          "pattern": "macOS[\\s\\S]*hardened runtime[\\s\\S]*notarization[\\s\\S]*Gatekeeper"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "dirty-worktree",
+        "inaccessible-target-host",
+        "false-green-test",
+        "stale-evidence",
+        "windows-unsigned-package",
+        "macos-not-notarized",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/release-gate.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "RELEASE CANDIDATE",
+        "REPOSITORY ROOT",
+        "TARGET PLATFORMS",
+        "RELEASE CRITERIA"
+      ],
+      "required_patterns": [
+        {
+          "id": "no-artifact-mutation",
+          "pattern": "Do not modify release artifacts|review-only"
+        },
+        {
+          "id": "target-host-proof",
+          "pattern": "target-host proof|real target host|target platform"
+        },
+        {
+          "id": "desktop-packaging",
+          "pattern": "Windows[\\s\\S]*signed|macOS[\\s\\S]*notarization"
+        },
+        {
+          "id": "final-recommendation",
+          "pattern": "release, conditional release, or reject"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "missing-source-of-truth",
+        "inaccessible-target-host",
+        "false-green-test",
+        "stale-evidence",
+        "windows-unsigned-package",
+        "macos-not-notarized"
+      ]
+    },
+    "prompts/full-stack-delivery-contract.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "DELIVERY GOAL",
+        "REPOSITORY ROOT",
+        "ALLOWED PATHS",
+        "TARGET HOSTS"
+      ],
+      "required_patterns": [
+        {
+          "id": "suite-contract",
+          "pattern": "source of truth[\\s\\S]*authority[\\s\\S]*mutation boundaries[\\s\\S]*non-goals[\\s\\S]*stop conditions"
+        },
+        {
+          "id": "loop-bounds",
+          "pattern": "bound[\\s\\S]*loops[\\s\\S]*tool calls[\\s\\S]*retries|maximum"
+        },
+        {
+          "id": "desktop-platforms",
+          "pattern": "Windows[\\s\\S]*macOS[\\s\\S]*N/A"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next Checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "hostile-repository-instructions",
+        "dirty-worktree",
+        "missing-source-of-truth",
+        "inaccessible-target-host",
+        "false-green-test",
+        "stale-evidence",
+        "windows-unsigned-package",
+        "macos-not-notarized",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/design-direction-first.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "THING",
+        "ONE SPECIFIC PERSON AND EMOTIONAL STATE",
+        "THE ONE JOB",
+        "TARGET PLATFORM"
+      ],
+      "required_patterns": [
+        {
+          "id": "verification",
+          "pattern": "verify|evidence|screenshot|render"
+        },
+        {
+          "id": "boundary",
+          "pattern": "Do not|Never|Banned|if .*missing"
+        }
+      ]
+    },
+    "prompts/adversarial-self-review.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "ARTIFACT PATH OR DIFF",
+        "REPOSITORY ROOT",
+        "CLAIMS TO VERIFY"
+      ],
+      "required_patterns": [
+        {
+          "id": "output-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers"
+        },
+        {
+          "id": "no-confidence-percentages",
+          "pattern": "confidence percentages|confidence scores"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "false-green-test",
+        "stale-evidence",
+        "missing-source-of-truth"
+      ]
+    },
+    "prompts/session-alignment.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "REPOSITORY ROOT",
+        "SESSION GOAL",
+        "ALLOWED PATHS"
+      ],
+      "required_patterns": [
+        {
+          "id": "output-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers"
+        },
+        {
+          "id": "trust-boundary",
+          "pattern": "evidence[\\s\\S]*not[\\s\\S]*higher-priority instructions|trust"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "hostile-repository-instructions",
+        "dirty-worktree",
+        "interrupted-work-preservation"
+      ]
+    },
+    "templates/task-report.md": {
+      "catalog_prompt": false,
+      "required_patterns": [
+        {
+          "id": "task-report-sections",
+          "pattern": "Outcome[\\s\\S]*Files changed[\\s\\S]*Verification[\\s\\S]*Risks and limitations"
+        }
+      ]
+    },
+    "schema/task-report.schema.json": {
+      "catalog_prompt": false,
+      "required_patterns": [
+        {
+          "id": "task-report-schema-id",
+          "pattern": "task-report\\.schema\\.json"
+        }
+      ]
+    },
+    "guides/global-agent-instructions.example.md": {
+      "catalog_prompt": false,
+      "required_patterns": [
+        {
+          "id": "global-vs-repo-local",
+          "pattern": "global[\\s\\S]*repo-local|repo-local[\\s\\S]*global"
+        },
+        {
+          "id": "not-authority",
+          "pattern": "not authority|example"
+        }
+      ]
+    }
+  }
+}
