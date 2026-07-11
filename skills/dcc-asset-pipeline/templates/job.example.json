@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "job_id": "medieval-village-001",
+  "operator_id": "operator-session-001",
+  "target": {
+    "engine": "Unity HDRP",
+    "platform": "desktop",
+    "export_format": "glb",
+    "default_triangle_budget": 40000,
+    "default_texture_max": 4096,
+    "lods_required": true,
+    "collision_required": true,
+    "lightmap_uv_required": true,
+    "commercial_project": true
+  },
+  "assets": [
+    {
+      "asset_id": "stone-house",
+      "source_path": "raw/stone-house.glb",
+      "asset_class": "complex-architecture",
+      "provenance": {
+        "generator": "Tripo AI",
+        "model": "Prism 3.1",
+        "license": "commercial-plan",
+        "commercial_use_allowed": true,
+        "reference": "references/stone-house.png"
+      },
+      "triangle_budget": 40000,
+      "texture_max": 4096,
+      "normal_map_required": true
+    }
+  ]
+}
