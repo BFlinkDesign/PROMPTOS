@@ -1,0 +1,14 @@
+{
+  "metrics": {
+    "source_triangles": 1800000,
+    "material_count": 4
+  },
+  "evidence": {
+    "screenshots": {
+      "close": "screenshots/stone-house-before-close.png",
+      "medium": "screenshots/stone-house-before-medium.png",
+      "far": "screenshots/stone-house-before-far.png",
+      "wireframe": "screenshots/stone-house-before-wireframe.png"
+    }
+  }
+}
