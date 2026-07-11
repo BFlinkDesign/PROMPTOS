@@ -151,10 +151,7 @@ PromptOS Console
 
 ## Known Caveats
 
-- `npm audit --omit=dev` is clean.
-- Full dev audit currently reports moderate transitive findings through
-  promptfoo's OpenTelemetry dependency chain. `npm audit fix --force` proposes
-  a breaking promptfoo downgrade; do not force-apply without reviewing.
+- Full `npm audit` is clean after the promptfoo `0.121.18` patch update.
 - `npm install-scripts ls` reports install-script approvals pending for
   dependency packages. The CLI and Playwright browser smoke still passed in the
   local worktree.
@@ -171,24 +168,33 @@ PromptOS Console
 - Keep the console browser-based. Do not add Electron, Tauri, or Nativefier to
   the repo until native distribution has a concrete requirement. Nativefier is
   acceptable only as an untracked personal launcher experiment.
+- Windows and macOS desktop requirements in the prompt suite are delivery
+  contracts, not native target-host proof for this browser console. CI remains
+  Ubuntu plus Chromium until PromptOS ships a real native desktop artifact.
 - `PromptOS Verify` CI uses Node 24 because the committed lockfile is generated
   by npm 11. A clean `npm ci` passed locally under Node 24/npm 11.
 
-## Browser-First File Access Direction
+## Browser-First File Access Status
 
-The next high-leverage console slice is File System Access API support:
+The browser-first File System Access slice is implemented on the current
+feature branch:
 
 1. Feature-detect `window.showDirectoryPicker` and `window.showOpenFilePicker`.
+   Open folders read-only, then request read/write permission only from the
+   explicit receipt-save action.
 2. Preserve current drop, paste, and file-input behavior as fallback.
-3. Let users open the local PromptOS folder, inspect prompt files, save raw
-   feedback to `feedback/*.json`, and export evaluation snapshots from explicit
-   user gestures.
-4. Do not silently promote browser-written feedback into
+3. Let users open the local PromptOS folder, inspect prompt files, and save
+   provenance-backed evaluation receipts under `snapshots/` from explicit user
+   gestures.
+4. Do not write browser-generated receipts to `feedback/` or silently promote
+   them into
    `tests/failures/*.json`; promotion remains the deterministic
    `npm run feedback:promote` / `npm run verify` path unless the user chooses a
    specific regression-save flow.
-5. Keep this implementable in the current Playwright console tests before
-   considering any native shell.
+5. Preserve paste, drag/drop, file-input, save-picker, and JSON-download
+   fallbacks when the native APIs are unavailable.
+6. Keep the console browser-based until native distribution has a concrete
+   requirement.
 
 ## Outcome Governance Direction
 
@@ -213,13 +219,14 @@ become authoritative only after passing the measurement verification gate.
 
 The repo has the durable deterministic spine. Continue hardening in this order:
 
-1. Implement the browser-first File System Access API slice above.
-2. Add 3 to 5 high-value promptfoo regression cases beyond the current local
+1. Add 3 to 5 high-value promptfoo regression cases beyond the current local
    echo smoke.
-3. Add first-class workflow, playbook, and runbook source directories once their
+2. Add first-class workflow, playbook, and runbook source directories once their
    content model is settled.
-4. Backfill real `created_at` and `updated_at` values from Git history instead
+3. Backfill real `created_at` and `updated_at` values from Git history instead
    of inventing dates.
+4. Correct the unmerged Prompt Engine branch's holdout-selection, provenance,
+   cost-accounting, and report-redaction defects before considering a merge.
 5. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.
 6. Record Inspect AI and DeepEval starter examples only after the deterministic
@@ -236,8 +243,10 @@ Keep each slice independently revertible and commit by concern.
 - Current checkout commit is always the live `git log -1 --oneline` value; do
   not treat this handoff block as a substitute for that one command.
 - Hardened status: default local and GitHub gates were green after PR #19.
-- Current catalog baseline: 7 prompts, average score `83/100`;
-  `decision-matrix` is `100/100`.
+- Current feature-branch catalog baseline: 15 prompts, average score `99/100`,
+  every prompt at least `85/100`, and 9 adversarial contract cases covered.
+- Current console baseline: 21 Playwright tests covering the browser receipt,
+  file-access, explicit-save, fallback, no-network, and mobile-overflow paths.
 - Default workflow: read `PROJECT-STATE.md` first, then run only the narrow gate
   needed for the task. Use `npm run verify` before behavior-changing commits.
 - Feedback workflow: stage raw failures in `feedback/*.json`, promote with
@@ -246,13 +255,12 @@ Keep each slice independently revertible and commit by concern.
 - Do not re-audit hardened infrastructure by default, do not add
   credentialed/model-judge evals to default CI, and do not change CI/workflow
   logic unless a live gate is failing.
-- Architecture decision: stay browser-first. Build File System Access API
-  support before considering any native wrapper. Do not bless Nativefier as a
-  repo dependency.
+- Architecture decision: stay browser-first. File System Access API support is
+  implemented; do not bless Nativefier as a repo dependency.
 - Outcome decision: evaluator output should follow the Outcome Governance
   Standard contract: action, evidence, authority, blockers, next checkpoint,
   fallback. Do not expose confidence theater as user-facing value.
-- Next useful work: implement File System Access API console support, triage old
-  draft PRs against the current schema, harden the remaining lower-scoring
-  prompts, backfill artifact timestamps from Git history, and add real promoted
-  failure cases when the console finds a miss.
+- Next useful work: independently review and land the current receipt/prompt
+  suite, then triage old draft PRs against the current schema, backfill artifact
+  timestamps from Git history, add real promoted failure cases, and repair the
+  unmerged Prompt Engine before any optimizer claim or merge.
