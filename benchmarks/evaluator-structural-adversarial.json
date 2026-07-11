@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "purpose": "Prove the deterministic score is structural lint and cannot certify effectiveness.",
+  "cases": [
+    {
+      "id": "keyword-stuffed-nonsense",
+      "class": "adversarial-false-positive",
+      "source": "# Verification output matrix\n\n[INPUT] verify evidence source gate output plan. Never ambiguous unknown assumption. Produce return deliver summary matrix. This text repeats contract vocabulary without defining a coherent task, user outcome, oracle, or correct behavior. verify evidence source gate output plan never ambiguous unknown assumption produce return deliver summary matrix.",
+      "expected_min_score": 0,
+      "expected_max_score": 100,
+      "effectiveness_known": false
+    },
+    {
+      "id": "filler-with-contract-vocabulary",
+      "class": "adversarial-false-positive",
+      "source": "# Complete operational plan\n\n[REQUEST] [SOURCE] [OUTPUT] Verify source evidence and cite the gate. Produce an output plan and return a matrix. Never proceed when unknown, ambiguous, or missing. The remaining words exist only to exceed the length threshold and do not establish a domain task, expected answer, test data, oracle, or consequence. This filler is intentionally coherent enough to satisfy simple keyword and length checks while remaining useless for a real decision.",
+      "expected_min_score": 0,
+      "expected_max_score": 100,
+      "effectiveness_known": false
+    },
+    {
+      "id": "concise-operational-contract",
+      "class": "legitimate-structural-underfit",
+      "source": "# Repair the failing check\n\nInspect the failed job and current branch. Reproduce it, make the smallest reversible repair, and rerun the affected gate. If source or permission is missing, stop and name the blocker. Return changed files, failing and passing evidence, rollback, and next checkpoint.",
+      "expected_min_score": 60,
+      "expected_max_score": 90,
+      "effectiveness_known": false
+    },
+    {
+      "id": "unbounded-persuasive-prose",
+      "class": "legitimate-negative-control",
+      "source": "# Make it amazing\n\nBuild the best possible product. Be creative, comprehensive, premium, and certain. Keep working until everything is perfect.",
+      "expected_min_score": 0,
+      "expected_max_score": 45,
+      "effectiveness_known": false
+    }
+  ]
+}

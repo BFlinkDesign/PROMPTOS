@@ -86,6 +86,10 @@ test('renders the tracked PromptOS catalog', async ({ page }) => {
 
   await expect(page).toHaveTitle('PromptOS Console');
   await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
+  const minimumStartupOpacity = await page.locator('.card').evaluateAll((cards) =>
+    Math.min(...cards.map((card) => Number(getComputedStyle(card).opacity))),
+  );
+  expect(minimumStartupOpacity).toBeGreaterThanOrEqual(0.7);
   await expect(page.locator('.skel')).toHaveCount(0);
   await expect(page.locator('#sourceBar')).toContainText(`${expectedCatalogCount} reviewed artifacts`);
   await expect(page.locator('#sourceBar')).toContainText(/source [a-f0-9]{12}/);
@@ -133,6 +137,9 @@ Verify the evidence, cite the source, produce a short matrix, and never invent m
   await page.locator('#evalRun').click();
 
   await expect(page.locator('#evalResult')).toContainText('/100');
+  await expect(page.locator('#evalResult')).toContainText('structure');
+  await expect(page.locator('#evalResult')).toContainText('effectiveness not evaluated');
+  await expect(page.locator('#evalResult')).not.toContainText(/\bready\b/i);
   await expect(page.locator('#evalResult')).toContainText('Fill-in inputs');
   await expect(page.locator('#evalResult')).toContainText('Verification terms');
   await expect(page.locator('#evalResult')).toContainText('Output contract');
@@ -251,8 +258,11 @@ test('evaluates a catalog prompt into an exact provenance receipt and returns to
     source_path: sourcePath,
     source_hash: sourceHash,
     evaluated_at: evaluatedAt,
+    evaluation_scope: 'structural-lint',
+    effectiveness: 'not-evaluated',
+    release_authority: false,
     score: 100,
-    verdict: 'ready',
+    verdict: 'structural-complete',
     factors: {
       title: 15,
       bodyLength: 15,
@@ -261,7 +271,7 @@ test('evaluates a catalog prompt into an exact provenance receipt and returns to
       outputContract: 20,
       boundaries: 15,
     },
-    action: 'Use this prompt with its required inputs and preserve the receipt with the resulting work.',
+    action: 'Run this prompt against a versioned behavioral dataset before relying on it or releasing it.',
     evidence: [
       { factor: 'title', points: 15, maximum: 15, finding: 'H1 title present.' },
       { factor: 'bodyLength', points: 15, maximum: 15, finding: 'Prompt body has at least 250 characters after trimming outer whitespace.' },
@@ -272,11 +282,12 @@ test('evaluates a catalog prompt into an exact provenance receipt and returns to
     ],
     authority: {
       runtime: 'tools/scoring-core.mjs',
-      method: 'deterministic structural scoring',
+      method: 'deterministic structural lint',
+      limitation: 'Does not evaluate model output, correctness, safety, cost, latency, or real-world effectiveness.',
     },
     blockers: [],
-    next_checkpoint: 'Re-evaluate after any substantive prompt edit.',
-    fallback: 'If the evaluator is unavailable, retain the source and hash and review the same six factors manually.',
+    next_checkpoint: 'Run a versioned behavioral dataset with declared graders and compare the result with an accepted baseline.',
+    fallback: 'If behavioral evaluation is unavailable, keep the artifact in draft and do not claim readiness.',
   });
   expect(JSON.stringify(receipt)).not.toMatch(/confidence|%/i);
   await expect(page.getByRole('button', { name: 'Save receipt' })).toBeEnabled();

@@ -1,0 +1,167 @@
+{
+  "version": 1,
+  "updated_at": "2026-07-12T03:00:00Z",
+  "method": "Capability parity against current official platform documentation; no marketing or aggregate competitor score.",
+  "criteria": [
+    {
+      "id": "artifact-provenance",
+      "capability": "Source-backed artifact identity and provenance",
+      "reference": "https://platform.openai.com/docs/api-reference/evals/run-output-item-object?lang=node",
+      "status": "verified",
+      "evidence": "Active items retain source paths, source text, hashes, and generated-data fingerprints.",
+      "gate": "npm run catalog:evaluate"
+    },
+    {
+      "id": "artifact-versioning",
+      "capability": "Explicit artifact versions and timestamps",
+      "reference": "https://www.braintrust.dev/docs/evaluate/run-evaluations",
+      "status": "partial",
+      "evidence": "Git history exists, but active item timestamps remain legacy-unknown and prompt versions are not first-class experiment inputs.",
+      "gate": "No complete gate exists."
+    },
+    {
+      "id": "deterministic-lint",
+      "capability": "Fast deterministic structural checks",
+      "reference": "https://www.promptfoo.dev/docs/configuration/expected-outputs/",
+      "status": "verified",
+      "evidence": "Node and browser run the same deterministic six-factor lint and adversarial limitations are pinned.",
+      "gate": "npm run benchmark:evaluator"
+    },
+    {
+      "id": "versioned-datasets",
+      "capability": "Versioned evaluation datasets with inputs, references, and metadata",
+      "reference": "https://docs.langchain.com/langsmith/manage-datasets",
+      "status": "missing",
+      "evidence": "Synthetic failure fixtures exist but no versioned behavioral dataset contract exists.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "deterministic-output-graders",
+      "capability": "Code graders for output correctness and format",
+      "reference": "https://platform.openai.com/docs/api-reference/graders?api-mode=chat",
+      "status": "missing",
+      "evidence": "Current checks inspect prompt text or echo it; they do not grade generated task outputs.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "model-graders",
+      "capability": "Declared and calibrated model graders",
+      "reference": "https://docs.langchain.com/langsmith/evaluation-types",
+      "status": "missing",
+      "evidence": "No model judge runs or calibration records exist.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "provider-matrix",
+      "capability": "Multi-provider and multi-model test matrix",
+      "reference": "https://www.promptfoo.dev/docs/configuration/guide/",
+      "status": "missing",
+      "evidence": "The only configured provider is local echo.",
+      "gate": "No provider-backed gate exists."
+    },
+    {
+      "id": "immutable-experiments",
+      "capability": "Immutable experiment records and accepted baselines",
+      "reference": "https://www.braintrust.dev/docs/evaluate/run-evaluations",
+      "status": "missing",
+      "evidence": "No baseline ID or accepted candidate experiment is persisted.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "regression-diffs",
+      "capability": "Per-case and aggregate candidate-versus-baseline regression diffs",
+      "reference": "https://docs.langchain.com/langsmith/evaluation",
+      "status": "missing",
+      "evidence": "The console has no experiment comparison or regression budget.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "pairwise-comparison",
+      "capability": "Randomized pairwise evaluation",
+      "reference": "https://docs.langchain.com/langsmith/evaluate-pairwise",
+      "status": "missing",
+      "evidence": "No randomized pairwise evaluator or side-by-side output view exists.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "red-team",
+      "capability": "Adversarial model and agent red teaming",
+      "reference": "https://www.promptfoo.dev/docs/red-team/quickstart/",
+      "status": "missing",
+      "evidence": "Named adversarial prompt requirements do not attack a live model or application target.",
+      "gate": "No promptfoo redteam gate exists."
+    },
+    {
+      "id": "sandbox-and-approval",
+      "capability": "Sandboxed tool execution and approval policy",
+      "reference": "https://inspect.aisi.org.uk/tasks.html",
+      "status": "missing",
+      "evidence": "Inspect AI is installed locally but no PromptOS task, sandbox, or approval policy runs.",
+      "gate": "No Inspect task passes."
+    },
+    {
+      "id": "execution-limits",
+      "capability": "Message, token, time, work, cost, retry, and early-stop limits",
+      "reference": "https://inspect.aisi.org.uk/tasks.html",
+      "status": "missing",
+      "evidence": "No model evaluation run enforces bounded execution limits.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "cost-latency-errors",
+      "capability": "Cost, token, latency, and error budgets",
+      "reference": "https://docs.langchain.com/langsmith/evaluation",
+      "status": "missing",
+      "evidence": "Echo smoke records no provider cost or latency distribution.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "human-annotation",
+      "capability": "Human rubric and pairwise annotation queues",
+      "reference": "https://docs.langchain.com/langsmith/evaluation-concepts",
+      "status": "missing",
+      "evidence": "No reviewer, rubric response, disagreement, or adjudication record exists.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "online-evaluation",
+      "capability": "Evaluation on production traces",
+      "reference": "https://docs.langchain.com/langsmith/evaluation",
+      "status": "missing",
+      "evidence": "No production trace adapter or online evaluator exists.",
+      "gate": "No passing gate exists."
+    },
+    {
+      "id": "failure-promotion",
+      "capability": "Promote observed failures into regression datasets",
+      "reference": "https://docs.langchain.com/langsmith/evaluation",
+      "status": "partial",
+      "evidence": "Manual feedback promotion is deterministic, but production capture and dataset versioning are absent.",
+      "gate": "npm run feedback:verify"
+    },
+    {
+      "id": "reproducible-logs-resume",
+      "capability": "Reproducible logs, checkpoints, retry, and resume",
+      "reference": "https://inspect.aisi.org.uk/eval-logs.html",
+      "status": "partial",
+      "evidence": "Structural receipts and promptfoo output exist, but full experiment config and resumable run state do not.",
+      "gate": "npm run verify"
+    },
+    {
+      "id": "offline-local-workbench",
+      "capability": "Local, offline artifact browsing and evaluation",
+      "reference": "https://www.promptfoo.dev/docs/usage/command-line/",
+      "status": "verified",
+      "evidence": "The single-file console and local gates run with no model API.",
+      "gate": "npm run test:console"
+    },
+    {
+      "id": "desktop-lifecycle",
+      "capability": "Windows and macOS package, signing, update, and clean-host lifecycle",
+      "reference": "https://www.electronjs.org/docs/latest/tutorial/distribution-overview",
+      "status": "missing",
+      "evidence": "No desktop shell or target-host release proof exists; Electron versus Tauri 2 remains pending a repository-grounded ADR.",
+      "gate": "No Windows or macOS release gate has passed."
+    }
+  ]
+}

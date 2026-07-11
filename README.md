@@ -50,6 +50,10 @@ may appear through bounded read-only adapters or links.
 
 - [PromptOS ecosystem consolidation](docs/PROMPTOS-ECOSYSTEM.md)
 - [Machine-readable ecosystem registry](ecosystem/registry.json)
+- [Normative product contract](docs/PRODUCT-CONTRACT.md)
+- [Target architecture](docs/TARGET-ARCHITECTURE.md)
+- [Official-source evaluation benchmark](docs/EVALUATION-BENCHMARK.md)
+- [Machine-readable capability ledger](governance/capabilities.json)
 
 The registry names one canonical product and records the migration or retirement
 gate for known duplicate folders and repositories. It is validated by
@@ -57,9 +61,15 @@ gate for known duplicate folders and repositories. It is validated by
 
 ## The prompts
 
-The catalog contains 16 tracked prompts. `PROMPTS.md` is the canonical index;
-`npm run prompt:quality` enforces the 16-prompt baseline, a minimum deterministic
-score of 85/100 for every prompt, and the required adversarial cases.
+The active catalog contains 16 tracked prompts. `PROMPTS.md` is the canonical
+index; `npm run prompt:quality` enforces their structure contracts and named
+adversarial requirements. Its 0-100 result is structure lint only. It is not
+evidence of correctness, effectiveness, safety, maturity, or release readiness.
+
+The complete historical 159-record console catalog is preserved under
+`intake/legacy-console-v1/` and dispositioned by
+`governance/capabilities.json`; it is not silently discarded or represented as
+approved active content.
 
 | Workflow stage | Prompt coverage |
 | --- | --- |
@@ -76,11 +86,12 @@ npm ci
 npm run verify
 ```
 
-The verify gate runs prompt quality first, checks the generated console catalog,
-validates the typed `items[]`, task-report, and ecosystem schemas, validates promoted
-feedback regressions, runs local promptfoo smokes through the no-API `echo`
-provider, and launches Playwright Chromium against the static console and
-Evaluator tab.
+The verify gate runs prompt structure checks and the adversarial scorer benchmark,
+validates the capability ledger and historical intake, checks the generated
+console catalog, validates the typed `items[]`, task-report, and ecosystem
+schemas, validates promoted feedback regressions, runs local promptfoo smokes
+through the no-API `echo` provider, and launches Playwright Chromium against the
+static console and Evaluator tab.
 
 Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
 
@@ -88,9 +99,10 @@ Regenerate the console payload after editing `PROMPTS.md` or `prompts/*.md`:
 npm run catalog:build
 ```
 
-## Audits
+## Audits and benchmarks
 
 - [Prompt library audit - 2026-07-06](audits/prompt-library-audit-2026-07-06.md)
+- [Evaluation capability benchmark](docs/EVALUATION-BENCHMARK.md)
 
 ## Standards
 
@@ -120,7 +132,9 @@ through a connected PromptOS directory, the native open-file picker, the hidden
 file-input fallback, drag/drop, or paste. Every prompt receipt records the exact
 SHA-256 of the text actually evaluated and the Outcome Governance fields:
 Action, Evidence, Authority, Blockers, Next Checkpoint, and Fallback. Receipts
-use deterministic scores and verdicts, not confidence percentages.
+use deterministic structure-lint results and verdicts, not confidence
+percentages. Receipts explicitly state that effectiveness is not evaluated and
+that lint has no release authority.
 
 The header also displays a deterministic SHA-256 fingerprint of the exact
 embedded catalog, prompt sources, scoring runtime, and ecosystem registry. The

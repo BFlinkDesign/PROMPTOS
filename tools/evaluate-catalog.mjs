@@ -7,13 +7,13 @@ const minAverage = minAverageArg ? Number(minAverageArg.split('=')[1]) : null;
 const result = evaluateCatalog(process.cwd());
 
 if (minAverage !== null && result.averageScore < minAverage) {
-  result.errors.push(`average score ${result.averageScore}/100 is below ${minAverage}`);
+  result.errors.push(`average structure lint ${result.averageScore}/100 is below ${minAverage}`);
 }
 
 if (json) {
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 } else {
-  console.log(`PromptOS catalog: ${result.entries.length} prompts, average score ${result.averageScore}/100`);
+  console.log(`PromptOS catalog: ${result.entries.length} prompts, average structure lint ${result.averageScore}/100`);
   for (const entry of result.entries) {
     console.log(`- ${entry.filePath}: ${entry.score.total}/100, ${entry.inputs} inputs`);
   }

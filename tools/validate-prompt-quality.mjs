@@ -162,7 +162,7 @@ for (const row of catalogRows) {
   catalogBodies.set(filePath, body);
   const score = scorePrompt(body).total;
   if (score < minimumScore) {
-    failures.push(`${filePath}: deterministic catalog score ${score}/100 is below required minimum ${minimumScore}/100`);
+    failures.push(`${filePath}: deterministic structure lint ${score}/100 is below required minimum ${minimumScore}/100`);
   }
 }
 
@@ -256,4 +256,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`PromptOS prompt-quality validation passed: ${catalogRows.length} catalog prompts checked, minimum score ${minimumScore}/100, ${requiredCaseIds.length} adversarial cases covered`);
+console.log(`PromptOS prompt-contract validation passed: ${catalogRows.length} catalog prompts checked, minimum structure lint ${minimumScore}/100, ${requiredCaseIds.length} named adversarial contracts covered`);
