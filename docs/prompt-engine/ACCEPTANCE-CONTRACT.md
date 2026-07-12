@@ -106,6 +106,8 @@ proves holdout loader ordering and aggregate-only output, tests report
 redaction, enforces claim ordering, and tests retry, timeout, cancellation,
 token, cost, and attempt bounds.
 
-After this contract is accepted, the next artifact is a file-by-file salvage
-matrix for `origin/codex/prompt-engine-agent-team` with dispositions:
-`ACCEPT`, `PORT_WITH_REPAIR`, `REWRITE`, `DEFER`, or `DROP`.
+The audited next artifact is
+[`SALVAGE-MATRIX.md`](SALVAGE-MATRIX.md). It assigns every file on
+`origin/codex/prompt-engine-agent-team` exactly one disposition: `ACCEPT`,
+`PORT_WITH_REPAIR`, `REWRITE`, `DEFER`, or `DROP`. The matrix does not authorize
+a wholesale branch import.

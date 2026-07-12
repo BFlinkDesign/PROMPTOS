@@ -144,6 +144,13 @@ execution, and claim governance. No old engine code, provider integration, HTTP
 service, React workbench, or Electron shell is included, and no Prompt Engine
 runtime effectiveness is claimed.
 
+The stale branch now has a complete 33-file disposition in
+[`docs/prompt-engine/SALVAGE-MATRIX.md`](docs/prompt-engine/SALVAGE-MATRIX.md).
+No file qualifies for unchanged acceptance. Deterministic kernels may be
+reimplemented with repairs; authority-bearing contracts, providers, and release
+policy require rewrites; HTTP and the skill are deferred; the old UI and stale
+root wiring are dropped.
+
 ## Ecosystem Consolidation Boundary
 
 PromptOS is the single owner of reusable prompt artifacts, the catalog,
@@ -255,6 +262,8 @@ npm run verify -> exit 0
 - feedback: 2 failure cases and 2 promptfoo regression tests valid
 - promptfoo: 3 passed, 0 failed, 0 errors
 - Playwright Chromium: 25 passed
+- Prompt Engine acceptance: 14 tests; schema/hash/context validator passed
+- focused acceptance exploit replay: 9 demonstrated variants rejected
 ```
 
 The console renders the 16 tracked prompt blocks from `PROMPTS.md`. The complete
@@ -286,7 +295,8 @@ The console renders the 16 tracked prompt blocks from `PROMPTS.md`. The complete
 3. Add first workflow/playbook/runbook source artifacts and wire them into the
    generator.
 4. Implement the first read-only Sources adapter from the frontier radar export.
-5. Create the Prompt Engine file-level salvage matrix only after the acceptance
-   contract is accepted; do not rebase the stale branch wholesale.
+5. After the acceptance contract and salvage matrix are accepted, reimplement
+   only the deterministic utility, Pareto, and statistics kernel as the first
+   framework-neutral TypeScript port. Do not rebase the stale branch wholesale.
 6. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.

@@ -37,6 +37,8 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
     official-source capability parity and adversarial structural-lint limits.
 18. `intake/legacy-console-v1/` for the preserved 159-record historical
     catalog; intake is never active or authoritative without promotion gates.
+19. `docs/prompt-engine/ACCEPTANCE-CONTRACT.md` and
+    `docs/prompt-engine/SALVAGE-MATRIX.md` for the Prompt Engine import boundary.
 
 ## Ecosystem Boundary
 
@@ -252,8 +254,8 @@ The repo has the durable deterministic spine. Continue hardening in this order:
    content model is settled.
 3. Backfill real `created_at` and `updated_at` values from Git history instead
    of inventing dates.
-4. Correct the unmerged Prompt Engine branch's holdout-selection, provenance,
-   cost-accounting, and report-redaction defects before considering a merge.
+4. Follow the Prompt Engine salvage matrix. Port the deterministic kernel first;
+   rewrite authority-bearing boundaries and never merge the stale branch.
 5. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.
 6. Record Inspect AI and DeepEval starter examples only after the deterministic
