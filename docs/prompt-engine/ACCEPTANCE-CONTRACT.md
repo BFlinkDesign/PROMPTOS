@@ -27,7 +27,9 @@ No lower claim may be represented as a higher one.
 
 ## Immutable Inputs
 
-`tests/fixtures/engine/acceptance-manifest.v1.json` binds by SHA-256:
+`tests/fixtures/engine/acceptance-manifest.v1.json` binds canonical UTF-8 text
+by SHA-256. A UTF-8 BOM is removed and CRLF/CR line endings are normalized to LF
+before hashing so Git checkouts retain one identity across operating systems:
 
 - the public development dataset;
 - the offline replay provider;

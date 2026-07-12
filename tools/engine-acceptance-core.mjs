@@ -44,8 +44,12 @@ export function hashJson(value) {
   return sha256(canonicalJson(value));
 }
 
+export function canonicalText(value) {
+  return value.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
+}
+
 export function hashFile(filePath) {
-  return sha256(fs.readFileSync(filePath));
+  return sha256(canonicalText(fs.readFileSync(filePath, 'utf8')));
 }
 
 function deepFreeze(value) {

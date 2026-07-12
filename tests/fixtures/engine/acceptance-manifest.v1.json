@@ -17,11 +17,11 @@
   "baselines": [
     {
       "prompt_path": "prompts/decision-matrix.md",
-      "prompt_sha256": "89a2c667b2a62915036ba48fbda12815be2ab30d3b609c5ce0831198e4bc4214"
+      "prompt_sha256": "956dfc3031b220f0199adcf5e94014ffdf70d719553eb5abc9358db2aa286503"
     },
     {
       "prompt_path": "prompts/scope-pipeline.md",
-      "prompt_sha256": "2109828a072b41bbcd7aedb437f4df93c9b780b9402fbd6714365a90b574ec0a"
+      "prompt_sha256": "6d4bbf00fe5c521e10bcf785da48b292994fe72860b34d2c8aa57b8d4ea274eb"
     }
   ],
   "pricing": {

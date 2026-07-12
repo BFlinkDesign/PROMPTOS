@@ -6,6 +6,7 @@ import {
   RetryableOperationError,
   assertComparableCosts,
   assertSafeReport,
+  canonicalText,
   createReplayProvider,
   deriveClaimState,
   evaluateConcealedHoldout,
@@ -32,6 +33,11 @@ test('manifest hashes bind every tracked input and accepted baseline', () => {
   for (const baseline of manifest.baselines) {
     assert.equal(hashFile(path.join(root, baseline.prompt_path)), baseline.prompt_sha256);
   }
+});
+
+test('canonical text identity is stable across BOM and platform line endings', () => {
+  assert.equal(canonicalText('\uFEFFalpha\r\nbeta\r'), 'alpha\nbeta\n');
+  assert.equal(sha256(canonicalText('alpha\r\nbeta\r')), sha256('alpha\nbeta\n'));
 });
 
 test('offline replay is input-bound and passes deterministic public graders', async () => {
