@@ -112,6 +112,11 @@ async function loadEvidence({ github, owner, repo, headSha, core, attempt }) {
     ref: headSha,
     filter: 'all',
     per_page: 100,
+  }, (response) => {
+    const data = response?.data;
+    return Array.isArray(data)
+      ? data
+      : (Array.isArray(data?.check_runs) ? data.check_runs : []);
   }));
   await read('rollup', () => loadRollup(github, owner, repo, headSha));
   await read('workflowRuns', async () => {

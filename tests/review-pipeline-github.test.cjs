@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 
 const {
   deleteBranchIfUnchanged,
+  loadEvidence,
   resolvePullRequest,
   runGitHubReviewPipeline,
 } = require('../tools/review-pipeline-github.cjs');
@@ -89,6 +90,70 @@ test('preserves a branch that moved after the verified merge head', async () => 
   assert.equal(deleted, false);
 });
 
+test('check-run pagination flattens the REST wrapper into actual check runs', async () => {
+  const checkRun = {
+    id: 10,
+    name: 'npm run verify',
+    app: { slug: 'github-actions' },
+  };
+  const github = {
+    paginate: async (method, args, map) => {
+      const response = await method(args);
+      return map ? map(response) : response.data;
+    },
+    graphql: async () => ({ repository: { object: null } }),
+    rest: {
+      actions: { listWorkflowRunsForRepo: async () => ({ data: [] }) },
+      checks: {
+        listCheckRunsForRef: async () => ({
+          data: { total_count: 1, check_runs: [checkRun] },
+        }),
+      },
+      repos: { listCommitStatusesForRef: async () => ({ data: [] }) },
+    },
+  };
+
+  const snapshot = await loadEvidence({
+    github,
+    owner: 'BFlinkDesign',
+    repo: 'PROMPTOS',
+    headSha: HEAD,
+    core: { info: () => {}, warning: () => {} },
+    attempt: 1,
+  });
+
+  assert.deepEqual(snapshot.checkRuns, [checkRun]);
+  assert.equal(snapshot.sourceErrors.length, 0);
+});
+
+test('check-run pagination preserves an already-array response shape', async () => {
+  const checkRun = { id: 11, name: 'security scan', app: { slug: 'github-actions' } };
+  const github = {
+    paginate: async (method, args, map) => {
+      const response = await method(args);
+      return map ? map(response) : response.data;
+    },
+    graphql: async () => ({ repository: { object: null } }),
+    rest: {
+      actions: { listWorkflowRunsForRepo: async () => ({ data: [] }) },
+      checks: { listCheckRunsForRef: async () => ({ data: [checkRun] }) },
+      repos: { listCommitStatusesForRef: async () => ({ data: [] }) },
+    },
+  };
+
+  const snapshot = await loadEvidence({
+    github,
+    owner: 'BFlinkDesign',
+    repo: 'PROMPTOS',
+    headSha: HEAD,
+    core: { info: () => {}, warning: () => {} },
+    attempt: 1,
+  });
+
+  assert.deepEqual(snapshot.checkRuns, [checkRun]);
+  assert.equal(snapshot.sourceErrors.length, 0);
+});
+
 test('GitHub adapter performs a SHA-bound squash merge and emits a receipt', async () => {
   const mergeCalls = [];
   let merged = false;
@@ -107,7 +172,7 @@ test('GitHub adapter performs a SHA-bound squash merge and emits a receipt', asy
   };
 
   const endpoints = {
-    listCheckRunsForRef: async () => ({ data: [checkRun] }),
+    listCheckRunsForRef: async () => ({ data: { total_count: 1, check_runs: [checkRun] } }),
     listWorkflowRunsForRepo: async () => ({ data: [] }),
     listCommitStatusesForRef: async () => ({ data: [] }),
     listComments: async () => ({ data: comments }),
@@ -115,7 +180,10 @@ test('GitHub adapter performs a SHA-bound squash merge and emits a receipt', asy
     listPulls: async () => ({ data: [pullRequest()] }),
   };
   const github = {
-    paginate: async (method, args) => (await method(args)).data,
+    paginate: async (method, args, map) => {
+      const response = await method(args);
+      return map ? map(response) : response.data;
+    },
     graphql: async () => ({
       repository: {
         object: {
