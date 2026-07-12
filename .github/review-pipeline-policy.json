@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "requiredChecks": [
+    { "appSlug": "github-actions", "name": "npm run verify" },
+    { "appSlug": "github-actions", "name": "Analyze (actions)" },
+    { "appSlug": "github-actions", "name": "Analyze (javascript-typescript)" },
+    { "appSlug": "github-advanced-security", "name": "CodeQL" },
+    { "appSlug": "coderabbitai", "name": "CodeRabbit" },
+    { "appSlug": "gitguardian", "name": "GitGuardian Security Checks" },
+    { "appSlug": "socket-security", "name": "Socket Security: Project Report" },
+    { "appSlug": "socket-security", "name": "Socket Security: Pull Request Alerts" }
+  ],
+  "additionalObservedChecksAreGating": true,
+  "stableObservations": 2
+}
