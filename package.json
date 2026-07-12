@@ -7,6 +7,7 @@
     "capabilities:validate": "node tools/validate-capabilities.mjs",
     "benchmark:evaluator": "node tools/benchmark-evaluator.mjs",
     "benchmark:platform": "node tools/benchmark-platform.mjs",
+    "pages:build": "node tools/build-pages.mjs",
     "eval:snapshot": "promptfoo eval -o snapshots/promptfoo-results.json",
     "eval:promptfoo": "promptfoo eval",
     "feedback:promote": "node tools/promote.js",
@@ -14,10 +15,11 @@
     "prompt:quality": "node tools/validate-prompt-quality.mjs",
     "schema:validate": "node tools/validate-items.mjs",
     "test:review-pipeline": "node --test tests/review-pipeline-gate.test.cjs tests/review-pipeline-github.test.cjs",
+    "test:pages": "node --test tests/pages-build.test.mjs",
     "test:console": "playwright test",
     "tool:promptfoo": "promptfoo --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run capabilities:validate && npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run eval:promptfoo && npm run test:console"
+    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run capabilities:validate && npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:pages && npm run eval:promptfoo && npm run test:console"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
