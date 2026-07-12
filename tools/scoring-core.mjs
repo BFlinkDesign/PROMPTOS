@@ -1,6 +1,27 @@
+export function parsePromptStructure(body) {
+  const source = String(body || '').replace(/\r\n/g, '\n');
+  const headings = [];
+  const sections = new Map();
+  let current = '';
+  for (const line of source.split('\n')) {
+    const heading = line.match(/^(#{1,6})\s+(.+?)\s*$/);
+    if (heading) {
+      current = normalizeHeading(heading[2]);
+      headings.push({ depth: heading[1].length, title: stripMarkdown(heading[2]), key: current });
+      if (!sections.has(current)) sections.set(current, []);
+      continue;
+    }
+    if (current) sections.get(current).push(line);
+  }
+  return {
+    source,
+    headings,
+    sections: Object.fromEntries([...sections].map(([key, lines]) => [key, lines.join('\n').trim()])),
+  };
+}
+
 export function extractTitle(body) {
-  const match = String(body || '').match(/^#\s+(.+)$/m);
-  return match ? stripMarkdown(match[1]) : '';
+  return parsePromptStructure(body).headings.find((heading) => heading.depth === 1)?.title || '';
 }
 
 export function extractSummary(body) {
@@ -44,14 +65,19 @@ export function extractRules(body) {
 export function scorePrompt(body) {
   const source = String(body || '');
   const text = source.toLowerCase();
+  const structure = parsePromptStructure(source);
+  const sectionKeys = new Set(Object.keys(structure.sections));
   const inputs = extractInputs(source);
   const factors = {
-    title: /^#\s+.+$/m.test(source) ? 15 : 0,
+    title: structure.headings.some((heading) => heading.depth === 1) ? 15 : 0,
     bodyLength: source.trim().length >= 250 ? 15 : source.trim().length >= 120 ? 8 : 0,
     inputs: inputs.length ? 15 : 0,
-    verification: /\b(verify|gate|evidence|cite|citation|hash|recompute|source)\b/.test(text) ? 20 : 0,
-    outputContract: /\b(produce|emit|return|deliver|ending|output|matrix|summary|plan)\b/.test(text) ? 20 : 0,
-    boundaries: /\b(never|do not|if .*missing|ambiguous|unknown|assumption|trust)\b/.test(text) ? 15 : 0,
+    verification: hasSection(sectionKeys, ['verification', 'evidence', 'gates', 'acceptance gates'])
+      || /\b(verify|gate|evidence|cite|citation|hash|recompute|source)\b/.test(text) ? 20 : 0,
+    outputContract: hasSection(sectionKeys, ['required output', 'output', 'expected outputs', 'deliverables'])
+      || /\b(produce|emit|return|deliver|ending|output|matrix|summary|plan)\b/.test(text) ? 20 : 0,
+    boundaries: hasSection(sectionKeys, ['boundaries', 'failure handling', 'failure modes', 'rollback'])
+      || /\b(never|do not|if .*missing|ambiguous|unknown|assumption|trust)\b/.test(text) ? 15 : 0,
   };
   const total = Object.values(factors).reduce((sum, value) => sum + value, 0);
   return { total, factors };
@@ -68,6 +94,101 @@ export function verdictForScore(score) {
   if (score >= 85) return 'structural-complete';
   if (score >= 60) return 'structural-partial';
   return 'structural-incomplete';
+}
+
+export function generatePrompt({
+  title = 'Generated prompt',
+  objective = '',
+  inputs = ['TASK'],
+  constraints = '',
+  verification = '',
+  output = '',
+} = {}) {
+  const normalizedObjective = String(objective || '').trim();
+  if (!normalizedObjective) {
+    throw new Error('A prompt objective is required.');
+  }
+
+  const normalizedTitle = cleanHeading(title) || 'Generated prompt';
+  const inputLabels = normalizeInputLabels(inputs);
+  const constraintLines = toListItems(constraints);
+  const verificationText = String(verification || '').trim()
+    || 'Verify the result against the named source of truth, run every declared gate, and record the observed evidence.';
+  const outputText = String(output || '').trim()
+    || 'Return exactly: Action, Evidence, Authority, Blockers, Next checkpoint, and Fallback.';
+
+  return [
+    `# ${normalizedTitle}`,
+    '',
+    '## Objective',
+    normalizedObjective,
+    '',
+    '## Inputs',
+    ...inputLabels.map((label) => `- [${label}]: Supply this value before execution.`),
+    '',
+    '## Operating rules',
+    ...(constraintLines.length ? constraintLines : ['- Follow the governing repository contract and current source-of-truth evidence.']),
+    '- Do not invent missing evidence, credentials, runtime behavior, or completion claims.',
+    '- If a required input is missing or ambiguous, identify the blocker and state how to obtain it.',
+    '',
+    '## Verification',
+    verificationText,
+    '',
+    '## Required output',
+    outputText,
+    '',
+    '## Failure handling',
+    'If a gate fails, preserve the evidence, stop consequential action, and return the smallest recovery or rollback path.',
+  ].join('\n');
+}
+
+export function improvePrompt(sourceText = '') {
+  const source = String(sourceText ?? '').replace(/\r\n/g, '\n');
+  const originalScore = scorePrompt(source);
+  const additions = [];
+  const changes = [];
+  let prefix = '';
+
+  if (originalScore.factors.title === 0) {
+    prefix = `# ${deriveTitle(source)}\n\n`;
+    changes.push({ factor: 'title', action: 'Added an H1 title derived from the source.' });
+  }
+  if (originalScore.factors.inputs === 0) {
+    additions.push('## Inputs\n- [TASK]: Provide the task or requested outcome before execution.');
+    changes.push({ factor: 'inputs', action: 'Added an explicit fill-in input contract.' });
+  }
+  if (originalScore.factors.verification === 0) {
+    additions.push('## Verification\nVerify the result against the governing source of truth, run every declared gate, and record the observed evidence.');
+    changes.push({ factor: 'verification', action: 'Added evidence and gate requirements.' });
+  }
+  if (originalScore.factors.outputContract === 0) {
+    additions.push('## Required output\nReturn exactly: Action, Evidence, Authority, Blockers, Next checkpoint, and Fallback.');
+    changes.push({ factor: 'outputContract', action: 'Added an explicit output contract.' });
+  }
+  if (originalScore.factors.boundaries === 0) {
+    additions.push('## Boundaries\nDo not invent missing facts, credentials, test results, or runtime behavior. If required evidence is missing or ambiguous, identify the blocker and state how to obtain it.');
+    changes.push({ factor: 'boundaries', action: 'Added missing-input and prohibited-behavior boundaries.' });
+  }
+
+  let candidateText = prefix + source;
+  for (const addition of additions) {
+    const separator = !candidateText ? '' : candidateText.endsWith('\n\n') ? '' : candidateText.endsWith('\n') ? '\n' : '\n\n';
+    candidateText += `${separator}${addition}`;
+  }
+  const candidateScore = scorePrompt(candidateText);
+  const unresolved = buildFactorEvidence(candidateScore.factors)
+    .filter((item) => item.points < item.maximum)
+    .map((item) => blockerForFactor(item.factor));
+
+  return {
+    sourceText: source,
+    candidateText,
+    originalScore,
+    candidateScore,
+    changes,
+    unresolved,
+    limitation: 'Structural repair does not establish correctness, safety, cost, latency, or real-world effectiveness.',
+  };
 }
 
 export async function buildEvaluationReceipt({
@@ -116,6 +237,40 @@ export function normalizeText(value) {
     .replace(/\r?\n+/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function cleanHeading(value) {
+  return stripMarkdown(String(value || '').replace(/^#+\s*/, '')).replace(/[\r\n]+/g, ' ').trim().slice(0, 120);
+}
+
+function normalizeHeading(value) {
+  return stripMarkdown(value).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function hasSection(sectionKeys, accepted) {
+  return accepted.some((key) => sectionKeys.has(key));
+}
+
+function deriveTitle(source) {
+  const firstLine = String(source || '').split(/\r?\n/).map((line) => line.trim()).find(Boolean) || '';
+  return cleanHeading(firstLine).replace(/[.!?:;]+$/, '') || 'Improved prompt';
+}
+
+function normalizeInputLabels(inputs) {
+  const values = Array.isArray(inputs) ? inputs : String(inputs || '').split(/[,\n]/);
+  const labels = [...new Set(values
+    .map((value) => String(value || '').replace(/^\[|\]$/g, '').trim().toUpperCase())
+    .map((value) => value.replace(/[^A-Z0-9 /&._-]/g, '').slice(0, 80))
+    .filter(Boolean))];
+  return labels.length ? labels : ['TASK'];
+}
+
+function toListItems(value) {
+  return String(value || '')
+    .split(/\r?\n/)
+    .map((line) => line.trim().replace(/^[-*]\s+/, ''))
+    .filter(Boolean)
+    .map((line) => `- ${line}`);
 }
 
 function stripMarkdown(value) {

@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { parse as parseYaml } from 'yaml';
 import {
   extractInputs,
   extractRules,
@@ -11,6 +12,7 @@ import {
 } from './scoring-core.mjs';
 
 const MAX_PROMPT_SOURCE_BYTES = 1024 * 1024;
+const TYPED_ARTIFACT_FOLDERS = ['workflows', 'playbooks', 'runbooks'];
 
 export function readText(filePath) {
   return fs.readFileSync(filePath, 'utf8');
@@ -55,8 +57,72 @@ export function loadPromptEntries(rootDir = process.cwd()) {
       inputs: extractInputs(body),
       rules: extractRules(body),
       score: scorePrompt(body),
+      id: promptId(markdownPath),
+      artifactType: 'prompt',
+      expectedOutputFormat: row.catalogTitle,
+      domain: 'Core Prompt Blocks',
+      tags: tagsFor({ ...row, markdownPath }),
+      maturity: maturityForScore(scorePrompt(body).total),
+      createdAt: 'legacy-unknown',
+      updatedAt: 'legacy-unknown',
+      stage: stageForPrompt(row.number),
+      compatibility: ['universal'],
+      enforcement: 'guidance',
     };
   });
+}
+
+export function loadTypedArtifactEntries(rootDir = process.cwd()) {
+  return TYPED_ARTIFACT_FOLDERS.flatMap((folder) => {
+    const folderPath = path.join(rootDir, folder);
+    if (!fs.existsSync(folderPath)) return [];
+    return fs.readdirSync(folderPath, { withFileTypes: true })
+      .filter((entry) => entry.isFile() && entry.name.endsWith('.md'))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((entry) => {
+        const markdownPath = `${folder}/${entry.name}`;
+        const absolutePath = path.join(folderPath, entry.name);
+        if (fs.statSync(absolutePath).size > MAX_PROMPT_SOURCE_BYTES) {
+          throw new Error(`artifact source exceeds ${MAX_PROMPT_SOURCE_BYTES} bytes: ${markdownPath}`);
+        }
+        const source = normalizeNewlines(readText(absolutePath));
+        const { metadata, content } = parseArtifactFrontmatter(source, markdownPath);
+        const artifactType = folder.slice(0, -1);
+        if (metadata.type !== artifactType) {
+          throw new Error(`${markdownPath}: front matter type must be ${artifactType}`);
+        }
+        const score = scorePrompt(content);
+        return {
+          number: null,
+          catalogTitle: metadata.title,
+          filePath: markdownPath.replaceAll('/', path.sep),
+          markdownPath,
+          absolutePath,
+          exists: true,
+          body: content,
+          title: metadata.title,
+          summary: metadata.summary,
+          inputs: extractInputs(content),
+          rules: extractRules(content),
+          score,
+          id: metadata.id,
+          artifactType,
+          expectedOutputFormat: metadata.expected_output_format || `Follow the ${artifactType} required-output section.`,
+          domain: metadata.domain,
+          tags: uniqueStrings(metadata.tags),
+          maturity: metadata.maturity,
+          createdAt: metadata.created_at,
+          updatedAt: metadata.updated_at,
+          stage: metadata.stage,
+          compatibility: uniqueStrings(metadata.compatibility),
+          enforcement: metadata.enforcement,
+        };
+      });
+  });
+}
+
+export function loadArtifactEntries(rootDir = process.cwd()) {
+  return [...loadPromptEntries(rootDir), ...loadTypedArtifactEntries(rootDir)];
 }
 
 export function resolvePromptSourcePath(rootDir, sourcePath) {
@@ -79,29 +145,33 @@ export function resolvePromptSourcePath(rootDir, sourcePath) {
 }
 
 export function buildConsoleData(rootDir = process.cwd()) {
-  const entries = loadPromptEntries(rootDir);
+  const entries = loadArtifactEntries(rootDir);
   const ecosystem = loadEcosystemRegistry(rootDir);
-  const ids = entries.map((entry) => promptId(entry.markdownPath));
+  const ids = entries.map((entry) => entry.id);
   const items = entries.map((entry, index) => ({
     id: ids[index],
-    type: 'prompt',
+    type: entry.artifactType,
     source_path: entry.markdownPath,
     title: entry.title,
     summary: entry.summary,
     input_requirements: entry.inputs,
-    expected_output_format: entry.catalogTitle,
+    expected_output_format: entry.expectedOutputFormat,
     rules: entry.rules,
-    domain: 'Core Prompt Blocks',
-    tags: tagsFor(entry),
-    maturity: maturityForScore(entry.score.total),
-    created_at: 'legacy-unknown',
-    updated_at: 'legacy-unknown',
+    domain: entry.domain,
+    tags: entry.tags,
+    maturity: entry.maturity,
+    created_at: entry.createdAt,
+    updated_at: entry.updatedAt,
+    stage: entry.stage,
+    compatibility: entry.compatibility,
+    enforcement: entry.enforcement,
     score: entry.score.total,
     related: relatedIds(ids, index),
   }));
   const prompts = items.map((item, index) => ({
     id: item.id,
     volume: 'core',
+    type: item.type,
     domain: item.domain,
     num: entries[index].number,
     title: item.title,
@@ -111,6 +181,10 @@ export function buildConsoleData(rootDir = process.cwd()) {
     inputs: item.input_requirements,
     rules: item.rules,
     enforceable: item.maturity !== 'draft',
+    maturity: item.maturity,
+    stage: item.stage,
+    compatibility: item.compatibility,
+    enforcement: item.enforcement,
     tags: item.tags,
     related: relatedIds(ids, index),
     source_path: item.source_path,
@@ -123,7 +197,7 @@ export function buildConsoleData(rootDir = process.cwd()) {
     'duplicate-checkout',
   ]);
   const sourceMaterial = [
-    normalizeNewlines(readText(path.join(rootDir, 'PROMPTS.md'))),
+    ...['PROMPTS.md', 'WORKFLOWS.md', 'PLAYBOOKS.md', 'RUNBOOKS.md'].map((file) => readOptionalText(path.join(rootDir, file))),
     ...entries.map((entry) => `${entry.markdownPath}\n${entry.body}`),
     readOptionalText(path.join(rootDir, 'tools', 'scoring-core.mjs')),
     JSON.stringify(ecosystem),
@@ -131,7 +205,7 @@ export function buildConsoleData(rootDir = process.cwd()) {
   const sourceFingerprint = crypto.createHash('sha256').update(sourceMaterial, 'utf8').digest('hex');
   const assets = Array.isArray(ecosystem.assets) ? ecosystem.assets : [];
   const catalogMeta = {
-    canonical_source: 'PROMPTS.md + prompts/*.md',
+    canonical_source: 'PROMPTS.md + prompts/*.md + typed artifact front matter',
     reviewed_artifact_count: items.length,
     source_registry_count: assets.length,
     action_required_count: assets.filter((asset) => actionRequiredStatuses.has(asset.status)).length,
@@ -189,6 +263,7 @@ export function buildScoringRuntime(rootDir = process.cwd()) {
   return `${browserSource.trim()}
 
 globalThis.PromptOSScoring = Object.freeze({
+  parsePromptStructure,
   extractTitle,
   extractSummary,
   extractInputs,
@@ -196,6 +271,8 @@ globalThis.PromptOSScoring = Object.freeze({
   scorePrompt,
   maturityForScore,
   verdictForScore,
+  generatePrompt,
+  improvePrompt,
   buildEvaluationReceipt,
   normalizeText,
 });`;
@@ -226,22 +303,25 @@ ${html.slice(end)}`;
 }
 
 export function evaluateCatalog(rootDir = process.cwd()) {
-  const entries = loadPromptEntries(rootDir);
+  const entries = loadArtifactEntries(rootDir);
   const generated = buildConsoleData(rootDir);
   const errors = [];
   const warnings = [];
 
   if (!entries.length) {
-    errors.push('PROMPTS.md has no catalog rows');
+    errors.push('catalog has no artifact entries');
   }
 
   const seenPaths = new Set();
   const seenNumbers = new Set();
+  const seenIds = new Set();
   for (const entry of entries) {
-    if (seenNumbers.has(entry.number)) {
+    if (entry.number !== null && seenNumbers.has(entry.number)) {
       errors.push(`duplicate catalog number ${entry.number}`);
     }
-    seenNumbers.add(entry.number);
+    if (entry.number !== null) seenNumbers.add(entry.number);
+    if (seenIds.has(entry.id)) errors.push(`duplicate catalog id ${entry.id}`);
+    seenIds.add(entry.id);
     if (seenPaths.has(entry.markdownPath)) {
       errors.push(`duplicate catalog file ${entry.markdownPath}`);
     }
@@ -303,12 +383,41 @@ export function evaluateCatalog(rootDir = process.cwd()) {
     averageScore,
     entries: entries.map((entry) => ({
       number: entry.number,
+      type: entry.artifactType,
       filePath: entry.markdownPath,
       title: entry.title,
       score: entry.score,
       inputs: entry.inputs.length,
     })),
   };
+}
+
+function parseArtifactFrontmatter(source, markdownPath) {
+  const lines = String(source || '').split('\n');
+  if (lines[0] !== '---') throw new Error(`${markdownPath}: YAML front matter is required`);
+  const end = lines.indexOf('---', 1);
+  if (end === -1) throw new Error(`${markdownPath}: YAML front matter is not terminated`);
+  const metadata = parseYaml(lines.slice(1, end).join('\n')) || {};
+  const required = ['id', 'type', 'title', 'summary', 'created_at', 'updated_at', 'maturity', 'domain', 'tags', 'stage', 'compatibility', 'enforcement'];
+  for (const field of required) {
+    if (metadata[field] === undefined || metadata[field] === null || metadata[field] === '') {
+      throw new Error(`${markdownPath}: missing front matter field ${field}`);
+    }
+  }
+  return { metadata, content: lines.slice(end + 1).join('\n').trim() };
+}
+
+function uniqueStrings(value) {
+  if (!Array.isArray(value) || !value.length) throw new Error('metadata list must contain at least one value');
+  return [...new Set(value.map((item) => String(item).trim()).filter(Boolean))];
+}
+
+function stageForPrompt(number) {
+  if (number <= 2) return 'align';
+  if (number <= 7) return 'plan';
+  if (number <= 10) return 'build';
+  if (number <= 14) return 'verify';
+  return 'learn';
 }
 
 function findJsonEnd(source, start) {

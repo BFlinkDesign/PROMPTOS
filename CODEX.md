@@ -17,8 +17,10 @@ thin `agent/PROMPTS.md` pointer that names this repo as the canonical source.
 1. `PROJECT-STATE.md` for current branch, PR, gates, caveats, and next actions.
 2. `README.md` for repo purpose and workflow.
 3. `OGS.md` for the normative Outcome Governance Standard.
-4. `PROMPTS.md` for the tracked prompt catalog.
-5. `prompts/*.md` for individual prompt blocks.
+4. `PROMPTS.md`, `WORKFLOWS.md`, `PLAYBOOKS.md`, and `RUNBOOKS.md` for the
+   tracked artifact catalogs.
+5. `prompts/*.md`, `workflows/*.md`, `playbooks/*.md`, and `runbooks/*.md` for
+   individual artifacts.
 6. `schema/items.schema.json` for the typed artifact contract.
 7. `tools/scoring-core.mjs` for the shared deterministic scoring rules.
 8. `feedback/` for raw failure staging.
@@ -126,6 +128,7 @@ Catalog and console hardening:
 ```powershell
 npm run catalog:build
 npm run catalog:evaluate
+npm run catalog:workbench-audit
 npm run schema:validate
 npm run feedback:promote
 npm run feedback:verify
@@ -246,10 +249,10 @@ become authoritative only after passing the measurement verification gate.
 
 The repo has the durable deterministic spine. Continue hardening in this order:
 
-1. Add 3 to 5 high-value promptfoo regression cases beyond the current local
-   echo smoke.
-2. Add first-class workflow, playbook, and runbook source directories once their
-   content model is settled.
+1. Add versioned behavioral cases and credential-gated provider runs beyond the
+   current local Promptfoo echo smoke.
+2. Expand the first-class workflow, playbook, and runbook cohorts only with
+   artifact-specific acceptance cases.
 3. Backfill real `created_at` and `updated_at` values from Git history instead
    of inventing dates.
 4. Correct the unmerged Prompt Engine branch's holdout-selection, provenance,

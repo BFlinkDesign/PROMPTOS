@@ -130,17 +130,17 @@ if (contract.schema_version !== '1.0') {
 }
 
 const minimumScore = Number(contract.minimum_catalog_score ?? 85);
-const expectedCatalogCount = Number(contract.expected_catalog_count);
+const expectedPromptCount = Number(contract.expected_prompt_count ?? contract.expected_catalog_count);
 const requiredCaseIds = contract.required_adversarial_case_ids || [];
 const globalForbiddenTerms = (contract.forbidden_terms || []).map(asForbiddenTerm);
 const catalogRows = parsePromptCatalog(rootDir);
 const catalogPaths = new Set(catalogRows.map((row) => normalizePath(row.markdownPath)));
 const catalogBodies = new Map();
 
-if (!Number.isInteger(expectedCatalogCount) || expectedCatalogCount < 1) {
-  failures.push('tests/prompt-quality-contracts.json: expected_catalog_count must be a positive integer');
-} else if (catalogRows.length !== expectedCatalogCount) {
-  failures.push(`catalog suite: expected ${expectedCatalogCount} catalog prompts, found ${catalogRows.length}`);
+if (!Number.isInteger(expectedPromptCount) || expectedPromptCount < 1) {
+  failures.push('tests/prompt-quality-contracts.json: expected_prompt_count must be a positive integer');
+} else if (catalogRows.length !== expectedPromptCount) {
+  failures.push(`catalog suite: expected ${expectedPromptCount} catalog prompts, found ${catalogRows.length}`);
 }
 
 for (const row of catalogRows) {

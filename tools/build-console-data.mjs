@@ -25,4 +25,4 @@ const next = replaceConsoleScoring(
   buildScoringRuntime(rootDir),
 );
 fs.writeFileSync(consolePath, next, 'utf8');
-console.log(`updated ${path.relative(rootDir, consolePath)} with ${data.count} prompts`);
+console.log(`updated ${path.relative(rootDir, consolePath)} with ${data.count} artifacts`);

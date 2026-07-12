@@ -1,4 +1,4 @@
-description: PromptOS local no-API prompt smoke
+description: PromptOS local no-API structural regression smoke; not behavioral evaluation
 
 prompts:
   - file://tools/promptfoo-dynamic-prompt.js
