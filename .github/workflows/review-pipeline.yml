@@ -4,7 +4,8 @@ name: Review Pipeline
 #
 #   Layer 1 REVIEW : CodeRabbit (.coderabbit.yaml) + Gemini Code Assist (.gemini/)
 #                    comment on the PR. Cross-vendor, advisory only.
-#   Layer 2 GATE   : ALL GitHub Actions check runs for the PR head SHA must be green.
+#   Layer 2 GATE   : All observed check runs and commit statuses for the authoritative
+#                    PR head SHA must be green across first- and third-party apps.
 #                    This is the merge gate — there is no human merge gate.
 #   Layer 3 ACT    : this workflow. When every CI check on a PR head is green it
 #                    squash-merges and deletes the branch; when one is red it raises
@@ -14,16 +15,24 @@ name: Review Pipeline
 # status; alert ONLY on real BROKE (CI red) or THREAT (security scanner red);
 # a final "merged" status when it lands. No per-step pings.
 #
-# Dynamic gating: no hardcoded workflow names. Any GitHub Actions check run for the
-# head SHA is a gate. Repos with no CI checks get review-only (no auto-merge).
+# Dynamic gating: no hardcoded check names. REST Checks, GraphQL status rollup,
+# Actions workflow runs, and commit statuses are bounded alternate evidence sources.
+# The complete check set must be stable across two observations before merge. Repos
+# with no visible CI evidence get review-only (no auto-merge), and stacked PR bases
+# are never eligible for this autonomous merge lane.
 #
-# Fires on any workflow_run completion. Skips base branches (master/main/maintenance).
-# Skips its own runs to avoid self-loops.
+# Fires on named workflow completion plus third-party check-suite and legacy-status
+# completion. The merge request is bound to the verified head SHA.
 
-on:
+# workflow_run supplies metadata only; the job checks out and executes the pinned
+# adapter from the trusted default branch and binds mutation to a fresh PR head SHA.
+on: # zizmor: ignore[dangerous-triggers] reviewed privileged metadata trigger
   workflow_run:
     workflows: ["CodeQL Advanced", "PromptOS Verify"]
     types: [completed]
+  check_suite:
+    types: [completed]
+  status:
   pull_request:
     types: [closed]
   workflow_dispatch:
@@ -32,14 +41,10 @@ on:
         description: Head branch to evaluate (manual act run)
         required: false
 
-permissions:
-  checks: read
-  contents: write
-  pull-requests: write
-  issues: write
+permissions: {}
 
 concurrency:
-  group: review-pipeline-${{ github.event.workflow_run.head_branch || github.event.pull_request.number || github.event.inputs.branch || github.run_id }}
+  group: review-pipeline-${{ github.event.workflow_run.head_branch || github.event.check_suite.head_branch || github.event.pull_request.number || github.event.inputs.branch || github.event.sha || github.run_id }}
   cancel-in-progress: false
 
 jobs:
@@ -48,140 +53,32 @@ jobs:
   # ---------------------------------------------------------------------------
   act:
     name: gate -> merge | alert
+    permissions:
+      actions: read # List workflow runs for the authoritative head SHA.
+      checks: read # Read first- and third-party check runs.
+      contents: write # Perform a SHA-bound merge and delete its merged branch.
+      issues: write # Maintain one sticky status and one deduplicated alert issue.
+      pull-requests: write # Read and merge the selected pull request.
+      statuses: read # Read legacy commit-status contexts.
     if: |
       (github.event_name == 'workflow_run' && github.event.workflow_run.name != 'Review Pipeline') ||
+      (github.event_name == 'check_suite' && github.event.check_suite.app.slug != 'github-actions') ||
+      github.event_name == 'status' ||
       github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # workflow_run is privileged: execute only the adapter from the trusted default
+      # branch, never code from the triggering pull-request head.
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
       - uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
           script: |
-            const THREAT_PATTERN = /semgrep|codeql|security|guardian|socket/i;
-            const BASE_BRANCHES = new Set(["master", "main", "maintenance"]);
-            const SELF_JOBS = new Set([
-              "gate -> merge | alert",
-              "promote maintenance -> master",
-              "prune merged branches",
-            ]);
-            const STATUS_MARKER = "<!-- review-pipeline:status -->";
-            const owner = context.repo.owner, repo = context.repo.repo;
-
-            // Resolve the head branch.
-            let branch, headSha;
-            if (context.eventName === "workflow_dispatch") {
-              branch = context.payload.inputs && context.payload.inputs.branch;
-              if (!branch) { core.info("No branch input; nothing to do."); return; }
-            } else {
-              const wr = context.payload.workflow_run;
-              branch = wr.head_branch;
-              headSha = wr.head_sha;
-            }
-            if (BASE_BRANCHES.has(branch)) {
-              core.info(`Branch ${branch} is a base line; act job skips it.`);
-              return;
-            }
-
-            // Find the open, non-draft PR for this branch.
-            const prs = await github.rest.pulls.list({
-              owner, repo, state: "open", head: `${owner}:${branch}`,
-            });
-            const pr = prs.data.find(p => !p.draft);
-            if (!pr) { core.info(`No open non-draft PR for ${branch}.`); return; }
-            if (!headSha) headSha = pr.head.sha;
-
-            // Sticky-status helper: one comment, edited in place. No spam.
-            async function setStatus(body) {
-              const text = `${STATUS_MARKER}\n${body}`;
-              const cs = await github.rest.issues.listComments({ owner, repo, issue_number: pr.number, per_page: 100 });
-              const existing = cs.data.find(c => c.body && c.body.includes(STATUS_MARKER));
-              if (existing) await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body: text });
-              else await github.rest.issues.createComment({ owner, repo, issue_number: pr.number, body: text });
-            }
-            // BROKE/THREAT issue: one per PR, upserted; closed on green.
-            async function upsertAlert(kind, detail) {
-              const label = kind === "threat" ? "threat" : "broke";
-              const title = `[pipeline] PR #${pr.number} blocked: ${kind.toUpperCase()}`;
-              const found = await github.rest.issues.listForRepo({ owner, repo, state: "open", labels: label, per_page: 100 });
-              const hit = found.data.find(i => i.title === title);
-              const body = [
-                `Automated gate flagged **${kind.toUpperCase()}** on PR #${pr.number} (\`${branch}\`).`,
-                "", detail, "",
-                `Head: \`${headSha.slice(0,9)}\` — PR: #${pr.number}`,
-                "This issue auto-closes when the gating checks go green.",
-              ].join("\n");
-              if (hit) await github.rest.issues.update({ owner, repo, issue_number: hit.number, body });
-              else await github.rest.issues.create({ owner, repo, title, body, labels: [label, "pipeline"] });
-            }
-            async function closeAlerts() {
-              for (const label of ["broke", "threat"]) {
-                const found = await github.rest.issues.listForRepo({ owner, repo, state: "open", labels: label, per_page: 100 });
-                for (const i of found.data.filter(x => x.title === `[pipeline] PR #${pr.number} blocked: ${label.toUpperCase()}`)) {
-                  await github.rest.issues.update({ owner, repo, issue_number: i.number, state: "closed" });
-                }
-              }
-            }
-
-            // Dynamic gating: get all GitHub Actions check runs for head SHA.
-            // Exclude our own pipeline jobs (self-loop guard) and Dependabot.
-            let allRuns;
-            try {
-              allRuns = await github.paginate(github.rest.checks.listCheckRunsForRef, {
-                owner, repo, ref: headSha, per_page: 100,
-              });
-            } catch (e) {
-              core.info(`Checks API unavailable: ${e.message}`);
-              return;
-            }
-            const relevant = allRuns.filter(r =>
-              r.app && r.app.slug === "github-actions" &&
-              !SELF_JOBS.has(r.name)
-            );
-
-            if (relevant.length === 0) {
-              await setStatus(`### Pipeline: waiting\nNo CI check runs found yet for \`${headSha.slice(0,9)}\`. Waiting for CI to start.`);
-              core.info("No relevant check runs yet; waiting.");
-              return;
-            }
-
-            const failed = relevant.filter(r =>
-              r.status === "completed" &&
-              !["success", "neutral", "skipped"].includes(r.conclusion)
-            );
-            const pending = relevant.filter(r => r.status !== "completed");
-
-            if (failed.length) {
-              const kind = failed.some(r => THREAT_PATTERN.test(r.name)) ? "threat" : "broke";
-              const detail = failed.map(r => `- ${r.name}: \`${r.conclusion}\` — ${r.html_url}`).join("\n");
-              await upsertAlert(kind, detail);
-              await setStatus(`### Pipeline: BLOCKED (${kind.toUpperCase()})\nFailing check(s):\n${detail}`);
-              core.info(`Blocked: ${kind} on ${failed.map(r=>r.name).join(", ")}`);
-              return;
-            }
-            if (pending.length) {
-              await setStatus(`### Pipeline: checks running\nWaiting on: ${pending.map(r=>r.name).join(", ")}`);
-              core.info(`Not ready. pending=${pending.map(r=>r.name).join(", ")}`);
-              return;
-            }
-
-            // All gating check runs green -> merge (squash) + delete branch.
-            try {
-              await github.rest.pulls.merge({
-                owner, repo, pull_number: pr.number, merge_method: "squash",
-              });
-            } catch (e) {
-              await setStatus(`### Pipeline: merge could not complete\nAll checks green but merge failed: \`${e.message}\`. (conflict / out-of-date base?)`);
-              core.warning(`Merge failed: ${e.message}`);
-              return;
-            }
-            try { await github.rest.git.deleteRef({ owner, repo, ref: `heads/${branch}` }); } catch (e) { core.info(`branch delete skipped: ${e.message}`); }
-            await closeAlerts();
-            const base = pr.base.ref;
-            const shipped = (BASE_BRANCHES.has(base) && base !== "maintenance")
-              ? "merged to the working line (**shipped**). Tag `v*` to publish a Release."
-              : `merged into \`${base}\`. Will auto-promote to master/main on green CI.`;
-            await setStatus(`### Pipeline: MERGED\nAll gates green -> squash-merged, branch deleted. ${shipped}`);
-            core.info(`Merged PR #${pr.number} into ${base}.`);
+            const { runGitHubReviewPipeline } = require(`${process.env.GITHUB_WORKSPACE}/tools/review-pipeline-github.cjs`);
+            await runGitHubReviewPipeline({ github, context, core });
 
   # ---------------------------------------------------------------------------
   # PROMOTE: maintenance -> master/main automatically on green (no human gate).
@@ -189,6 +86,9 @@ jobs:
   # ---------------------------------------------------------------------------
   promote:
     name: promote maintenance -> master
+    permissions:
+      contents: write # Merge the green maintenance branch into the default branch.
+      pull-requests: write # Create and merge the promotion pull request.
     if: |
       github.event_name == 'workflow_run' &&
       github.event.workflow_run.name != 'Review Pipeline' &&
@@ -201,13 +101,19 @@ jobs:
         with:
           script: |
             const owner = context.repo.owner, repo = context.repo.repo;
+            const testedSha = context.payload.workflow_run.head_sha;
             // Detect the working default branch (master or main).
             const repoInfo = await github.rest.repos.get({ owner, repo });
             const base = repoInfo.data.default_branch;
             const head = "maintenance";
+            const maintenanceRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${head}` });
+            if (maintenanceRef.data.object.sha !== testedSha) {
+              core.warning(`Stale maintenance event: tested ${testedSha}, current ${maintenanceRef.data.object.sha}. No promotion attempted.`);
+              return;
+            }
             // Only promote if maintenance is actually ahead.
             const cmp = await github.rest.repos.compareCommitsWithBasehead({
-              owner, repo, basehead: `${base}...${head}`,
+              owner, repo, basehead: `${base}...${testedSha}`,
             });
             if (cmp.data.status === "identical" || cmp.data.ahead_by === 0) {
               core.info(`maintenance not ahead of ${base}; nothing to promote.`);
@@ -222,9 +128,29 @@ jobs:
                 body: "Automated promotion. CI is green on `maintenance`; no human merge gate.",
               })).data;
             }
+            pr = (await github.rest.pulls.get({ owner, repo, pull_number: pr.number })).data;
+            if (pr.head.sha !== testedSha) {
+              core.warning(`Promotion PR #${pr.number} moved from tested SHA ${testedSha} to ${pr.head.sha}. No merge attempted.`);
+              return;
+            }
             try {
-              await github.rest.pulls.merge({ owner, repo, pull_number: pr.number, merge_method: "merge" });
-              core.info(`Promoted maintenance -> ${base} via PR #${pr.number}.`);
+              const merged = (await github.rest.pulls.merge({
+                owner,
+                repo,
+                pull_number: pr.number,
+                merge_method: "merge",
+                sha: testedSha,
+              })).data;
+              if (!merged.merged) {
+                core.warning(`Promotion merge rejected: ${merged.message || 'unknown reason'}`);
+                return;
+              }
+              const receipt = (await github.rest.pulls.get({ owner, repo, pull_number: pr.number })).data;
+              if (receipt.state !== "closed" || !receipt.merged_at || receipt.merge_commit_sha !== merged.sha) {
+                core.warning(`Promotion merged but receipt verification failed for PR #${pr.number}; expected ${merged.sha}, observed ${receipt.merge_commit_sha || 'none'}.`);
+                return;
+              }
+              core.info(`Promoted tested maintenance SHA ${testedSha} -> ${base} via PR #${pr.number}; merge ${merged.sha}.`);
             } catch (e) {
               core.warning(`Promotion merge failed: ${e.message}`);
             }
@@ -234,6 +160,9 @@ jobs:
   # ---------------------------------------------------------------------------
   prune:
     name: prune merged branches
+    permissions:
+      contents: write # Delete a merged branch reference.
+      pull-requests: read # Keep branches with open pull requests.
     if: |
       (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
       github.event_name == 'workflow_dispatch'
@@ -250,10 +179,19 @@ jobs:
             // 1) Delete the just-merged PR's head branch.
             if (context.eventName === "pull_request") {
               const b = context.payload.pull_request.head.ref;
+              const expectedSha = context.payload.pull_request.head.sha;
               const sameRepo = context.payload.pull_request.head.repo &&
                                context.payload.pull_request.head.repo.full_name === `${owner}/${repo}`;
               if (sameRepo && !PROTECTED.has(b)) {
-                try { await github.rest.git.deleteRef({ owner, repo, ref: `heads/${b}` }); core.info(`deleted ${b}`); }
+                try {
+                  const current = (await github.rest.git.getRef({ owner, repo, ref: `heads/${b}` })).data.object.sha;
+                  if (current !== expectedSha) {
+                    core.info(`preserved ${b}: moved from merged ${expectedSha} to ${current}`);
+                    return;
+                  }
+                  await github.rest.git.deleteRef({ owner, repo, ref: `heads/${b}` });
+                  core.info(`deleted ${b} at merged SHA ${expectedSha}`);
+                }
                 catch (e) { core.info(`skip ${b}: ${e.message}`); }
               }
               return;
@@ -269,9 +207,18 @@ jobs:
             for (const br of branches) {
               const name = br.name;
               if (PROTECTED.has(name) || !SWEEP.test(name) || openHeads.has(name)) continue;
-              const cmp = await github.rest.repos.compareCommitsWithBasehead({ owner, repo, basehead: `${defaultBranch}...${name}` });
+              const observedSha = br.commit.sha;
+              const cmp = await github.rest.repos.compareCommitsWithBasehead({ owner, repo, basehead: `${defaultBranch}...${observedSha}` });
               if (cmp.data.status === "behind" || cmp.data.status === "identical") {
-                try { await github.rest.git.deleteRef({ owner, repo, ref: `heads/${name}` }); deleted.push(name); }
+                try {
+                  const current = (await github.rest.git.getRef({ owner, repo, ref: `heads/${name}` })).data.object.sha;
+                  if (current !== observedSha) {
+                    core.info(`preserved ${name}: moved from observed ${observedSha} to ${current}`);
+                    continue;
+                  }
+                  await github.rest.git.deleteRef({ owner, repo, ref: `heads/${name}` });
+                  deleted.push(name);
+                }
                 catch (e) { core.info(`skip ${name}: ${e.message}`); }
               }
             }
