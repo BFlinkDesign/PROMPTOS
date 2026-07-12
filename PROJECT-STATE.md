@@ -57,12 +57,13 @@ npm run verify
 
 1. the 16-prompt structure contract and named adversarial-contract coverage,
 2. adversarial proof that structural lint cannot certify effectiveness,
-3. the capability ledger and full 159-record historical intake,
-4. deterministic catalog evaluation and generated-data freshness,
-5. typed `items[]` validation plus task-report schema compilation,
-6. promoted feedback regression validation,
-7. promptfoo smokes through the documented local `echo` provider,
-8. Playwright Chromium tests against the static console and Evaluator tab.
+3. the offline Prompt Engine pre-import acceptance contract,
+4. the capability ledger and full 159-record historical intake,
+5. deterministic catalog evaluation and generated-data freshness,
+6. typed `items[]` validation plus task-report schema compilation,
+7. promoted feedback regression validation,
+8. promptfoo smokes through the documented local `echo` provider,
+9. Playwright Chromium tests against the static console and Evaluator tab.
 
 ## Generated Console Contract
 
@@ -136,9 +137,12 @@ repo-local facts, gates, and architecture.
 
 ## Prompt Engine Boundary
 
-The separate Prompt Engine branch remains unmerged and unproven. It is outside
-this catalog-evaluator workflow slice and no Prompt Engine runtime behavior is
-claimed here.
+The separate Prompt Engine branch remains unmerged and unproven. Current main now
+defines a pre-import acceptance contract for immutable public fixtures, holdout
+isolation, provenance, cost accounting, report redaction, cancellation, bounded
+execution, and claim governance. No old engine code, provider integration, HTTP
+service, React workbench, or Electron shell is included, and no Prompt Engine
+runtime effectiveness is claimed.
 
 ## Ecosystem Consolidation Boundary
 
@@ -282,5 +286,7 @@ The console renders the 16 tracked prompt blocks from `PROMPTS.md`. The complete
 3. Add first workflow/playbook/runbook source artifacts and wire them into the
    generator.
 4. Implement the first read-only Sources adapter from the frontier radar export.
-5. Add credential-gated model-judge examples only outside default CI; keep
+5. Create the Prompt Engine file-level salvage matrix only after the acceptance
+   contract is accepted; do not rebase the stale branch wholesale.
+6. Add credential-gated model-judge examples only outside default CI; keep
    `npm run verify` deterministic.

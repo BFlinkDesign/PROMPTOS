@@ -1,0 +1,48 @@
+{
+  "version": 1,
+  "manifest_id": "prompt-engine-acceptance-v1",
+  "created_at": "2026-07-11T00:00:00Z",
+  "public_dataset": {
+    "path": "tests/fixtures/engine/public-development-dataset.v1.json",
+    "sha256": "237a272127d95b2ea7299da3dad3a464e6e4c58967c82c5ed1325840efa94fb2"
+  },
+  "holdout_contract": {
+    "path": "tests/fixtures/engine/holdout-contract.v1.json",
+    "sha256": "59f4c47e85524f2d85ced0e88ad1c5a9ecffb043fcb17352fae02d6e06d0a079"
+  },
+  "offline_replay_provider": {
+    "path": "tests/fixtures/engine/offline-replay-provider.v1.json",
+    "sha256": "29a1b40be0122d98d177422252c5eea67bee02836770d97c94255e7299b036f7"
+  },
+  "baselines": [
+    {
+      "prompt_path": "prompts/decision-matrix.md",
+      "prompt_sha256": "89a2c667b2a62915036ba48fbda12815be2ab30d3b609c5ce0831198e4bc4214"
+    },
+    {
+      "prompt_path": "prompts/scope-pipeline.md",
+      "prompt_sha256": "2109828a072b41bbcd7aedb437f4df93c9b780b9402fbd6714365a90b574ec0a"
+    }
+  ],
+  "pricing": {
+    "version": "offline-zero-v1",
+    "effective_at": "2026-07-11T00:00:00Z",
+    "source": "local deterministic replay provider",
+    "input_usd_per_million": 0,
+    "output_usd_per_million": 0
+  },
+  "limits": {
+    "timeout_ms": 1000,
+    "max_attempts": 2,
+    "max_tokens": 2000,
+    "max_cost_usd": 0,
+    "require_known_cost": true
+  },
+  "claim_states": [
+    "STATIC-VALID",
+    "PUBLIC-EVAL-PASSED",
+    "BASELINE-WIN",
+    "HOLDOUT-WIN",
+    "INDEPENDENTLY-BENCHMARKED"
+  ]
+}

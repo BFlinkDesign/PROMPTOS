@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "contract_id": "prompt-engine-concealed-holdout-v1",
+  "storage": "external-sealed",
+  "dataset_sha256": "a52a0e1c27d6ffce91c60f2484871c2ae6a69a174e1aaaab832caacad4da3a19",
+  "split_sha256": "ce33df24258e652e0f99a87a963a00691abd9b56ff4a9ea8b103425972eef270",
+  "cases_visible_to_generation": false,
+  "report_mode": "aggregate-only",
+  "loader_authority": "credential-gated-ci-or-independent-reviewer"
+}
