@@ -320,6 +320,39 @@ test('requires success rather than skipped or neutral for policy-required checks
   assert.equal(result.reason, 'required_checks_not_successful');
 });
 
+test('allows a required check neutral conclusion only when the policy names it', () => {
+  const policy = {
+    requiredChecks: [{
+      appSlug: 'github-advanced-security',
+      name: 'CodeQL',
+      allowedConclusions: ['success', 'neutral'],
+    }],
+  };
+  const neutral = evaluateEvidence({
+    pr: pr(),
+    defaultBranch: 'main',
+    policy,
+    snapshot: { checkRuns: [check({
+      name: 'CodeQL',
+      app: { slug: 'github-advanced-security' },
+      conclusion: 'neutral',
+    })] },
+  });
+  const skipped = evaluateEvidence({
+    pr: pr(),
+    defaultBranch: 'main',
+    policy,
+    snapshot: { checkRuns: [check({
+      name: 'CodeQL',
+      app: { slug: 'github-advanced-security' },
+      conclusion: 'skipped',
+    })] },
+  });
+
+  assert.equal(neutral.state, 'ready');
+  assert.equal(skipped.state, 'failed');
+});
+
 test('refuses stacked feature-base pull requests', () => {
   const result = evaluateEvidence({
     pr: pr({ base: { ref: 'codex/prompt-engine-acceptance-contract' } }),

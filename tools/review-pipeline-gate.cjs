@@ -23,6 +23,16 @@ function validatePolicy(policy) {
       const identity = `${check.appSlug}:${check.name}`;
       if (identities.has(identity)) errors.push(`requiredChecks contains duplicate ${identity}`);
       identities.add(identity);
+      if (check.allowedConclusions !== undefined) {
+        const allowed = check.allowedConclusions;
+        const valid = new Set(['success', 'neutral', 'skipped']);
+        if (!Array.isArray(allowed) || allowed.length === 0
+          || !allowed.includes('success')
+          || allowed.some((item) => !valid.has(item))
+          || new Set(allowed).size !== allowed.length) {
+          errors.push(`requiredChecks[${index}].allowedConclusions must be unique, include success, and contain only success, neutral, or skipped`);
+        }
+      }
     }
   }
   if (policy?.additionalObservedChecksAreGating !== true) {
@@ -217,10 +227,13 @@ function evaluateEvidence({ pr, defaultBranch, eventSha, policy = {}, snapshot =
     };
   }
 
-  const requiredSet = new Set(requiredIdentities);
-  const requiredNotSuccessful = checks.filter((item) => requiredSet.has(item.identity)
+  const requiredPolicy = new Map((policy.requiredChecks || []).map((item) => [
+    `check:${item.appSlug}:${item.name}`,
+    new Set(item.allowedConclusions || ['success']),
+  ]));
+  const requiredNotSuccessful = checks.filter((item) => requiredPolicy.has(item.identity)
     && item.status === 'completed'
-    && item.conclusion !== 'success');
+    && !requiredPolicy.get(item.identity).has(item.conclusion));
   if (requiredNotSuccessful.length) {
     return {
       state: 'failed',
