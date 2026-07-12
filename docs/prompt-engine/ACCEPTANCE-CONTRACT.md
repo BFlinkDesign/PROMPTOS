@@ -24,6 +24,9 @@ The following claims require evidence that this repository does not yet contain:
   the holdout result.
 
 No lower claim may be represented as a higher one.
+Receipt schema version 1 therefore permits only `STATIC-VALID` and
+`PUBLIC-EVAL-PASSED`. Higher states require a new versioned evidence schema;
+they are not dormant enum values that callers may set early.
 
 ## Immutable Inputs
 
@@ -55,6 +58,9 @@ Behavioral receipts must conform to
 `schema/engine-evaluation-receipt.schema.json` and record source, dataset, split,
 candidate, provider, model, model configuration, seed, tool, environment,
 commit, artifact, timestamps, attempts, duration, and usage provenance.
+Schema validation establishes structure only. `assertReceiptConsistency` must
+also bind public totals and dataset/split hashes to the loaded evaluation
+context before a receipt is persisted or used for a claim.
 
 Provider-reported usage and table-estimated usage are distinct. Missing cost is
 `null` with source `unknown`; it is never converted to zero. Certification must

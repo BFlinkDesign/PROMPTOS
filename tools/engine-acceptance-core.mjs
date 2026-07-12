@@ -1,5 +1,6 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
+import path from 'node:path';
 
 export const CLAIM_STATES = Object.freeze([
   'STATIC-VALID',
@@ -9,15 +10,28 @@ export const CLAIM_STATES = Object.freeze([
   'INDEPENDENTLY-BENCHMARKED',
 ]);
 
-const FORBIDDEN_REPORT_KEYS = new Set([
-  'api_key',
+const FORBIDDEN_REPORT_KEY_MARKERS = Object.freeze([
+  'apikey',
   'authorization',
-  'holdout_cases',
-  'holdout_labels',
-  'judge_rationale',
-  'provider_secret',
-  'request_headers',
-  'repository_secret',
+  'cookie',
+  'credential',
+  'holdoutcases',
+  'holdoutlabels',
+  'judgerationale',
+  'password',
+  'passphrase',
+  'privatekey',
+  'requestheaders',
+  'secret',
+]);
+const FORBIDDEN_REPORT_KEYS = new Set(['headers', 'passwd']);
+const SAFE_ACCOUNTING_TOKEN_KEYS = new Set([
+  'inputtokens',
+  'maxtokens',
+  'outputtokens',
+  'remainingtokens',
+  'totaltokens',
+  'usedtokens',
 ]);
 
 function sortValue(value) {
@@ -50,6 +64,35 @@ export function canonicalText(value) {
 
 export function hashFile(filePath) {
   return sha256(canonicalText(fs.readFileSync(filePath, 'utf8')));
+}
+
+export function resolveRepoRelativePath(root, relativePath) {
+  const portableCharacters = typeof relativePath === 'string'
+    && /^[A-Za-z0-9._/-]+$/.test(relativePath);
+  const segments = typeof relativePath === 'string' ? relativePath.split('/') : [];
+  const hasWindowsReservedSegment = segments.some((segment) => (
+    /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment)
+    || segment.endsWith('.')
+  ));
+  const invalid = typeof relativePath !== 'string'
+    || !relativePath
+    || !portableCharacters
+    || hasWindowsReservedSegment
+    || relativePath.includes('\\')
+    || path.posix.isAbsolute(relativePath)
+    || path.win32.isAbsolute(relativePath)
+    || path.posix.normalize(relativePath) !== relativePath
+    || relativePath === '..'
+    || relativePath.startsWith('../');
+  if (invalid) throw new Error('manifest path must be a portable repository-relative path');
+
+  const absoluteRoot = path.resolve(root);
+  const resolved = path.resolve(absoluteRoot, ...relativePath.split('/'));
+  const fromRoot = path.relative(absoluteRoot, resolved);
+  if (!fromRoot || fromRoot.startsWith('..') || path.isAbsolute(fromRoot)) {
+    throw new Error('manifest path must be a portable repository-relative path');
+  }
+  return resolved;
 }
 
 function deepFreeze(value) {
@@ -107,9 +150,24 @@ export function createReplayProvider(fixture) {
 }
 
 export function normalizeUsage(raw = {}, pricing = null) {
-  const inputTokens = Number.isInteger(raw.input_tokens) ? raw.input_tokens : null;
-  const outputTokens = Number.isInteger(raw.output_tokens) ? raw.output_tokens : null;
-  if (Number.isFinite(raw.provider_cost_usd) && raw.provider_cost_usd >= 0) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+    throw new TypeError('usage must be an object');
+  }
+  function tokenCount(name) {
+    const value = raw[name];
+    if (value === undefined || value === null) return null;
+    if (!Number.isSafeInteger(value) || value < 0) {
+      throw new TypeError(`${name} must be a non-negative safe integer`);
+    }
+    return value;
+  }
+  const inputTokens = tokenCount('input_tokens');
+  const outputTokens = tokenCount('output_tokens');
+  const hasReportedCost = Object.hasOwn(raw, 'provider_cost_usd');
+  if (hasReportedCost && (!Number.isFinite(raw.provider_cost_usd) || raw.provider_cost_usd < 0)) {
+    throw new TypeError('provider_cost_usd must be a non-negative finite number');
+  }
+  if (hasReportedCost) {
     return {
       source: 'reported',
       input_tokens: inputTokens,
@@ -150,22 +208,98 @@ export function assertComparableCosts(receipts) {
   return true;
 }
 
+export function assertAggregateCounts(aggregate) {
+  if (!aggregate || !Number.isSafeInteger(aggregate.total) || aggregate.total < 1) {
+    throw new Error('evaluation aggregate must contain at least one case');
+  }
+  if (!Number.isSafeInteger(aggregate.passed) || aggregate.passed < 0) {
+    throw new Error('evaluation aggregate passed count must be a non-negative safe integer');
+  }
+  if (aggregate.passed > aggregate.total) {
+    throw new Error('evaluation aggregate passed count cannot exceed total');
+  }
+  return true;
+}
+
+export function assertReceiptConsistency(receipt, context = null) {
+  if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) {
+    throw new Error('evaluation receipt must be an object');
+  }
+  if (receipt.holdout_eval !== null) {
+    throw new Error('receipt schema v1 does not support holdout evidence');
+  }
+  if (receipt.claim_state === 'STATIC-VALID') {
+    if (receipt.public_eval !== null) {
+      throw new Error('static-valid receipt cannot contain public evaluation evidence');
+    }
+    return true;
+  }
+  if (receipt.claim_state !== 'PUBLIC-EVAL-PASSED') {
+    throw new Error('receipt schema v1 does not support the requested claim state');
+  }
+  if (!context || !Number.isSafeInteger(context.public_case_count) || context.public_case_count < 1) {
+    throw new Error('public-pass receipt requires a valid public dataset context');
+  }
+  const aggregate = receipt.public_eval;
+  if (!aggregate || aggregate.failed !== 0) {
+    throw new Error('public-pass receipt must record zero failed cases');
+  }
+  if (!Number.isSafeInteger(aggregate.total) || aggregate.total < 1) {
+    throw new Error('public-pass receipt total must be a positive safe integer');
+  }
+  if (aggregate.total !== context.public_case_count) {
+    throw new Error('public-pass receipt case count does not match the dataset');
+  }
+  if (
+    aggregate.dataset_sha256 !== receipt.dataset_sha256
+    || aggregate.dataset_sha256 !== context.dataset_sha256
+  ) {
+    throw new Error('public-pass receipt dataset hash does not match the evaluation context');
+  }
+  if (
+    aggregate.split_sha256 !== receipt.split_sha256
+    || aggregate.split_sha256 !== context.split_sha256
+  ) {
+    throw new Error('public-pass receipt split hash does not match the evaluation context');
+  }
+  return true;
+}
+
 export function assertSafeReport(report, sensitiveValues = []) {
+  const normalizeSecurityText = (value) => canonicalText(value).normalize('NFKC');
+  const protectedValues = sensitiveValues.filter(
+    (value) => typeof value === 'string' && value.length > 0,
+  ).map(normalizeSecurityText);
+  function assertNoProtectedMaterial(value) {
+    if (
+      typeof value === 'string'
+      && protectedValues.some((sensitive) => (
+        normalizeSecurityText(value).includes(sensitive)
+      ))
+    ) {
+      throw new Error('report contains protected source material');
+    }
+  }
   function inspect(value, path = '$') {
+    assertNoProtectedMaterial(value);
     if (Array.isArray(value)) return value.forEach((entry, index) => inspect(entry, `${path}[${index}]`));
     if (!value || typeof value !== 'object') return;
     for (const [key, nested] of Object.entries(value)) {
-      if (FORBIDDEN_REPORT_KEYS.has(key.toLowerCase())) {
+      const normalizedKey = normalizeSecurityText(key).toLowerCase().replace(/[^a-z0-9]/g, '');
+      const tokenKey = normalizedKey.includes('token')
+        && !SAFE_ACCOUNTING_TOKEN_KEYS.has(normalizedKey);
+      if (
+        FORBIDDEN_REPORT_KEYS.has(normalizedKey)
+        || FORBIDDEN_REPORT_KEY_MARKERS.some((forbidden) => normalizedKey.includes(forbidden))
+        || tokenKey
+      ) {
         throw new Error(`report contains forbidden field at ${path}.${key}`);
       }
+      assertNoProtectedMaterial(key);
       inspect(nested, `${path}.${key}`);
     }
   }
   inspect(report);
-  const serialized = canonicalJson(report);
-  for (const sensitive of sensitiveValues.filter(Boolean)) {
-    if (serialized.includes(sensitive)) throw new Error('report contains protected source material');
-  }
   return true;
 }
 
@@ -176,7 +310,8 @@ export async function evaluateConcealedHoldout({ candidate, loadHoldout, provide
   const holdout = await loadHoldout();
   let passed = 0;
   for (const testCase of holdout.cases) {
-    const result = await provider(testCase, candidate);
+    const providerInput = deepFreeze({ input: testCase.input });
+    const result = await provider(providerInput, candidate);
     if (gradeCase(testCase, result.output)) passed += 1;
   }
   const aggregate = {
@@ -185,6 +320,7 @@ export async function evaluateConcealedHoldout({ candidate, loadHoldout, provide
     dataset_sha256: holdout.dataset_sha256,
     split_sha256: holdout.split_sha256,
   };
+  assertAggregateCounts(aggregate);
   assertSafeReport(aggregate, holdout.cases.flatMap((testCase) => [
     testCase.input,
     testCase.grader.expected,

@@ -40,46 +40,63 @@
     "provider": { "type": "string", "minLength": 1 },
     "model": { "type": "string", "minLength": 1 },
     "model_config_sha256": { "$ref": "#/$defs/sha256" },
-    "seed": { "type": ["integer", "null"] },
+    "seed": {
+      "type": ["integer", "null"],
+      "minimum": -9007199254740991,
+      "maximum": 9007199254740991
+    },
     "tool_version": { "type": "string", "minLength": 1 },
     "environment": { "type": "string", "minLength": 1 },
     "git_commit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
     "artifact_sha256": { "$ref": "#/$defs/sha256" },
     "started_at": { "$ref": "#/$defs/timestamp" },
     "completed_at": { "$ref": "#/$defs/timestamp" },
-    "attempts": { "type": "integer", "minimum": 1 },
-    "duration_ms": { "type": "integer", "minimum": 0 },
+    "attempts": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+    "duration_ms": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
     "usage": { "$ref": "#/$defs/usage" },
     "claim_state": {
       "enum": [
         "STATIC-VALID",
-        "PUBLIC-EVAL-PASSED",
-        "BASELINE-WIN",
-        "HOLDOUT-WIN",
-        "INDEPENDENTLY-BENCHMARKED"
+        "PUBLIC-EVAL-PASSED"
       ]
     },
-    "public_eval": { "$ref": "#/$defs/aggregate" },
-    "holdout_eval": {
+    "public_eval": {
       "oneOf": [
         { "type": "null" },
-        { "$ref": "#/$defs/aggregate" }
+        { "$ref": "#/$defs/passAggregate" }
       ]
-    }
+    },
+    "holdout_eval": { "type": "null" }
   },
+  "allOf": [
+    {
+      "if": {
+        "required": ["claim_state"],
+        "properties": { "claim_state": { "const": "STATIC-VALID" } }
+      },
+      "then": { "properties": { "public_eval": { "type": "null" } } }
+    },
+    {
+      "if": {
+        "required": ["claim_state"],
+        "properties": { "claim_state": { "const": "PUBLIC-EVAL-PASSED" } }
+      },
+      "then": { "properties": { "public_eval": { "$ref": "#/$defs/passAggregate" } } }
+    }
+  ],
   "$defs": {
     "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
     "timestamp": {
       "type": "string",
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z$"
     },
-    "aggregate": {
+    "passAggregate": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["passed", "total", "dataset_sha256", "split_sha256"],
+      "required": ["failed", "total", "dataset_sha256", "split_sha256"],
       "properties": {
-        "passed": { "type": "integer", "minimum": 0 },
-        "total": { "type": "integer", "minimum": 0 },
+        "failed": { "const": 0 },
+        "total": { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
         "dataset_sha256": { "$ref": "#/$defs/sha256" },
         "split_sha256": { "$ref": "#/$defs/sha256" }
       }
@@ -96,8 +113,16 @@
       ],
       "properties": {
         "source": { "enum": ["reported", "estimated", "unknown"] },
-        "input_tokens": { "type": ["integer", "null"], "minimum": 0 },
-        "output_tokens": { "type": ["integer", "null"], "minimum": 0 },
+        "input_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "output_tokens": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
         "cost_usd": { "type": ["number", "null"], "minimum": 0 },
         "pricing_version": { "type": ["string", "null"] }
       },

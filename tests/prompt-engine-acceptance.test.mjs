@@ -4,7 +4,9 @@ import path from 'node:path';
 import test from 'node:test';
 import {
   RetryableOperationError,
+  assertAggregateCounts,
   assertComparableCosts,
+  assertReceiptConsistency,
   assertSafeReport,
   canonicalText,
   createReplayProvider,
@@ -16,6 +18,7 @@ import {
   hashFile,
   normalizeUsage,
   publicGenerationContext,
+  resolveRepoRelativePath,
   sha256,
 } from '../tools/engine-acceptance-core.mjs';
 
@@ -91,12 +94,42 @@ test('concealed holdout loads only after candidate freeze and returns aggregate-
   assert.equal(result.passed, 1);
   assert.equal(JSON.stringify(result).includes(hiddenCase.input), false);
   assert.equal(JSON.stringify(result).includes(hiddenCase.grader.expected), false);
+
+  let providerView;
+  const attemptedLeak = await evaluateConcealedHoldout({
+    candidate: freezeCandidate('candidate'),
+    loadHoldout,
+    provider: async (visibleCase) => {
+      providerView = visibleCase;
+      return { output: visibleCase.grader?.expected ?? 'label-not-visible' };
+    },
+  });
+  assert.deepEqual(Object.keys(providerView), ['input']);
+  assert.equal(Object.isFrozen(providerView), true);
+  assert.equal(attemptedLeak.passed, 0);
 });
 
 test('report guard rejects hidden material, credentials, and forbidden nested fields', () => {
   assert.equal(assertSafeReport({ passed: 1, total: 1 }, ['hidden-value']), true);
   assert.throws(() => assertSafeReport({ nested: { authorization: 'Bearer x' } }), /forbidden field/);
   assert.throws(() => assertSafeReport({ summary: 'contains hidden-value' }, ['hidden-value']), /protected/);
+  assert.throws(() => assertSafeReport({ apiKey: 'secret' }), /forbidden field/);
+  assert.throws(() => assertSafeReport({ headers: { 'x-api-key': 'secret' } }), /forbidden field/);
+  assert.throws(() => assertSafeReport({ headers: { 'x-auth-token': 'secret' } }), /forbidden field/);
+  assert.throws(() => assertSafeReport({ metadata: { password: 'secret' } }), /forbidden field/);
+  assert.throws(() => assertSafeReport({ metadata: { repositoryToken: 'secret' } }), /forbidden field/);
+  assert.throws(() => assertSafeReport({ 'x-api-Ｋey': 'secret' }), /forbidden field/);
+  assert.throws(() => assertSafeReport({ holdoutCases: ['sealed'] }), /forbidden field/);
+  assert.throws(
+    () => assertSafeReport({ summary: 'contains first\nsecond' }, ['first\nsecond']),
+    /protected/,
+  );
+  assert.throws(
+    () => assertSafeReport({ summary: 'contains first\r\nsecond' }, ['first\nsecond']),
+    /protected/,
+  );
+  assert.throws(() => assertSafeReport({ summary: 'ＫEY' }, ['KEY']), /protected/);
+  assert.throws(() => assertSafeReport({ summary: '１２３' }, ['123']), /protected/);
 });
 
 test('usage keeps unknown cost unknown and distinguishes provider reports from estimates', () => {
@@ -121,6 +154,66 @@ test('usage keeps unknown cost unknown and distinguishes provider reports from e
       pricing_version: 'prices-v1',
     },
   );
+  assert.throws(() => normalizeUsage({ input_tokens: -1, output_tokens: 0 }), /input_tokens/);
+  assert.throws(() => normalizeUsage({ input_tokens: 0, output_tokens: -1 }), /output_tokens/);
+});
+
+test('aggregate counts reject impossible evidence', () => {
+  assert.equal(assertAggregateCounts({ passed: 1, total: 1 }), true);
+  assert.throws(() => assertAggregateCounts({ passed: 2, total: 1 }), /cannot exceed total/);
+  assert.throws(() => assertAggregateCounts({ passed: 0, total: 0 }), /at least one case/);
+});
+
+test('receipt evidence is bound to the declared public dataset context', () => {
+  const receipt = {
+    claim_state: 'PUBLIC-EVAL-PASSED',
+    dataset_sha256: 'a'.repeat(64),
+    split_sha256: 'b'.repeat(64),
+    public_eval: {
+      failed: 0,
+      total: 3,
+      dataset_sha256: 'a'.repeat(64),
+      split_sha256: 'b'.repeat(64),
+    },
+    holdout_eval: null,
+  };
+  const context = {
+    public_case_count: 3,
+    dataset_sha256: 'a'.repeat(64),
+    split_sha256: 'b'.repeat(64),
+  };
+  assert.equal(assertReceiptConsistency(receipt, context), true);
+  assert.throws(
+    () => assertReceiptConsistency({
+      ...receipt,
+      public_eval: { ...receipt.public_eval, total: 4 },
+    }, context),
+    /case count/,
+  );
+  assert.throws(
+    () => assertReceiptConsistency({
+      ...receipt,
+      public_eval: { ...receipt.public_eval, dataset_sha256: 'c'.repeat(64) },
+    }, context),
+    /dataset hash/,
+  );
+});
+
+test('manifest paths stay portable and inside the repository', () => {
+  assert.equal(
+    resolveRepoRelativePath(root, 'tests/fixtures/engine/public-development-dataset.v1.json'),
+    path.join(root, 'tests', 'fixtures', 'engine', 'public-development-dataset.v1.json'),
+  );
+  for (const unsafe of [
+    '../outside.json',
+    '/tmp/outside.json',
+    'C:/Temp/outside.json',
+    'C:outside.json',
+    'tests/fixtures/engine/public-development-dataset.v1.json:ads',
+    'tests\\fixtures\\engine\\public-development-dataset.v1.json',
+  ]) {
+    assert.throws(() => resolveRepoRelativePath(root, unsafe), /portable repository-relative path/);
+  }
 });
 
 test('certification rejects unknown or unequal cost bases', () => {

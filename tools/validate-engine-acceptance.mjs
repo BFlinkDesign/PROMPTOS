@@ -2,7 +2,14 @@
 import fs from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
-import { hashFile, hashJson, sha256 } from './engine-acceptance-core.mjs';
+import {
+  assertAggregateCounts,
+  assertReceiptConsistency,
+  hashFile,
+  hashJson,
+  resolveRepoRelativePath,
+  sha256,
+} from './engine-acceptance-core.mjs';
 
 const require = createRequire(import.meta.url);
 const Ajv2020 = require('ajv/dist/2020.js');
@@ -30,19 +37,19 @@ for (const [schemaPath, dataPath] of contracts) {
 
 const manifest = readJson('tests/fixtures/engine/acceptance-manifest.v1.json');
 for (const ref of [manifest.public_dataset, manifest.holdout_contract, manifest.offline_replay_provider]) {
-  const actual = hashFile(path.join(root, ref.path));
+  const actual = hashFile(resolveRepoRelativePath(root, ref.path));
   if (actual !== ref.sha256) failures.push(`${ref.path} hash mismatch: ${actual}`);
 }
 for (const baseline of manifest.baselines) {
-  const actual = hashFile(path.join(root, baseline.prompt_path));
+  const actual = hashFile(resolveRepoRelativePath(root, baseline.prompt_path));
   if (actual !== baseline.prompt_sha256) {
     failures.push(`${baseline.prompt_path} baseline hash mismatch: ${actual}`);
   }
 }
 
-const dataset = readJson(manifest.public_dataset.path);
-const replay = readJson(manifest.offline_replay_provider.path);
-const holdout = readJson(manifest.holdout_contract.path);
+const dataset = JSON.parse(fs.readFileSync(resolveRepoRelativePath(root, manifest.public_dataset.path), 'utf8'));
+const replay = JSON.parse(fs.readFileSync(resolveRepoRelativePath(root, manifest.offline_replay_provider.path), 'utf8'));
+const holdout = JSON.parse(fs.readFileSync(resolveRepoRelativePath(root, manifest.holdout_contract.path), 'utf8'));
 const caseIds = dataset.cases.map((testCase) => testCase.id);
 const responseIds = replay.responses.map((response) => response.case_id);
 if (new Set(caseIds).size !== caseIds.length) failures.push('public dataset contains duplicate case ids');
@@ -90,7 +97,7 @@ const sampleReceipt = {
   },
   claim_state: 'PUBLIC-EVAL-PASSED',
   public_eval: {
-    passed: dataset.cases.length,
+    failed: 0,
     total: dataset.cases.length,
     dataset_sha256: manifest.public_dataset.sha256,
     split_sha256: holdout.split_sha256,
@@ -102,6 +109,20 @@ if (!validateReceipt(sampleReceipt)) {
     (error) => `sample receipt ${error.instancePath || '/'} ${error.message}`,
   ));
 }
+assertReceiptConsistency(sampleReceipt, {
+  public_case_count: dataset.cases.length,
+  dataset_sha256: manifest.public_dataset.sha256,
+  split_sha256: holdout.split_sha256,
+});
+const staticReceipt = structuredClone(sampleReceipt);
+staticReceipt.claim_state = 'STATIC-VALID';
+staticReceipt.public_eval = null;
+if (!validateReceipt(staticReceipt)) {
+  failures.push(...validateReceipt.errors.map(
+    (error) => `static receipt ${error.instancePath || '/'} ${error.message}`,
+  ));
+}
+assertReceiptConsistency(staticReceipt);
 const invalidUnknownCost = structuredClone(sampleReceipt);
 invalidUnknownCost.usage = {
   source: 'unknown',
@@ -123,6 +144,69 @@ invalidEstimatedPricing.usage = {
 };
 if (validateReceipt(invalidEstimatedPricing)) {
   failures.push('receipt schema accepted estimated cost without a pricing version');
+}
+const invalidClaimEscalation = structuredClone(sampleReceipt);
+invalidClaimEscalation.claim_state = 'INDEPENDENTLY-BENCHMARKED';
+if (validateReceipt(invalidClaimEscalation)) {
+  failures.push('receipt schema accepted a claim state unsupported by v1 evidence');
+}
+const invalidStaticEvidence = structuredClone(sampleReceipt);
+invalidStaticEvidence.claim_state = 'STATIC-VALID';
+if (validateReceipt(invalidStaticEvidence)) {
+  failures.push('receipt schema accepted public evaluation evidence for a static-only claim');
+}
+const invalidPublicFailure = structuredClone(sampleReceipt);
+invalidPublicFailure.public_eval.failed = 1;
+if (validateReceipt(invalidPublicFailure)) {
+  failures.push('receipt schema accepted failed cases for a public-pass claim');
+}
+const invalidPublicCountShape = structuredClone(sampleReceipt);
+delete invalidPublicCountShape.public_eval.failed;
+invalidPublicCountShape.public_eval.passed = 999;
+if (validateReceipt(invalidPublicCountShape)) {
+  failures.push('receipt schema accepted contradictory pass counts');
+}
+const invalidUnsafeTokens = structuredClone(sampleReceipt);
+invalidUnsafeTokens.usage.input_tokens = Number.MAX_SAFE_INTEGER + 1;
+if (validateReceipt(invalidUnsafeTokens)) {
+  failures.push('receipt schema accepted token usage outside the JavaScript safe-integer range');
+}
+const invalidUnsafeTotal = structuredClone(sampleReceipt);
+invalidUnsafeTotal.public_eval.total = Number.MAX_SAFE_INTEGER + 1;
+if (validateReceipt(invalidUnsafeTotal)) {
+  failures.push('receipt schema accepted an unsafe public evaluation total');
+}
+const invalidDatasetCount = structuredClone(sampleReceipt);
+invalidDatasetCount.public_eval.total = dataset.cases.length + 1;
+try {
+  assertReceiptConsistency(invalidDatasetCount, {
+    public_case_count: dataset.cases.length,
+    dataset_sha256: manifest.public_dataset.sha256,
+    split_sha256: holdout.split_sha256,
+  });
+  failures.push('receipt consistency accepted a public total inconsistent with the dataset');
+} catch {
+  // Expected fail-closed behavior.
+}
+try {
+  assertAggregateCounts({ passed: 2, total: 1 });
+  failures.push('runtime accepted aggregate passed count greater than total');
+} catch {
+  // Expected fail-closed behavior.
+}
+for (const unsafePath of [
+  '../outside.json',
+  'C:/Temp/outside.json',
+  'C:outside.json',
+  'tests/fixtures/engine/outside.json:ads',
+  'tests\\fixtures\\engine\\outside.json',
+]) {
+  try {
+    resolveRepoRelativePath(root, unsafePath);
+    failures.push(`runtime accepted unsafe manifest path: ${unsafePath}`);
+  } catch {
+    // Expected fail-closed behavior.
+  }
 }
 
 if (failures.length) {
