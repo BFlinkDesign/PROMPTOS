@@ -60,3 +60,30 @@ The current run preserves two intentionally useless prompts that score 100/100.
 This is a measured baseline defect, not a desired invariant. A future lint
 improvement may lower those scores, but no structural score may become
 user-facing readiness or effectiveness authority.
+
+## Benchmark Stack
+
+No external benchmark is the release authority for every PromptOS domain.
+PromptOS versioned behavioral datasets are primary because they encode the
+actual outcomes, authorities, failure paths, and non-regressions expected from
+the artifacts. SWE-bench Verified checks generalization on human-validated
+repository issue resolution. Terminal-Bench checks long-horizon work in
+reproducible terminal environments. tau-bench checks policy-constrained
+tool-agent-user interaction. Inspect AI provides sandboxed tasks, tools,
+scorers, logs, and benchmark execution.
+
+External suites provide generalization evidence. They cannot override a failed
+PromptOS domain gate, concealed holdout, security veto, or cost budget.
+
+## Promptfoo Role
+
+Promptfoo remains the rapid prompt/provider matrix, assertion, pairwise,
+model-grader, and red-team harness. The default `npm run eval:smoke` is
+deliberately offline and proves regression configuration and source plumbing
+only. It does not execute a model and cannot certify effectiveness.
+
+Credential-gated behavioral runs must record provider and model identifiers,
+dataset and split hashes, grader versions, usage provenance, latency, cost,
+candidate hash, and accepted baseline hash. Candidate generation and revision
+may inspect public development cases only. Concealed holdout cases load after
+candidate freeze through the Prompt Engine acceptance kernel.

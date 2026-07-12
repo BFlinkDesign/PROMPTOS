@@ -4,27 +4,31 @@
   "scripts": {
     "catalog:build": "node tools/build-console-data.mjs --write",
     "catalog:evaluate": "node tools/evaluate-catalog.mjs",
+    "catalog:workbench-audit": "node tools/audit-workbench.mjs",
     "capabilities:validate": "node tools/validate-capabilities.mjs",
     "benchmark:evaluator": "node tools/benchmark-evaluator.mjs",
     "benchmark:platform": "node tools/benchmark-platform.mjs",
     "pages:build": "node tools/build-pages.mjs",
     "eval:snapshot": "promptfoo eval -o snapshots/promptfoo-results.json",
-    "eval:promptfoo": "promptfoo eval",
+    "eval:smoke": "promptfoo eval",
+    "eval:promptfoo": "npm run eval:smoke",
     "feedback:promote": "node tools/promote.js",
     "feedback:verify": "node tools/verify-feedback.mjs",
     "engine:acceptance": "node --test tests/prompt-engine-acceptance.test.mjs && node tools/validate-engine-acceptance.mjs",
     "prompt:quality": "node tools/validate-prompt-quality.mjs",
     "schema:validate": "node tools/validate-items.mjs",
     "test:review-pipeline": "node --test tests/review-pipeline-gate.test.cjs tests/review-pipeline-github.test.cjs",
+    "test:workbench": "node --test tests/prompt-workbench.test.mjs",
     "test:pages": "node --test tests/pages-build.test.mjs",
     "test:console": "playwright test",
     "tool:promptfoo": "promptfoo --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run engine:acceptance && npm run capabilities:validate && npm run catalog:evaluate && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:pages && npm run eval:promptfoo && npm run test:console"
+    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run engine:acceptance && npm run capabilities:validate && npm run catalog:evaluate && npm run catalog:workbench-audit && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:workbench && npm run test:pages && npm run eval:smoke && npm run test:console"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
     "ajv": "^8.20.0",
-    "promptfoo": "^0.121.18"
+    "promptfoo": "^0.121.18",
+    "yaml": "^2.9.0"
   }
 }

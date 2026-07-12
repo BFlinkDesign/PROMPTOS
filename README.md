@@ -69,7 +69,8 @@ gate for known duplicate folders and repositories. It is validated by
 
 ## The prompts
 
-The active catalog contains 16 tracked prompts. `PROMPTS.md` is the canonical
+The active catalog contains 16 tracked prompts plus first-class workflow,
+playbook, and runbook artifacts. `PROMPTS.md` remains the canonical prompt
 index; `npm run prompt:quality` enforces their structure contracts and named
 adversarial requirements. Its 0-100 result is structure lint only. It is not
 evidence of correctness, effectiveness, safety, maturity, or release readiness.
@@ -136,7 +137,9 @@ schema validated by `npm run schema:validate`.
 ## Evaluation receipts
 
 The zero-network console supports a browser-first catalog-to-evaluator workflow.
-Open a catalog card and choose **Evaluate this prompt**, or load local source
+Use the Generator for a deterministic contract scaffold, the Improver for an
+additive review proposal, and the Evaluator for a hash-backed structural
+receipt. Open a catalog card and choose **Evaluate this prompt**, or load local source
 through a connected PromptOS directory, the native open-file picker, the hidden
 file-input fallback, drag/drop, or paste. Every prompt receipt records the exact
 SHA-256 of the text actually evaluated and the Outcome Governance fields:

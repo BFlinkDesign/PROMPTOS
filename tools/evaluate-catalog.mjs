@@ -13,7 +13,7 @@ if (minAverage !== null && result.averageScore < minAverage) {
 if (json) {
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
 } else {
-  console.log(`PromptOS catalog: ${result.entries.length} prompts, average structure lint ${result.averageScore}/100`);
+  console.log(`PromptOS catalog: ${result.entries.length} artifacts, average structure lint ${result.averageScore}/100`);
   for (const entry of result.entries) {
     console.log(`- ${entry.filePath}: ${entry.score.total}/100, ${entry.inputs} inputs`);
   }

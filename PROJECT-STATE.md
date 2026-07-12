@@ -45,6 +45,7 @@ The repo now has a local, no-API verification spine:
 npm run prompt:quality
 npm run catalog:build
 npm run catalog:evaluate
+npm run catalog:workbench-audit
 npm run schema:validate
 npm run feedback:promote
 npm run feedback:verify
@@ -268,8 +269,11 @@ The console renders the 16 tracked prompt blocks from `PROMPTS.md`. The complete
   dependency packages used by Playwright, SWC, or ONNX. Review before approving.
 - Existing timestamps are still `legacy-unknown`; backfill with Git history
   before treating dates as provenance.
-- The schema supports workflows, playbooks, and runbooks, while the current
-  generated source set is 16 prompt files listed in `PROMPTS.md`.
+- The active source set includes 16 prompts plus one workflow, playbook, and
+  runbook. All remain draft until artifact-specific behavioral gates pass.
+- The Generator and Improver are deterministic structural tools. They cannot
+  claim effectiveness or auto-apply revisions; accepted drafts return to the
+  Evaluator and later behavioral gates.
 - A shared React/TypeScript workbench and framework-neutral Core are accepted.
   ADR-0001 selects Electron for desktop v1 because the intended local evaluator
   is Node-based. Implementation remains DRAFT pending Prompt Engine repair,

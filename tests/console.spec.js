@@ -731,7 +731,7 @@ test('keeps the verification workbench usable without horizontal overflow on mob
     const bodyStyle = getComputedStyle(document.body);
     const scoreStyle = getComputedStyle(document.querySelector('.eval-score strong'));
     const textareaStyle = getComputedStyle(document.querySelector('#evalText'));
-    const actions = [...document.querySelectorAll('.eval-actions button:not([hidden])')].map((button) => {
+    const actions = [...document.querySelectorAll('#evalPanel .eval-actions button:not([hidden])')].map((button) => {
       const rect = button.getBoundingClientRect();
       return { name: button.textContent.trim(), left: rect.left, right: rect.right, visible: rect.width > 0 && rect.height > 0 };
     });
@@ -767,4 +767,74 @@ test('keeps the verification workbench usable without horizontal overflow on mob
     expect(action.left, action.name).toBeGreaterThanOrEqual(0);
     expect(action.right, action.name).toBeLessThanOrEqual(layout.viewportWidth);
   }
+});
+
+test('filters first-class prompts, workflows, playbooks, runbooks, stages, and targets', async ({ page }) => {
+  await page.goto(consoleUrl);
+  await expect(page.locator('.card')).toHaveCount(19);
+
+  await page.locator('#typeFilter').selectOption('workflow');
+  await expect(page.locator('.card')).toHaveCount(1);
+  await expect(page.getByText('Repository repair and release')).toBeVisible();
+
+  await page.locator('#typeFilter').selectOption('ALL');
+  await page.locator('#stageFilter').selectOption('operate');
+  await expect(page.locator('.card')).toHaveCount(1);
+  await expect(page.getByText('Rebuild and verify PromptOS')).toBeVisible();
+
+  await page.locator('#stageFilter').selectOption('ALL');
+  await page.locator('#compatFilter').selectOption('grok-build');
+  await expect(page.locator('.card')).toHaveCount(2);
+});
+
+test('generates a structured draft and evaluates its exact output', async ({ page }) => {
+  await page.goto(consoleUrl);
+  await page.getByRole('tab', { name: 'Generator' }).click();
+  await page.getByRole('button', { name: 'Generate' }).click();
+
+  const generated = await page.locator('#genPreview').inputValue();
+  expect(generated).toContain('# Repository repair and release decision');
+  expect(generated).toContain('[REPOSITORY PATH]');
+  expect(generated).toContain('## Verification');
+
+  await page.getByRole('button', { name: 'Evaluate draft' }).click();
+  await expect(page.locator('#evalText')).toHaveValue(generated);
+  await expect(page.locator('#evalResult')).toContainText('100/100 structure');
+  await expect(page.locator('#evalResult')).toContainText('effectiveness not evaluated');
+});
+
+test('improver preserves the original until explicit acceptance and rejects stale proposals', async ({ page }) => {
+  await page.goto(consoleUrl);
+  await page.getByRole('tab', { name: 'Evaluator' }).click();
+  await page.locator('#evalText').fill('Summarize the repository.');
+  await page.getByRole('tab', { name: 'Improver' }).click();
+
+  await expect(page.locator('#improveOriginal')).toHaveValue('Summarize the repository.');
+  const candidate = await page.locator('#improveCandidate').inputValue();
+  expect(candidate).toContain('## Verification');
+  expect(await page.locator('#evalText').inputValue()).toBe('Summarize the repository.');
+
+  await page.evaluate(() => {
+    const input = document.querySelector('#evalText');
+    input.value = 'Changed behind the proposal.';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await page.getByRole('button', { name: 'Apply to evaluator draft' }).click();
+  await expect(page.locator('#improveStatus')).toContainText('0/100 structure');
+
+  await page.getByRole('button', { name: 'Apply to evaluator draft' }).click();
+  await expect(page.locator('#evalPanel')).toBeVisible();
+  await expect(page.locator('#evalText')).not.toHaveValue('Changed behind the proposal.');
+  await expect(page.locator('#evalResult')).toContainText('effectiveness not evaluated');
+});
+
+test('keeps Generator and Improver usable without horizontal overflow on mobile', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(consoleUrl);
+  await page.getByRole('tab', { name: 'Generator' }).click();
+  await page.getByRole('button', { name: 'Generate' }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+  await page.getByRole('button', { name: 'Open in Improver' }).click();
+  await expect(page.locator('#improverPanel')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 });

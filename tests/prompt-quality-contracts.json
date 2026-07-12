@@ -1,6 +1,7 @@
 {
   "schema_version": "1.0",
-  "expected_catalog_count": 16,
+  "expected_prompt_count": 16,
+  "expected_catalog_count": 19,
   "minimum_catalog_score": 85,
   "required_adversarial_case_ids": [
     "hostile-repository-instructions",
