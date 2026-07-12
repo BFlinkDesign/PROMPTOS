@@ -29,13 +29,13 @@
 }
 
   :root{
-    --clay:#d97757;--accent:#c6613f;
+    --clay:#d77656;--accent:#c76041;
     --ivory-light:#faf9f5;--ivory-medium:#f0eee6;--ivory-dark:#e8e6dc;
     --slate-dark:#141413;--slate-medium:#3d3d3a;--slate-light:#5e5d59;
     --cloud-medium:#b0aea5;--cloud-dark:#87867f;--cactus:#bcd1ca;
     --bg:var(--ivory-light);--surface:#ffffff;--surface-2:var(--ivory-medium);
     --text:var(--slate-dark);--text-2:var(--slate-light);--border:#1414131a;
-    --accent-c:var(--clay);--accent-h:var(--accent);--accent-text:#b8512f;--badge-bg:#bcd1ca;--badge-fg:#1c3a30;
+    --accent-c:var(--accent);--accent-h:var(--clay);--accent-text:#b8512f;--badge-bg:#bcd1ca;--badge-fg:#1c3a30;
     --shadow:0 6px 24px #14141322;
     --font-sans:"Anthropic Sans","Poppins",Arial,sans-serif;
     --font-serif:"Anthropic Serif","Lora",Georgia,serif;
@@ -46,13 +46,13 @@
   html[data-theme="dark"]{
     --bg:var(--slate-dark);--surface:#1e1e1c;--surface-2:#27261f;
     --text:var(--ivory-light);--text-2:var(--cloud-medium);--border:#faf9f51a;
-    --accent-c:#e08a6a;--accent-h:#f0a583;--accent-text:#e08a6a;--badge-bg:#2f4a40;--badge-fg:#bcd1ca;--shadow:0 6px 28px #00000066;
+    --accent-c:#c76041;--accent-h:#d77656;--accent-text:#d77656;--badge-bg:#2f4a40;--badge-fg:#bcd1ca;--shadow:0 6px 28px #00000066;
   }
   @media (prefers-color-scheme: dark){
     html:not([data-theme="light"]){
       --bg:var(--slate-dark);--surface:#1e1e1c;--surface-2:#27261f;
       --text:var(--ivory-light);--text-2:var(--cloud-medium);--border:#faf9f51a;
-      --accent-c:#e08a6a;--accent-h:#f0a583;--accent-text:#e08a6a;--badge-bg:#2f4a40;--badge-fg:#bcd1ca;--shadow:0 6px 28px #00000066;
+      --accent-c:#c76041;--accent-h:#d77656;--accent-text:#d77656;--badge-bg:#2f4a40;--badge-fg:#bcd1ca;--shadow:0 6px 28px #00000066;
     }
   }
   html[data-density="compact"]{--pad-card:.7rem .8rem;--gap:.7rem;--row:.3rem}
@@ -2996,11 +2996,29 @@ const App = (() => {
     const reviewed=Number.isInteger(meta.reviewed_artifact_count)?meta.reviewed_artifact_count:S.prompts.length;
     const actionRequired=Number.isInteger(meta.action_required_count)?meta.action_required_count:0;
     const bar=$("sourceBar"); if(!bar) return;
-    bar.innerHTML=`<span class="source-state"><strong>Embedded source set</strong></span>
-      <span class="source-state">${reviewed} reviewed artifacts</span>
-      <span class="source-state">${actionRequired} ecosystem actions</span>
-      <span class="source-state mono" title="${esc(meta.source_fingerprint||"Fingerprint unavailable")}">source ${esc(fingerprint?fingerprint.slice(0,12):"unavailable")}</span>
-      <span class="source-state">gate <span class="mono">${esc(meta.verification_gate||"not declared")}</span></span>`;
+    bar.replaceChildren(
+      sourceState("Embedded source set", { strong: true }),
+      sourceState(`${reviewed} reviewed artifacts`),
+      sourceState(`${actionRequired} ecosystem actions`),
+      sourceState(`source ${fingerprint ? fingerprint.slice(0,12) : "unavailable"}`, {
+        mono: true,
+        title: String(meta.source_fingerprint || "Fingerprint unavailable"),
+      }),
+      sourceState(`gate ${String(meta.verification_gate || "not declared")}`, { monoTail: true }),
+    );
+  }
+  function sourceState(text,{strong=false,mono=false,monoTail=false,title=""}={}){
+    const span=document.createElement("span");
+    span.className=`source-state${mono?" mono":""}`;
+    if(title) span.title=title;
+    if(strong){
+      const node=document.createElement("strong"); node.textContent=text; span.append(node);
+    }else if(monoTail){
+      const [label,...rest]=String(text).split(" ");
+      span.append(`${label} `);
+      const node=document.createElement("span"); node.className="mono"; node.textContent=rest.join(" "); span.append(node);
+    }else span.textContent=text;
+    return span;
   }
   function renderSources(){
     const panel=$("sourcesPanel"), grid=$("sourceGrid"), summary=$("sourceSummary");
