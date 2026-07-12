@@ -17,6 +17,12 @@ start C:\Eagle\PROMPTOS\console\promptos-console.html
 notepad C:\Eagle\PROMPTOS\PROMPTS.md
 ```
 
+## Console
+
+Open the [PromptOS Console](https://bflinkdesign.github.io/PROMPTOS/). Directory
+access is feature-detected; when unavailable, the console falls back to file
+import and receipt download.
+
 ## Install pointer into a repo
 
 ```powershell
