@@ -413,6 +413,8 @@ function uniqueStrings(value) {
 }
 
 function stageForPrompt(number) {
+  if (number === 17) return 'align';
+  if (number === 18) return 'learn';
   if (number <= 2) return 'align';
   if (number <= 7) return 'plan';
   if (number <= 10) return 'build';

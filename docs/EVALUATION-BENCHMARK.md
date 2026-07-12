@@ -87,3 +87,20 @@ dataset and split hashes, grader versions, usage provenance, latency, cost,
 candidate hash, and accepted baseline hash. Candidate generation and revision
 may inspect public development cases only. Concealed holdout cases load after
 candidate freeze through the Prompt Engine acceptance kernel.
+
+## Local Behavioral Comparison
+
+`npm run eval:behavioral:local` runs the versioned public suite in
+`evals/behavioral/outcome-intake.v1.json`. It uses separate, serial Promptfoo
+processes for each installed Ollama provider so one model-switch or process
+failure cannot erase the other provider's evidence. Promptfoo telemetry is
+disabled by the repository wrapper because the current Windows and Node 24
+combination otherwise exits with a libuv handle-closing assertion after some
+CLI commands.
+
+The redacted receipt at
+`evals/receipts/outcome-intake-public-v1.json` records a frozen baseline at 3/8
+passing provider-case rows and the revised candidate at 8/8 across Mistral Small
+3.2 24B and Llama 3.1 8B. This authorizes a `PUBLIC-EVAL-PROBE` claim only. No
+concealed holdout, premium provider, independent model judge, production tool
+trajectory, or real-world deployment was evaluated.

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "expected_prompt_count": 16,
-  "expected_catalog_count": 19,
+  "expected_prompt_count": 18,
+  "expected_catalog_count": 27,
   "minimum_catalog_score": 85,
   "required_adversarial_case_ids": [
     "hostile-repository-instructions",
@@ -415,6 +415,63 @@
         "false-green-test",
         "stale-evidence",
         "interrupted-work-preservation"
+      ]
+    },
+    "prompts/outcome-first-intake.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "DESIRED OUTCOME",
+        "CURRENT SITUATION",
+        "AVAILABLE MATERIAL",
+        "CONSEQUENCE OF ERROR"
+      ],
+      "required_patterns": [
+        {
+          "id": "plain-language-intake",
+          "pattern": "plain language[\\s\\S]*Do not require[\\s\\S]*technical"
+        },
+        {
+          "id": "meaningful-questions-only",
+          "pattern": "already known[\\s\\S]*missing fact[\\s\\S]*changes the next action"
+        },
+        {
+          "id": "outcome-contract",
+          "pattern": "Action[\\s\\S]*Evidence[\\s\\S]*Authority[\\s\\S]*Blockers[\\s\\S]*Next checkpoint[\\s\\S]*Fallback"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "missing-source-of-truth",
+        "stale-evidence",
+        "interrupted-work-preservation"
+      ]
+    },
+    "prompts/prompt-behavioral-improvement.md": {
+      "catalog_prompt": true,
+      "required_inputs": [
+        "SOURCE PROMPT",
+        "OUTCOME DATASET",
+        "ACCEPTED BASELINE",
+        "TARGET PROVIDERS",
+        "BUDGET"
+      ],
+      "required_patterns": [
+        {
+          "id": "holdout-isolation",
+          "pattern": "concealed holdout[\\s\\S]*freeze[\\s\\S]*must not"
+        },
+        {
+          "id": "verified-improvement",
+          "pattern": "statistically[\\s\\S]*behavioral[\\s\\S]*accepted baseline"
+        },
+        {
+          "id": "provenance-and-cost",
+          "pattern": "provider[\\s\\S]*model[\\s\\S]*dataset[\\s\\S]*grader[\\s\\S]*cost[\\s\\S]*latency"
+        }
+      ],
+      "required_adversarial_case_ids": [
+        "false-green-test",
+        "stale-evidence",
+        "missing-source-of-truth"
       ]
     },
     "templates/task-report.md": {

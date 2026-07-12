@@ -29,6 +29,8 @@ capable LLM.
 | 14 | Release gate | [prompts/release-gate.md](prompts/release-gate.md) |
 | 15 | Retrospective (project pause) | [prompts/retrospective.md](prompts/retrospective.md) |
 | 16 | Adaptive product design | [prompts/adaptive-product-design.md](prompts/adaptive-product-design.md) |
+| 17 | Outcome-first project intake | [prompts/outcome-first-intake.md](prompts/outcome-first-intake.md) |
+| 18 | Prompt behavioral improvement | [prompts/prompt-behavioral-improvement.md](prompts/prompt-behavioral-improvement.md) |
 
 ## Console
 

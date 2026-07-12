@@ -178,10 +178,24 @@
       "status": "verified",
       "trust": "VERIFIED",
       "source": "console/promptos-console.html",
-      "evidence": "Generated data, shared scoring and revision runtime, source fingerprint, typed filters, explicit revision acceptance, and Playwright workflows pass locally.",
+      "evidence": "Generated data, outcome-first Start routing, shared scoring and revision runtime, source fingerprint, typed filters, explicit revision acceptance, and Playwright workflows pass locally.",
       "gate": "npm run test:console && npm run catalog:evaluate",
       "user_impact": "Users can browse active prompts and run structural lint without a network service.",
       "next_action": "Connect behavioral experiment receipts without expanding browser filesystem or release authority.",
+      "replacement": null
+    },
+    {
+      "id": "evaluation.local-behavioral-comparison",
+      "domain": "evaluation",
+      "capability": "Hash-bound public baseline-versus-candidate prompt comparison",
+      "owner": "PromptOS",
+      "status": "verified",
+      "trust": "VERIFIED",
+      "source": "evals/behavioral/outcome-intake.v1.json",
+      "evidence": "Redacted receipt records baseline 3/8 and candidate 8/8 across Mistral Small 3.2 24B and Llama 3.1 8B with separate provider processes.",
+      "gate": "npm run behavioral:validate && npm run eval:behavioral:local",
+      "user_impact": "Prompt revisions can be rejected unless they beat a frozen baseline on declared public outcomes.",
+      "next_action": "Add concealed holdout execution, credentialed premium providers, independent graders, cost provenance, and additional artifact suites before stronger certification.",
       "replacement": null
     },
     {

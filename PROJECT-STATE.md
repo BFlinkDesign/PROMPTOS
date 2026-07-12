@@ -46,6 +46,8 @@ npm run prompt:quality
 npm run catalog:build
 npm run catalog:evaluate
 npm run catalog:workbench-audit
+npm run behavioral:validate
+npm run eval:behavioral:local
 npm run schema:validate
 npm run feedback:promote
 npm run feedback:verify
@@ -269,8 +271,13 @@ The console renders the 16 tracked prompt blocks from `PROMPTS.md`. The complete
   dependency packages used by Playwright, SWC, or ONNX. Review before approving.
 - Existing timestamps are still `legacy-unknown`; backfill with Git history
   before treating dates as provenance.
-- The active source set includes 16 prompts plus one workflow, playbook, and
-  runbook. All remain draft until artifact-specific behavioral gates pass.
+- The active source set includes 18 prompts plus three workflows, three
+  playbooks, and three runbooks. Typed artifacts remain draft until their own
+  behavioral gates pass.
+- The outcome-first intake prompt has a redacted public comparison receipt:
+  frozen baseline 3/8 versus candidate 8/8 across two local Ollama models. This
+  is `PUBLIC-EVAL-PROBE` evidence only; concealed holdout and premium-provider
+  certification remain absent.
 - The Generator and Improver are deterministic structural tools. They cannot
   claim effectiveness or auto-apply revisions; accepted drafts return to the
   Evaluator and later behavioral gates.

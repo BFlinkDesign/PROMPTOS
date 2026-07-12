@@ -6,7 +6,7 @@ const { pathToFileURL } = require('node:url');
 const { test, expect } = require('@playwright/test');
 const { expected_catalog_count: expectedCatalogCount } = require('./prompt-quality-contracts.json');
 
-const consoleUrl = pathToFileURL(path.join(process.cwd(), 'console', 'promptos-console.html')).href;
+const consoleUrl = `${pathToFileURL(path.join(process.cwd(), 'console', 'promptos-console.html')).href}?view=library`;
 
 test('rejects catalog links that escape prompts/', async () => {
   const { loadPromptEntries } = await import('../tools/catalog.mjs');
@@ -771,20 +771,58 @@ test('keeps the verification workbench usable without horizontal overflow on mob
 
 test('filters first-class prompts, workflows, playbooks, runbooks, stages, and targets', async ({ page }) => {
   await page.goto(consoleUrl);
-  await expect(page.locator('.card')).toHaveCount(19);
+  await expect(page.locator('.card')).toHaveCount(expectedCatalogCount);
 
   await page.locator('#typeFilter').selectOption('workflow');
-  await expect(page.locator('.card')).toHaveCount(1);
+  await expect(page.locator('.card')).toHaveCount(3);
   await expect(page.getByText('Repository repair and release')).toBeVisible();
 
   await page.locator('#typeFilter').selectOption('ALL');
   await page.locator('#stageFilter').selectOption('operate');
-  await expect(page.locator('.card')).toHaveCount(1);
+  await expect(page.locator('.card')).toHaveCount(2);
   await expect(page.getByText('Rebuild and verify PromptOS')).toBeVisible();
 
   await page.locator('#stageFilter').selectOption('ALL');
   await page.locator('#compatFilter').selectOption('grok-build');
   await expect(page.locator('.card')).toHaveCount(2);
+});
+
+test('routes a nontechnical outcome into a governed generated prompt', async ({ page }) => {
+  await page.goto(consoleUrl.replace('?view=library', ''));
+
+  await expect(page.getByRole('heading', { name: 'What needs to happen?' })).toBeVisible();
+  await expect(page.locator('#q')).toBeHidden();
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await expect(page.locator('#q')).toBeVisible();
+  await page.getByRole('tab', { name: 'Start' }).click();
+  await expect(page.locator('.outcome-card')).toHaveCount(6);
+  await page.getByRole('button', { name: /Build or improve a prompt/ }).click();
+  await expect(page.locator('#outcomePath')).toContainText('Prompt behavioral improvement');
+  await expect(page.locator('#outcomePath')).toContainText('Run a behavioral prompt evaluation');
+
+  await page.locator('#outcomeRequest').fill('Make the repository repair prompt complete real tasks with fewer regressions.');
+  await page.locator('#outcomeTarget').selectOption('codex');
+  await page.getByRole('button', { name: 'Create work prompt' }).click();
+
+  await expect(page.locator('#generatorPanel')).toBeVisible();
+  await expect(page.locator('#genPreview')).toHaveValue(/Make the repository repair prompt complete real tasks with fewer regressions\./);
+  await expect(page.locator('#genPreview')).toHaveValue(/Prompt behavioral improvement/);
+  await expect(page.locator('#genPreview')).toHaveValue(/Target: codex/);
+});
+
+test('keeps outcome routing and native selects readable on a dark mobile viewport', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.setViewportSize({ width: 430, height: 932 });
+  await page.goto(consoleUrl.replace('?view=library', ''));
+
+  const style = await page.locator('#outcomeTarget').evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return { background: computed.backgroundColor, color: computed.color };
+  });
+  expect(style.background).not.toBe('rgb(255, 255, 255)');
+  expect(style.color).not.toBe(style.background);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow).toBeLessThanOrEqual(1);
 });
 
 test('generates a structured draft and evaluates its exact output', async ({ page }) => {

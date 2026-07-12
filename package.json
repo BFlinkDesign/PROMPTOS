@@ -9,8 +9,10 @@
     "benchmark:evaluator": "node tools/benchmark-evaluator.mjs",
     "benchmark:platform": "node tools/benchmark-platform.mjs",
     "pages:build": "node tools/build-pages.mjs",
-    "eval:snapshot": "promptfoo eval -o snapshots/promptfoo-results.json",
-    "eval:smoke": "promptfoo eval",
+    "behavioral:validate": "node tools/validate-behavioral-suite.mjs",
+    "eval:behavioral:local": "node tools/run-local-behavioral.mjs",
+    "eval:snapshot": "node tools/run-promptfoo.mjs eval -o snapshots/promptfoo-results.json",
+    "eval:smoke": "node tools/run-promptfoo.mjs eval",
     "eval:promptfoo": "npm run eval:smoke",
     "feedback:promote": "node tools/promote.js",
     "feedback:verify": "node tools/verify-feedback.mjs",
@@ -21,9 +23,9 @@
     "test:workbench": "node --test tests/prompt-workbench.test.mjs",
     "test:pages": "node --test tests/pages-build.test.mjs",
     "test:console": "playwright test",
-    "tool:promptfoo": "promptfoo --version",
+    "tool:promptfoo": "node tools/run-promptfoo.mjs --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run engine:acceptance && npm run capabilities:validate && npm run catalog:evaluate && npm run catalog:workbench-audit && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:workbench && npm run test:pages && npm run eval:smoke && npm run test:console"
+    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run engine:acceptance && npm run behavioral:validate && npm run capabilities:validate && npm run catalog:evaluate && npm run catalog:workbench-audit && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:workbench && npm run test:pages && npm run eval:smoke && npm run test:console"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

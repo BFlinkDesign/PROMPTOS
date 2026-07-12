@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "suite_id": "promptos.outcome-intake.public.v1",
+  "claim_state": "PUBLIC-EVAL-PROBE",
+  "concealed_holdout_evaluated": false,
+  "baseline_prompt_sha256": "721a11fc365a58d12f6c31d20cc53cf2f5a4b1f6635518ce281892255006c572",
+  "candidate_prompt_sha256": "9c1fb8c74e7e7b173342bee191d6cb5bee49ffefcd9e23c94c2682e20685401f",
+  "manifest_sha256": "60f61b7bccf6374e9955157fd9c084d4f9172b333aa3c9d69bd9c193079e7428",
+  "providers": [
+    "ollama:chat:mistral-small3.2:24b",
+    "ollama:chat:llama3.1:8b"
+  ],
+  "provider_runs": [
+    {
+      "provider": "ollama:chat:mistral-small3.2:24b",
+      "rows": 8,
+      "passed": 6,
+      "failed": 2,
+      "result_sha256": "926e2a99e216fd09d313defc267e5cb2201510bf7f74317ef2562d6423906806"
+    },
+    {
+      "provider": "ollama:chat:llama3.1:8b",
+      "rows": 8,
+      "passed": 5,
+      "failed": 3,
+      "result_sha256": "0591a0db705da8b6f0d50a2947858114f5d724825ea0ec151af013a305123c74"
+    }
+  ],
+  "started_at": "2026-07-12T05:54:32.235Z",
+  "completed_at": "2026-07-12T05:57:00.357Z",
+  "rows": 16,
+  "passed": 11,
+  "failed": 5,
+  "baseline": { "rows": 8, "passed": 3, "failed": 5 },
+  "candidate": { "rows": 8, "passed": 8, "failed": 0 },
+  "promotion_passed": true,
+  "aggregate_result_sha256": "e5fa8d413c08650ff6b369b1eb804f18f203ce0884c8ef308e8f792455774dd3",
+  "limitations": [
+    "Public cases only; no concealed holdout was evaluated.",
+    "Local open-weight models only; no credentialed premium provider was evaluated.",
+    "Deterministic lexical assertions only; no independent model grader was used."
+  ]
+}
