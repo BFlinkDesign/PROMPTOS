@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptos.local/schema/engine-public-dataset.schema.json",
+  "title": "Prompt Engine public development dataset",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "dataset_id", "cases"],
+  "properties": {
+    "version": { "const": 1 },
+    "dataset_id": { "type": "string", "minLength": 1 },
+    "cases": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "input", "grader"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "input": { "type": "string", "minLength": 1 },
+          "grader": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "expected"],
+                "properties": {
+                  "type": { "const": "exact" },
+                  "expected": { "type": "string" }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "values"],
+                "properties": {
+                  "type": { "const": "contains_all" },
+                  "values": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["type", "required"],
+                "properties": {
+                  "type": { "const": "json_keys" },
+                  "required": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": { "type": "string", "minLength": 1 }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

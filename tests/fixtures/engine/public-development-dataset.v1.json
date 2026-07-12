@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "dataset_id": "prompt-engine-public-dev-v1",
+  "cases": [
+    {
+      "id": "approve-exact",
+      "input": "Return only the approval token for a change that passed every declared gate.",
+      "grader": {
+        "type": "exact",
+        "expected": "APPROVE"
+      }
+    },
+    {
+      "id": "outcome-json-shape",
+      "input": "Return a JSON outcome containing action and evidence fields.",
+      "grader": {
+        "type": "json_keys",
+        "required": ["action", "evidence"]
+      }
+    },
+    {
+      "id": "failure-controls",
+      "input": "Name the two required controls after a failed first action.",
+      "grader": {
+        "type": "contains_all",
+        "values": ["verify", "fallback"]
+      }
+    }
+  ]
+}

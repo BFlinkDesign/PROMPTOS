@@ -61,6 +61,7 @@ may appear through bounded read-only adapters or links.
 - [Electron desktop runtime decision](docs/adr/0001-electron-desktop-runtime.md)
 - [Official-source evaluation benchmark](docs/EVALUATION-BENCHMARK.md)
 - [Machine-readable capability ledger](governance/capabilities.json)
+- [Prompt Engine pre-import acceptance contract](docs/prompt-engine/ACCEPTANCE-CONTRACT.md)
 
 The registry names one canonical product and records the migration or retirement
 gate for known duplicate folders and repositories. It is validated by
@@ -94,6 +95,7 @@ npm run verify
 ```
 
 The verify gate runs prompt structure checks and the adversarial scorer benchmark,
+the offline Prompt Engine pre-import acceptance contract,
 validates the capability ledger and historical intake, checks the generated
 console catalog, validates the typed `items[]`, task-report, and ecosystem
 schemas, validates promoted feedback regressions, runs local promptfoo smokes
@@ -167,8 +169,12 @@ available and otherwise downloads the JSON receipt.
 
 ## Scope boundary
 
-The separate Prompt Engine branch remains unmerged and unproven. It is not part
-of this catalog, adversarial prompt suite, or evaluation-receipt slice.
+The separate Prompt Engine branch remains unmerged and unproven. Before any code
+is salvaged from it, `npm run engine:acceptance` freezes the public fixtures and
+baseline hashes and tests holdout isolation, provenance, cost handling,
+redaction, cancellation, and claim ordering. Passing that gate does not establish
+prompt effectiveness or authorize React, Electron, provider credentials, or
+repository mutation.
 
 ## Feedback regressions
 

@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "provider": "offline-replay",
+  "model": "fixture-v1",
+  "responses": [
+    {
+      "case_id": "approve-exact",
+      "input_sha256": "7dcfad36f7099d527cbdb1d617b84bed7474d8775a5c2926f831fba26be1d5da",
+      "output": "APPROVE",
+      "usage": {
+        "input_tokens": 13,
+        "output_tokens": 1,
+        "provider_cost_usd": 0
+      }
+    },
+    {
+      "case_id": "outcome-json-shape",
+      "input_sha256": "134af167059c22e93328926af8c2ef1ea351b9c84291bd78f8e2f459f787a294",
+      "output": "{\"action\":\"ship\",\"evidence\":[\"gate-pass\"]}",
+      "usage": {
+        "input_tokens": 11,
+        "output_tokens": 12,
+        "provider_cost_usd": 0
+      }
+    },
+    {
+      "case_id": "failure-controls",
+      "input_sha256": "032efef0ceb53a3eaf7e71e467d63c27b0b4575a8ff918e5a9253fc58f705f1c",
+      "output": "Verify the blocker, then use the declared fallback.",
+      "usage": {
+        "input_tokens": 12,
+        "output_tokens": 10,
+        "provider_cost_usd": 0
+      }
+    }
+  ]
+}

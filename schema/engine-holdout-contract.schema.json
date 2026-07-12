@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://promptos.local/schema/engine-holdout-contract.schema.json",
+  "title": "Prompt Engine concealed holdout contract",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "contract_id",
+    "storage",
+    "dataset_sha256",
+    "split_sha256",
+    "cases_visible_to_generation",
+    "report_mode",
+    "loader_authority"
+  ],
+  "properties": {
+    "version": { "const": 1 },
+    "contract_id": { "const": "prompt-engine-concealed-holdout-v1" },
+    "storage": { "const": "external-sealed" },
+    "dataset_sha256": { "$ref": "#/$defs/sha256" },
+    "split_sha256": { "$ref": "#/$defs/sha256" },
+    "cases_visible_to_generation": { "const": false },
+    "report_mode": { "const": "aggregate-only" },
+    "loader_authority": { "const": "credential-gated-ci-or-independent-reviewer" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
