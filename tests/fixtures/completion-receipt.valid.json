@@ -4,15 +4,22 @@
   "repository": "BFlinkDesign/PROMPTOS",
   "implementation_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "verified_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  "default_branch_head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "acceptance_criteria": [
-    { "id": "guard.regression", "status": "passed", "evidence": "run://completion-authority/1" }
+    {
+      "id": "guard.regression",
+      "status": "passed",
+      "evidence": "run://completion-authority/1"
+    }
   ],
   "verification": [
-    { "name": "npm run test:completion-authority", "conclusion": "success", "evidence": "run://completion-authority/1" }
+    {
+      "name": "npm run test:completion-authority",
+      "conclusion": "success",
+      "evidence": "run://completion-authority/1"
+    }
   ],
   "blockers": [],
   "authority": "independent verified SHA",
   "captured_at": "2026-09-25T14:00:00Z",
-  "receipt_sha256": "36f72d25f8fc72a7fb27bed145e4e6c8de7738d8965afc44233b8ef1655bae94"
+  "receipt_sha256": "05f0497b101b5822fc641499d9efe9a5bf8966385cc8cd24f9f2cc6d3fe6560b"
 }
