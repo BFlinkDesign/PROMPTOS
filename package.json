@@ -23,7 +23,8 @@
     "test:console": "playwright test",
     "tool:promptfoo": "promptfoo --version",
     "tool:playwright": "playwright --version",
-    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run engine:acceptance && npm run capabilities:validate && npm run catalog:evaluate && npm run catalog:workbench-audit && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:workbench && npm run test:pages && npm run eval:smoke && npm run test:console"
+    "verify": "npm run prompt:quality && npm run benchmark:evaluator && npm run benchmark:platform && npm run engine:acceptance && npm run capabilities:validate && npm run catalog:evaluate && npm run catalog:workbench-audit && npm run schema:validate && npm run feedback:verify && npm run test:review-pipeline && npm run test:completion-authority && npm run test:workbench && npm run test:pages && npm run eval:smoke && npm run test:console",
+    "test:completion-authority": "node --test tests/completion-authority.test.cjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

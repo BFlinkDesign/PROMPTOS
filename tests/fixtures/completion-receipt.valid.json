@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "issue_number": 44,
+  "repository": "BFlinkDesign/PROMPTOS",
+  "implementation_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "verified_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "acceptance_criteria": [
+    {
+      "id": "guard.regression",
+      "status": "passed",
+      "evidence": "run://completion-authority/1"
+    }
+  ],
+  "verification": [
+    {
+      "name": "npm run test:completion-authority",
+      "conclusion": "success",
+      "evidence": "run://completion-authority/1"
+    }
+  ],
+  "blockers": [],
+  "authority": "independent verified SHA",
+  "captured_at": "2026-09-25T14:00:00Z",
+  "receipt_sha256": "05f0497b101b5822fc641499d9efe9a5bf8966385cc8cd24f9f2cc6d3fe6560b"
+}

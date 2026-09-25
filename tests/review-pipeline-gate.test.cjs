@@ -70,6 +70,28 @@ test('maintenance promotion and branch cleanup remain SHA-bound', () => {
   assert.match(workflow, /current !== observedSha/);
 });
 
+
+test('blocks closing keywords, including negated prose, from autonomous merge', () => {
+  for (const body of ['Closes #44', 'this does not close #40', 'do not fix #40']) {
+    const result = evaluateEvidence({
+      pr: pr({ title: 'governance repair', body }),
+      defaultBranch: 'main',
+      snapshot: { checkRuns: [check()] },
+    });
+    assert.equal(result.state, 'blocked');
+    assert.equal(result.reason, 'closing_keyword_requires_explicit_completion');
+  }
+});
+
+test('ordinary issue references remain eligible for evidence evaluation', () => {
+  const result = evaluateEvidence({
+    pr: pr({ title: 'governance repair', body: 'Related work: #44' }),
+    defaultBranch: 'main',
+    snapshot: { checkRuns: [check()] },
+  });
+  assert.equal(result.state, 'ready');
+});
+
 test('retries when the Checks API is temporarily empty', async () => {
   const snapshots = [
     { checkRuns: [], rollup: [], workflowRuns: [], statuses: [] },
