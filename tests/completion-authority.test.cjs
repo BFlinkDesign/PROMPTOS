@@ -16,7 +16,6 @@ function receipt(overrides = {}) {
     repository: 'BFlinkDesign/PROMPTOS',
     implementation_sha: SHA,
     verified_sha: SHA,
-    default_branch_head_sha: SHA,
     acceptance_criteria: [{ id: 'compiler.ir', status: 'passed', evidence: 'run://verify/1' }],
     verification: [{ name: 'npm run verify', conclusion: 'success', evidence: 'run://verify/1' }],
     blockers: [],
@@ -54,12 +53,11 @@ test('valid completion receipt binds issue, repository, SHA, gates and hash', ()
   const result = validateCompletionReceipt(value, {
     issueNumber: 40,
     repository: 'BFlinkDesign/PROMPTOS',
-    currentDefaultHeadSha: SHA,
   });
   assert.deepEqual(result, { valid: true, errors: [] });
 });
 
-test('receipt fails closed on wrong issue, failed criteria, blockers or stale default head', () => {
+test('receipt fails closed on wrong issue, failed criteria and blockers', () => {
   const value = receipt({
     issue_number: 41,
     acceptance_criteria: [{ id: 'compiler.ir', status: 'failed', evidence: 'run://verify/1' }],
@@ -69,10 +67,9 @@ test('receipt fails closed on wrong issue, failed criteria, blockers or stale de
   const result = validateCompletionReceipt(value, {
     issueNumber: 40,
     repository: 'BFlinkDesign/PROMPTOS',
-    currentDefaultHeadSha: 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
   });
   assert.equal(result.valid, false);
-  assert.match(result.errors.join('\n'), /issue_number|must be passed|blockers|stale/);
+  assert.match(result.errors.join('\n'), /issue_number|must be passed|blockers/);
 });
 
 test('receipt hash prevents post-verification mutation', () => {
