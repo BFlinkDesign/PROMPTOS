@@ -8,16 +8,22 @@ const rootDir = process.cwd();
 const schemaPath = path.join(rootDir, 'schema', 'items.schema.json');
 const taskReportSchemaPath = path.join(rootDir, 'schema', 'task-report.schema.json');
 const ecosystemSchemaPath = path.join(rootDir, 'schema', 'ecosystem.schema.json');
+const completionReceiptSchemaPath = path.join(rootDir, 'schema', 'completion-receipt.schema.json');
 const ecosystemRegistryPath = path.join(rootDir, 'ecosystem', 'registry.json');
 const validTaskReportPath = path.join(rootDir, 'tests', 'fixtures', 'task-report.valid.json');
 const invalidTaskReportPath = path.join(rootDir, 'tests', 'fixtures', 'task-report.invalid.json');
+const validCompletionReceiptPath = path.join(rootDir, 'tests', 'fixtures', 'completion-receipt.valid.json');
+const invalidCompletionReceiptPath = path.join(rootDir, 'tests', 'fixtures', 'completion-receipt.invalid.json');
 const consolePath = path.join(rootDir, 'console', 'promptos-console.html');
 const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 const taskReportSchema = JSON.parse(fs.readFileSync(taskReportSchemaPath, 'utf8'));
 const ecosystemSchema = JSON.parse(fs.readFileSync(ecosystemSchemaPath, 'utf8'));
+const completionReceiptSchema = JSON.parse(fs.readFileSync(completionReceiptSchemaPath, 'utf8'));
 const ecosystemRegistry = JSON.parse(fs.readFileSync(ecosystemRegistryPath, 'utf8'));
 const validTaskReport = JSON.parse(fs.readFileSync(validTaskReportPath, 'utf8'));
 const invalidTaskReport = JSON.parse(fs.readFileSync(invalidTaskReportPath, 'utf8'));
+const validCompletionReceipt = JSON.parse(fs.readFileSync(validCompletionReceiptPath, 'utf8'));
+const invalidCompletionReceipt = JSON.parse(fs.readFileSync(invalidCompletionReceiptPath, 'utf8'));
 const generated = buildConsoleData(rootDir);
 const embedded = extractConsoleData(readText(consolePath));
 
@@ -25,6 +31,7 @@ const ajv = new Ajv2020({ allErrors: true });
 const validate = ajv.compile(schema);
 const validateTaskReport = ajv.compile(taskReportSchema);
 const validateEcosystem = ajv.compile(ecosystemSchema);
+const validateCompletionReceipt = ajv.compile(completionReceiptSchema);
 const failures = [];
 
 function validateEcosystemSemantics(registry) {
@@ -80,6 +87,12 @@ if (!validateTaskReport(validTaskReport)) {
 if (validateTaskReport(invalidTaskReport)) {
   failures.push('invalid task-report fixture unexpectedly passed schema validation');
 }
+if (!validateCompletionReceipt(validCompletionReceipt)) {
+  failures.push('valid completion-receipt fixture failed schema validation');
+}
+if (validateCompletionReceipt(invalidCompletionReceipt)) {
+  failures.push('invalid completion-receipt fixture unexpectedly passed schema validation');
+}
 if (!validateEcosystem(ecosystemRegistry)) {
   failures.push('ecosystem registry failed schema validation');
   for (const error of validateEcosystem.errors || []) {
@@ -113,4 +126,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`PromptOS schemas valid: ${generated.items.length} generated items, ${embedded.items.length} embedded items, ${ecosystemRegistry.assets.length} ecosystem assets, task report and ecosystem positive and negative controls passed`);
+console.log(`PromptOS schemas valid: ${generated.items.length} generated items, ${embedded.items.length} embedded items, ${ecosystemRegistry.assets.length} ecosystem assets, task report, completion receipt, and ecosystem positive and negative controls passed`);
