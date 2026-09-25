@@ -75,8 +75,23 @@ jobs:
             }
 
             const result = receipt
-              ? validateCompletionReceipt(receipt, { issueNumber, repository, currentDefaultHeadSha: defaultHeadSha })
+              ? validateCompletionReceipt(receipt, { issueNumber, repository })
               : { valid: false, errors: [`completion receipt unavailable: ${loadError?.message || 'unknown error'}`] };
+
+            if (result.valid) {
+              try {
+                const comparison = await github.rest.repos.compareCommitsWithBasehead({
+                  owner, repo, basehead: `${receipt.implementation_sha}...${defaultHeadSha}`,
+                });
+                if (!['ahead', 'identical'].includes(comparison.data.status)) {
+                  result.valid = false;
+                  result.errors.push(`implementation_sha is not reachable from current ${defaultBranch}`);
+                }
+              } catch (error) {
+                result.valid = false;
+                result.errors.push(`implementation reachability could not be verified: ${error.message}`);
+              }
+            }
 
             if (result.valid) {
               core.info(JSON.stringify({
