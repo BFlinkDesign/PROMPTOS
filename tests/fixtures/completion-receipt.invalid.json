@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "issue_number": 44,
+  "repository": "BFlinkDesign/PROMPTOS",
+  "implementation_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "verified_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "default_branch_head_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "acceptance_criteria": [],
+  "verification": [],
+  "blockers": ["still blocked"],
+  "authority": "",
+  "captured_at": "not-a-date",
+  "receipt_sha256": "bad"
+}
