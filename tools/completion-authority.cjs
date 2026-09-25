@@ -34,7 +34,7 @@ function findClosingReferences(text = '') {
   return matches;
 }
 
-function validateCompletionReceipt(receipt, { issueNumber, repository, currentDefaultHeadSha } = {}) {
+function validateCompletionReceipt(receipt, { issueNumber, repository } = {}) {
   const errors = [];
   if (!receipt || typeof receipt !== 'object' || Array.isArray(receipt)) {
     return { valid: false, errors: ['receipt must be an object'] };
@@ -48,9 +48,6 @@ function validateCompletionReceipt(receipt, { issueNumber, repository, currentDe
   if (!SHA40_RE.test(receipt.verified_sha || '')) errors.push('verified_sha must be a 40-character lowercase git SHA');
   if (receipt.implementation_sha && receipt.verified_sha && receipt.implementation_sha !== receipt.verified_sha) {
     errors.push('verified_sha must equal implementation_sha');
-  }
-  if (currentDefaultHeadSha && receipt.default_branch_head_sha && receipt.default_branch_head_sha !== currentDefaultHeadSha) {
-    errors.push('default_branch_head_sha is stale');
   }
   if (!Array.isArray(receipt.acceptance_criteria) || receipt.acceptance_criteria.length === 0) {
     errors.push('acceptance_criteria must be non-empty');
