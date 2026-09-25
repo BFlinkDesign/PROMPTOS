@@ -1,5 +1,7 @@
 'use strict';
 
+const { findClosingReferences } = require('./completion-authority.cjs');
+
 const PASSING_CONCLUSIONS = new Set(['success', 'neutral', 'skipped']);
 const SELF_JOBS = new Set([
   'gate -> merge | alert',
@@ -175,6 +177,14 @@ function resolveEvidence(snapshot, headSha) {
 function evaluateEvidence({ pr, defaultBranch, eventSha, policy = {}, snapshot = {} }) {
   if (!pr || pr.state !== 'open') return { state: 'skipped', reason: 'pr_not_open' };
   if (pr.draft) return { state: 'skipped', reason: 'draft_pr' };
+  const closingReferences = findClosingReferences(`${pr.title || ''}\n${pr.body || ''}`);
+  if (closingReferences.length) {
+    return {
+      state: 'blocked',
+      reason: 'closing_keyword_requires_explicit_completion',
+      closingReferences,
+    };
+  }
 
   const allowedBases = new Set([defaultBranch, 'maintenance']);
   if (!allowedBases.has(pr.base?.ref)) {
