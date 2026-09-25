@@ -1,0 +1,122 @@
+name: Issue Completion Guard
+
+on:
+  issues:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: Issue number to validate
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: issue-completion-guard-${{ github.event.issue.number || github.event.inputs.issue_number || github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout trusted default branch
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Validate completion authority
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b
+        with:
+          script: |
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const {
+              requiresCompletionReceipt,
+              validateCompletionReceipt,
+            } = require(path.join(process.env.GITHUB_WORKSPACE, 'tools', 'completion-authority.cjs'));
+
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const issueNumber = Number(context.payload.issue?.number || context.payload.inputs?.issue_number);
+            if (!Number.isInteger(issueNumber) || issueNumber < 1) {
+              core.setFailed('A positive issue number is required.');
+              return;
+            }
+
+            const issue = context.payload.issue || (await github.rest.issues.get({
+              owner, repo, issue_number: issueNumber,
+            })).data;
+
+            if (issue.pull_request || !requiresCompletionReceipt(issue.body || '')) {
+              core.info('Issue is not governed by PromptOS completion receipts; no action.');
+              return;
+            }
+
+            const repository = `${owner}/${repo}`;
+            const defaultBranch = context.payload.repository?.default_branch
+              || (await github.rest.repos.get({ owner, repo })).data.default_branch;
+            const defaultRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${defaultBranch}` });
+            const defaultHeadSha = defaultRef.data.object.sha;
+            const receiptPath = `completion-receipts/issue-${issueNumber}.json`;
+
+            let receipt = null;
+            let loadError = null;
+            try {
+              const response = await github.rest.repos.getContent({ owner, repo, path: receiptPath, ref: defaultHeadSha });
+              if (Array.isArray(response.data) || response.data.type !== 'file') throw new Error('receipt path is not a file');
+              receipt = JSON.parse(Buffer.from(response.data.content, response.data.encoding || 'base64').toString('utf8'));
+            } catch (error) {
+              loadError = error;
+            }
+
+            const result = receipt
+              ? validateCompletionReceipt(receipt, { issueNumber, repository, currentDefaultHeadSha: defaultHeadSha })
+              : { valid: false, errors: [`completion receipt unavailable: ${loadError?.message || 'unknown error'}`] };
+
+            if (result.valid) {
+              core.info(JSON.stringify({
+                event: 'completion_authority_accepted',
+                issue: issueNumber,
+                receipt: receiptPath,
+                verifiedSha: receipt.verified_sha,
+                defaultHeadSha,
+              }));
+              return;
+            }
+
+            if (issue.state === 'closed') {
+              await github.rest.issues.update({ owner, repo, issue_number: issueNumber, state: 'open' });
+            }
+            const marker = '<!-- promptos:completion-guard -->';
+            const body = [
+              marker,
+              '### Completion Guard: reopened',
+              '',
+              'This issue requires machine-verifiable completion evidence and was closed without a valid receipt.',
+              '',
+              ...result.errors.map((error) => `- ${error}`),
+              '',
+              `Expected receipt: \`${receiptPath}\``,
+              `Observed default head: \`${defaultHeadSha}\``,
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: issueNumber, per_page: 100,
+            });
+            const existing = comments.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number: issueNumber, body });
+            }
+            core.warning(JSON.stringify({
+              event: 'completion_authority_rejected',
+              issue: issueNumber,
+              errors: result.errors,
+              defaultHeadSha,
+            }));
